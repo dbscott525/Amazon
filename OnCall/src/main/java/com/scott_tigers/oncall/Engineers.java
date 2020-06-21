@@ -9,7 +9,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 
@@ -19,38 +18,31 @@ import com.fasterxml.jackson.dataformat.csv.CsvSchema;
  * @author bruscob
  */
 public class Engineers {
-    Engineers() {
-        CsvSchema csv = CsvSchema.emptySchema()
-                                 .withHeader();
 
-//        MappingIterator<Engineer> readValues;
-        try {
-            readValues = new CsvMapper().reader()
-                                        .forType(Engineer.class)
-                                        .with(csv)
-                                        .readValues(new File(Constants.ENGINEERS_CSV_FILE));
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+	private List<Engineer> engineers;
 
-//        List<Engineer> actualList = IteratorUtils.toList(readValues);
+	Engineers() {
+		try {
+			engineers = new CsvMapper().reader().forType(Engineer.class).with(CsvSchema.emptySchema().withHeader())
+					.<Engineer>readValues(new File(Constants.ENGINEERS_CSV_FILE)).readAll();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.exit(-1);
+		}
+	}
 
-    }
+	public List<Engineer> getEngineers() {
+		return engineers;
+	}
 
-    private List<Engineer> engineers;
+	public void setEngineers(List<Engineer> engineers) {
+		this.engineers = engineers;
+	}
 
-    public List<Engineer> getEngineers() {
-        return engineers;
-    }
-
-    public void setEngineers(List<Engineer> engineers) {
-        this.engineers = engineers;
-    }
-
-    @Override
-    public String toString() {
-        return "Engineers [" + (engineers != null ? "engineers=" + engineers : "") + "]";
-    }
+	@Override
+	public String toString() {
+		return "Engineers [" + (engineers != null ? "engineers=" + engineers : "") + "]";
+	}
 
 }
