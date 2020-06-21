@@ -19,14 +19,14 @@ import java.util.stream.Stream;
 
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 
-public class Schedule {
+public class OnCallSchedule {
 
     private List<Engineer> engineers;
     private int days;
     private List<List<Engineer>> daySchedules;
     private Date startDate = new Date();
 
-    public Schedule(Engineer[] engineers, Date startDate) {
+    public OnCallSchedule(Engineer[] engineers, Date startDate) {
 	this.startDate = startDate;
 	this.engineers = Arrays.asList(engineers);
 	days = engineers.length / Constants.ON_CALLS_PER_DAY;
@@ -36,7 +36,7 @@ public class Schedule {
 		.collect(scheduleCollector());
     }
 
-    public Schedule getBestSchedule(Schedule bestSchedule) {
+    public OnCallSchedule getBestSchedule(OnCallSchedule bestSchedule) {
 
 	boolean hasDateConflct = hasDateConflict();
 

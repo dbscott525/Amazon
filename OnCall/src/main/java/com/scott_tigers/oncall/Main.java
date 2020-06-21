@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 
 /*
  * COPYRIGHT (C) 2017 Aktana, Inc. All Rights Reserved.
@@ -30,17 +29,17 @@ public class Main {
 	    System.out.println("Usage: OnCall <start-date>");
 	    System.exit(1);
 	}
-	Date date1 = new Date();
+
+	Date startDate = new Date();
 	try {
-	    date1 = new SimpleDateFormat("M/d/y").parse(args[0]);
+	    startDate = new SimpleDateFormat("M/d/y").parse(args[0]);
 	} catch (ParseException e) {
 	    System.out.println(args[0] + " is and invalid date");
 	    System.exit(1);
 	}
-	List<Engineer> engineers = new Engineers().getEngineers();
-	System.out.println("engineers=" + (engineers));
-	var schedule = new OptimalSchedule(engineers, date1).getSchedule();
-	System.out.println("schedule=" + (schedule));
+	Engineer[] engineers = new Engineers().getEngineers().toArray(Engineer[]::new);
+	OnCallScheduler onCallSchedule = new OnCallScheduler(startDate, engineers);
+	System.out.println("onCallSchedule.getOnCallSchedule()=" + (onCallSchedule.getOnCallSchedule()));
     }
 
 }
