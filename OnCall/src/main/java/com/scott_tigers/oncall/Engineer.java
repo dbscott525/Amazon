@@ -5,6 +5,8 @@
  */
 package com.scott_tigers.oncall;
 
+import java.util.Arrays;
+
 /**
  * (Put description here)
  * 
@@ -12,28 +14,48 @@ package com.scott_tigers.oncall;
  */
 
 public class Engineer {
-	
+
     private String name;
-    private int    level;
+    private double level;
+    private String exclusionDates;
 
     public String getName() {
-        return name;
+	return name;
     }
 
     public void setName(String name) {
-        this.name = name;
+	this.name = name;
     }
 
-    public int getLevel() {
-        return level;
+    public double getLevel() {
+	return level;
     }
 
-    public void setLevel(int level) {
-        this.level = level;
+    public void setLevel(double level) {
+	this.level = level;
+    }
+
+    public String getExclusionDates() {
+	return exclusionDates;
+    }
+
+    public void setExclusionDates(String exclusionDates) {
+	this.exclusionDates = exclusionDates;
     }
 
     @Override
     public String toString() {
-        return "Engineer [" + (name != null ? "name=" + name + ", " : "") + "level=" + level + "]";
+	return "Engineer [name=" + name + ", level=" + level + ", exclusionDates=" + exclusionDates + "]";
     }
+
+    public boolean hasDayConflig(String date) {
+	if (exclusionDates == null) {
+	    return false;
+	}
+
+	return Arrays
+		.stream(exclusionDates.split(","))
+		.anyMatch(exclusion -> exclusion.equals(date));
+    }
+
 }

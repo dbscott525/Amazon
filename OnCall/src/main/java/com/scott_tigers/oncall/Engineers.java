@@ -19,30 +19,29 @@ import com.fasterxml.jackson.dataformat.csv.CsvSchema;
  */
 public class Engineers {
 
-	private List<Engineer> engineers;
+    private List<Engineer> engineers;
 
-	Engineers() {
-		try {
-			engineers = new CsvMapper().reader().forType(Engineer.class).with(CsvSchema.emptySchema().withHeader())
-					.<Engineer>readValues(new File(Constants.ENGINEERS_CSV_FILE)).readAll();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			System.exit(-1);
-		}
+    Engineers() {
+	try {
+	    engineers = new CsvMapper().reader().forType(Engineer.class).with(CsvSchema.emptySchema().withHeader())
+		    .<Engineer>readValues(new File(Constants.ENGINEERS_CSV_FILE)).readAll();
+	} catch (IOException e) {
+	    e.printStackTrace();
+	    System.exit(-1);
 	}
+    }
 
-	public List<Engineer> getEngineers() {
-		return engineers;
-	}
+    public List<Engineer> getEngineers() {
+	return engineers;
+    }
 
-	public void setEngineers(List<Engineer> engineers) {
-		this.engineers = engineers;
-	}
+    public void setEngineers(List<Engineer> engineers) {
+	this.engineers = engineers;
+    }
 
-	@Override
-	public String toString() {
-		return "Engineers [" + (engineers != null ? "engineers=" + engineers : "") + "]";
-	}
+    @Override
+    public String toString() {
+	return "Engineers [" + (engineers != null ? "engineers=" + engineers : "") + "]";
+    }
 
 }
