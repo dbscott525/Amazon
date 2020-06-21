@@ -10,7 +10,7 @@ public class OnCallScheduler {
     public OnCallScheduler(Date startDate, Engineer[] engineers) {
 	this.startDate = startDate;
 	var slots = engineers.length / Constants.ON_CALLS_PER_DAY * Constants.ON_CALLS_PER_DAY;
-	new ConbinationFinder(engineers, candidateSchedule -> processCandidateSchedule(candidateSchedule), slots);
+	new ConbinationFinder(engineers, this::processCandidateSchedule, slots);
     }
 
     private void processCandidateSchedule(Engineer[] candidateSchedule) {
