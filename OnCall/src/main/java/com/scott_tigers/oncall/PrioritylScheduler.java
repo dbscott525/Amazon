@@ -3,9 +3,9 @@ package com.scott_tigers.oncall;
 import java.util.Date;
 import java.util.List;
 
-public class OnCallScheduler extends Scheduler {
+public class PrioritylScheduler extends Scheduler {
 
-    public OnCallScheduler(Date startDate, Engineer[] engineers) {
+    public PrioritylScheduler(Date startDate, Engineer[] engineers) {
 	super(startDate, engineers);
     }
 
@@ -16,7 +16,7 @@ public class OnCallScheduler extends Scheduler {
 
     @Override
     protected int getRotationSize() {
-	return Constants.ON_CALLS_PER_DAY;
+	return Constants.PRIORITY_ENGINEERS_PER_WEEK;
     }
 
 }

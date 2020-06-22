@@ -21,6 +21,10 @@ import java.util.Date;
 // TODO: buddies
 // TODO escalation schedule
 // TODO take into account previous schedules
+// TODO level 3 or above
+// TODO no conflict with on-line schedule
+// TODO every Monday
+// TODO time of conflict based on M-F
 
 public class Main {
 
@@ -38,8 +42,10 @@ public class Main {
 	    System.exit(1);
 	}
 	Engineer[] engineers = new Engineers().getEngineers().toArray(Engineer[]::new);
-	OnCallScheduler onCallSchedule = new OnCallScheduler(startDate, engineers);
-	System.out.println("onCallSchedule.getOnCallSchedule()=" + (onCallSchedule.getOnCallSchedule()));
+	Scheduler onCallSchedule = new OnCallScheduler(startDate, engineers);
+	System.out.println("onCallSchedule.getOnCallSchedule()=" + (onCallSchedule.getSchedule()));
+	PrioritylScheduler priorityCallScheduler = new PrioritylScheduler(startDate, engineers);
+	System.out.println("priorityCallScheduler.getSchedule()=" + (priorityCallScheduler.getSchedule()));
     }
 
 }

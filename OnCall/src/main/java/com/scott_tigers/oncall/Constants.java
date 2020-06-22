@@ -13,6 +13,7 @@ package com.scott_tigers.oncall;
 public class Constants {
 
     static final String ENGINEERS_CSV_FILE = "J:\\SupportEngineering\\OnCallData\\EngineerRating.csv";
-	static final int ON_CALLS_PER_DAY = 4;
+    static final int ON_CALLS_PER_DAY = 4;
+    public static final int PRIORITY_ENGINEERS_PER_WEEK = 3;
 
 }
