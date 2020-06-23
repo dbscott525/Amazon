@@ -10,20 +10,21 @@ import java.util.stream.Stream;
 
 public class CombinationFinder<T> {
 
+    private static final int RESULT_SIZE = 3;
+    private static final int LIST_SIZE = 4;
+
     private Integer resultSize;
     private List<T> inputList;
     private Consumer<List<T>> combinationHandler;
 
     public static void main(String[] args) {
 	List<String> inputList = IntStream
-		.range(0, 4)
+		.range(0, LIST_SIZE)
 		.mapToObj(x -> Character.toString((char) ('A' + x)))
 		.collect(Collectors.toList());
 
-	System.out.println("inputList=" + (inputList));
-
 	new CombinationFinder<String>()
-		.input(inputList).resultSize(3)
+		.input(inputList).resultSize(RESULT_SIZE)
 		.combinationHandler(combination -> System.out.println("combination=" + (combination)))
 		.generate();
     }
@@ -43,10 +44,6 @@ public class CombinationFinder<T> {
 	return this;
     }
 
-//    public CombinationFinder(List<T> inputList) {
-//	this.inputList = inputList;
-//    }
-//
     public void generate() {
 	cartesian(new ArrayList<T>(), inputList);
     }
@@ -64,16 +61,17 @@ public class CombinationFinder<T> {
 
 	    List<T> newPrefix = Stream
 		    .of(prefix, Arrays.asList(postfix.get(index)))
-		    .flatMap(x -> x.stream())
+		    .flatMap(List<T>::stream)
 		    .collect(Collectors.toList());
 
 	    List<T> newPostfix = IntStream
 		    .range(0, postfix.size())
 		    .filter(i -> i != index)
-		    .mapToObj(i -> postfix.get(i))
+		    .mapToObj(postfix::get)
 		    .collect(Collectors.toList());
 
 	    cartesian(newPrefix, newPostfix);
+
 	});
     }
 

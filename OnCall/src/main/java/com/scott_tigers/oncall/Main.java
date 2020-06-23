@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 /*
  * COPYRIGHT (C) 2017 Aktana, Inc. All Rights Reserved.
@@ -16,15 +17,6 @@ import java.util.Date;
  * 
  * @author bruscob
  */
-
-// TODO: first and second tier
-// TODO: buddies
-// TODO escalation schedule
-// TODO take into account previous schedules
-// TODO level 3 or above
-// TODO no conflict with on-line schedule
-// TODO every Monday
-// TODO time of conflict based on M-F
 
 public class Main {
 
@@ -41,11 +33,16 @@ public class Main {
 	    System.out.println(args[0] + " is and invalid date");
 	    System.exit(1);
 	}
-	Engineer[] engineers = new Engineers().getEngineers().toArray(Engineer[]::new);
-	Scheduler onCallSchedule = new OnCallScheduler(startDate, engineers);
-	System.out.println("onCallSchedule.getOnCallSchedule()=" + (onCallSchedule.getSchedule()));
-	PrioritylScheduler priorityCallScheduler = new PrioritylScheduler(startDate, engineers);
-	System.out.println("priorityCallScheduler.getSchedule()=" + (priorityCallScheduler.getSchedule()));
+	List<Engineer> engineers = new Engineers().getEngineers();
+
+	ScheduleType.ON_CALL.
+
+//	ScheduleType scheduleType = ScheduleType.ON_CALL;
+		ScheduleType scheduleType = ScheduleType.PRIORITY;
+	Schedule schedule = scheduleType.getSchedue(startDate, engineers);
+	scheduleType.getSchedueRows(startDate, engineers);
+//	System.out.println("schedule=" + (schedule));
+
     }
 
 }

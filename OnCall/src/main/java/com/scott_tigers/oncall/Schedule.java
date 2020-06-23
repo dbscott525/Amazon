@@ -24,13 +24,13 @@ public class Schedule {
     private int days;
     private List<List<Engineer>> daySchedules;
     private Date startDate = new Date();
-    private int rotationSize;
+    private ScheduleType scheduleType;
 
-    public Schedule(List<Engineer> candidateSchedule, Date startDate, int rotationSize) {
+    public Schedule(List<Engineer> candidateSchedule, Date startDate, ScheduleType scheduleType) {
 	this.startDate = startDate;
-	this.rotationSize = rotationSize;
+	this.scheduleType = scheduleType;
 	this.engineers = candidateSchedule;
-	days = candidateSchedule.size() / rotationSize;
+	days = candidateSchedule.size() / scheduleType.getRotationSize();
 	daySchedules = IntStream
 		.range(0, candidateSchedule.size())
 		.mapToObj(Integer::valueOf)
@@ -56,7 +56,7 @@ public class Schedule {
     private boolean hasDateConflict() {
 	return dayRange().anyMatch(day -> {
 	    String date = getDateString(day);
-	    return daySchedules.get(day).stream().anyMatch(eng -> eng.hasDayConflig(date));
+	    return daySchedules.get(day).stream().anyMatch(eng -> eng.hasDateConflict(date));
 	});
     }
 
@@ -81,7 +81,7 @@ public class Schedule {
 		.collect(Collectors.toList());
 
 	BiConsumer<List<List<Engineer>>, Integer> accumlator = (result, index) -> result
-		.get((int) index / rotationSize)
+		.get((int) index / scheduleType.getRotationSize())
 		.add(engineers.get((int) index));
 
 	BinaryOperator<List<List<Engineer>>> combiner = (result1, result2) -> Stream
@@ -116,7 +116,7 @@ public class Schedule {
 			    .stream()
 			    .map(Engineer::getName)
 			    .collect(Collectors.joining(","));
-		    ps.println(getDateString(day) + ": " + engineers);
+		    ps.println(getDateString(day * scheduleType.getDaysPerInterval()) + ": " + engineers);
 		});
     }
 

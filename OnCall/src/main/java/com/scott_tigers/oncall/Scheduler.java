@@ -1,35 +1,56 @@
 package com.scott_tigers.oncall;
 
-import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
-public abstract class Scheduler {
+import org.apache.commons.math3.stat.descriptive.rank.Percentile;
+
+public class Scheduler {
 
     protected Date startDate;
     private Schedule schedule;
-    protected Engineer[] engineers;;
+    protected ScheduleType scheduleType;
+    private Map<Integer, Double> percentileMap = new HashMap<Integer, Double>();
+    private double[] sortedLevels;
 
-    public Scheduler(Date startDate, Engineer[] engineers) {
+    public Scheduler(ScheduleType scheduleType, Date startDate, List<Engineer> engineers) {
+	this.scheduleType = scheduleType;
 	this.startDate = startDate;
-	this.engineers = engineers;
+	sortedLevels = engineers.stream().map(Engineer::getLevel).sorted().mapToDouble(x -> x).toArray();
+	engineers.forEach(engineer -> engineer.setScheduler(this));
+	engineers = engineers.parallelStream().filter(scheduleType.getEngineerFilter()).collect(Collectors.toList());
 	new CombinationFinder<Engineer>()
-		.input(Arrays.asList(engineers))
-		.resultSize(engineers.length / getRotationSize() * getRotationSize())
+		.input(engineers)
+		.resultSize(engineers.size() / scheduleType.getRotationSize() * scheduleType.getRotationSize())
 		.combinationHandler(this::processCandidateSchedule)
 		.generate();
     }
 
-    protected abstract int getRotationSize();
-
     private void processCandidateSchedule(List<Engineer> candidateSchedule) {
-	schedule = createSchedule(candidateSchedule).getBestSchedule(schedule);
+	schedule = new Schedule(candidateSchedule, startDate, scheduleType)
+		.getBestSchedule(schedule);
     }
-
-    protected abstract Schedule createSchedule(List<Engineer> candidateSchedule);
 
     public Schedule getSchedule() {
 	return schedule;
+    }
+
+    public boolean isGreaterThanPercnetile(int percentile, double level) {
+	return level >= getPercentileValue(percentile);
+    }
+
+    private Double getPercentileValue(int percentile) {
+	Double percentileValue = percentileMap.get(percentile);
+	if (percentileValue == null) {
+	    percentileValue = new Percentile(percentile)
+		    .withEstimationType(Percentile.EstimationType.R_5)
+		    .evaluate(sortedLevels);
+	    percentileMap.put(percentile, percentileValue);
+	}
+	return percentileValue;
     }
 
 }

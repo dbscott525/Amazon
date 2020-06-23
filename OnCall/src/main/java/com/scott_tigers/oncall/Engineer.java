@@ -5,7 +5,7 @@
  */
 package com.scott_tigers.oncall;
 
-import java.util.Arrays;
+import com.google.gson.Gson;
 
 /**
  * (Put description here)
@@ -18,6 +18,10 @@ public class Engineer {
     private String name;
     private double level;
     private String exclusionDates;
+    private Scheduler scheduler;
+    private DateStringContainer dates;
+    private ResultCache<String, Boolean> dateConflictCache = new ResultCache<String, Boolean>();
+    private ResultCache<Integer, Boolean> percentileCache = new ResultCache<Integer, Boolean>();
 
     public String getName() {
 	return name;
@@ -48,14 +52,34 @@ public class Engineer {
 	return "Engineer [name=" + name + ", level=" + level + ", exclusionDates=" + exclusionDates + "]";
     }
 
-    public boolean hasDayConflig(String date) {
-	if (exclusionDates == null) {
-	    return false;
-	}
+    public boolean hasDateConflict(String date) {
+	return dateConflictCache.evaluate(date, () -> {
+	    if (exclusionDates == null || exclusionDates.length() == 0) {
+		return false;
+	    }
 
-	return Arrays
-		.stream(exclusionDates.split(","))
-		.anyMatch(exclusion -> exclusion.equals(date));
+	    if (dates == null) {
+		dates = new Gson().fromJson("{\"dates\":" + exclusionDates + "}", DateStringContainer.class);
+	    }
+
+	    boolean conflict = dates
+		    .getDates().stream()
+		    .anyMatch(exclusion -> exclusion.equals(date));
+
+	    return conflict;
+	});
+    }
+
+    public void setScheduler(Scheduler scheduler) {
+	this.scheduler = scheduler;
+    }
+
+    public boolean isGreaterThanPercentile(int percentile) {
+	return percentileCache
+		.evaluate(percentile,
+			() -> scheduler.isGreaterThanPercnetile(percentile, level));
+
+//	return scheduler.isGreaterThanPercnetile(percentile, level);
     }
 
 }
