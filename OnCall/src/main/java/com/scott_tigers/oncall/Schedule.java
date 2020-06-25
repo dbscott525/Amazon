@@ -6,6 +6,7 @@ import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -21,7 +22,6 @@ import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 public class Schedule {
 
     private List<Engineer> engineers;
-    private int days;
     private List<List<Engineer>> daySchedules;
     private Date startDate = new Date();
     private ScheduleType scheduleType;
@@ -30,7 +30,6 @@ public class Schedule {
 	this.startDate = startDate;
 	this.scheduleType = scheduleType;
 	this.engineers = candidateSchedule;
-	days = candidateSchedule.size() / scheduleType.getRotationSize();
 	daySchedules = IntStream
 		.range(0, candidateSchedule.size())
 		.mapToObj(Integer::valueOf)
@@ -49,18 +48,25 @@ public class Schedule {
 	    return this;
 	}
 
-	return getStandardDeviation() > bestSchedule.getStandardDeviation() ? bestSchedule : this;
+	double standardDeviation = getStandardDeviation();
+	boolean betterStandardDeviation = standardDeviation < bestSchedule.getStandardDeviation();
+	if (betterStandardDeviation) {
+	    System.out.println(new Date() + ": standardDeviation=" + (standardDeviation));
+	}
+	return betterStandardDeviation ? this : bestSchedule;
 
     }
 
     private boolean hasDateConflict() {
 	return dayRange().anyMatch(day -> {
 	    String date = getDateString(day);
-	    return daySchedules.get(day).stream().anyMatch(eng -> eng.hasDateConflict(date));
+	    return daySchedules.get(day).stream().anyMatch(eng -> {
+		return eng.hasDateConflict(date);
+	    });
 	});
     }
 
-    private double getStandardDeviation() {
+    public double getStandardDeviation() {
 
 	double[] levelSums = daySchedules.stream()
 		.map(engineers -> engineers
@@ -75,14 +81,15 @@ public class Schedule {
     }
 
     private Collector<Integer, List<List<Engineer>>, List<List<Engineer>>> scheduleCollector() {
-	Supplier<List<List<Engineer>>> supplier = () -> IntStream
-		.range(0, days)
-		.mapToObj(ArrayList<Engineer>::new)
-		.collect(Collectors.toList());
+	Supplier<List<List<Engineer>>> supplier = () -> new ArrayList<List<Engineer>>();
 
-	BiConsumer<List<List<Engineer>>, Integer> accumlator = (result, index) -> result
-		.get((int) index / scheduleType.getRotationSize())
-		.add(engineers.get((int) index));
+	BiConsumer<List<List<Engineer>>, Integer> accumlator = (result, index) -> {
+	    int i = (int) index / scheduleType.getRotationSize();
+	    while (result.size() < i + 1) {
+		result.add(new ArrayList<Engineer>());
+	    }
+	    result.get(i).add(engineers.get((int) index));
+	};
 
 	BinaryOperator<List<List<Engineer>>> combiner = (result1, result2) -> Stream
 		.concat(result1.stream(), result1.stream())
@@ -116,8 +123,12 @@ public class Schedule {
 			    .stream()
 			    .map(Engineer::getName)
 			    .collect(Collectors.joining(","));
-		    ps.println(getDateString(day * scheduleType.getDaysPerInterval()) + ": " + engineers);
+		    ps.println(getAdjustedDate(day) + ": " + engineers);
 		});
+    }
+
+    private String getAdjustedDate(int day) {
+	return getDateString(day * scheduleType.getDaysPerInterval());
     }
 
     private IntStream dayRange() {
@@ -131,6 +142,31 @@ public class Schedule {
 	c.setTime(startDate);
 	c.add(Calendar.DATE, daySchedule);
 	return sdf.format(c.getTime());
+    }
+
+    public List<ScheduleRow> getScheduleRows() {
+	return dayRange().mapToObj(day -> {
+	    ScheduleRow scheduleRow = new ScheduleRow(getAdjustedDate(day));
+
+	    List<Engineer> sortedEngineesRow = daySchedules.get(day)
+		    .stream()
+		    .sorted(Comparator.comparingDouble(Engineer::getLevel).reversed())
+		    .collect(Collectors.toList());
+
+	    IntStream.range(0, sortedEngineesRow.size())
+		    .forEach(index -> scheduleType.getEngineerMaps()
+			    .get(index)
+			    .accept(scheduleRow, sortedEngineesRow.get(index).getName()));
+
+	    return scheduleRow;
+	}).collect(Collectors.toList());
+    }
+
+    public Date getNextDate() {
+	Calendar c = Calendar.getInstance();
+	c.setTime(startDate);
+	c.add(Calendar.DATE, daySchedules.size());
+	return c.getTime();
     }
 
 }

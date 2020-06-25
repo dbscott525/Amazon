@@ -23,8 +23,12 @@ public class Engineers {
 
     Engineers() {
 	try {
-	    engineers = new CsvMapper().reader().forType(Engineer.class).with(CsvSchema.emptySchema().withHeader())
-		    .<Engineer>readValues(new File(Constants.ENGINEERS_CSV_FILE)).readAll();
+	    engineers = new CsvMapper()
+		    .reader()
+		    .forType(Engineer.class)
+		    .with(CsvSchema.emptySchema().withHeader())
+		    .<Engineer>readValues(new File(Constants.ENGINEERS_CSV_FILE))
+		    .readAll();
 	} catch (IOException e) {
 	    e.printStackTrace();
 	    System.exit(-1);

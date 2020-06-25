@@ -5,6 +5,8 @@
  */
 package com.scott_tigers.oncall;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.Gson;
 
 /**
@@ -13,6 +15,7 @@ import com.google.gson.Gson;
  * @author bruscob
  */
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Engineer {
 
     private String name;
@@ -23,6 +26,7 @@ public class Engineer {
     private ResultCache<String, Boolean> dateConflictCache = new ResultCache<String, Boolean>();
     private ResultCache<Integer, Boolean> percentileCache = new ResultCache<Integer, Boolean>();
 
+    @JsonProperty("First Name")
     public String getName() {
 	return name;
     }
@@ -31,6 +35,7 @@ public class Engineer {
 	this.name = name;
     }
 
+    @JsonProperty("Level")
     public double getLevel() {
 	return level;
     }
@@ -39,6 +44,7 @@ public class Engineer {
 	this.level = level;
     }
 
+    @JsonProperty("OOO")
     public String getExclusionDates() {
 	return exclusionDates;
     }
@@ -53,7 +59,7 @@ public class Engineer {
     }
 
     public boolean hasDateConflict(String date) {
-	return dateConflictCache.evaluate(date, () -> {
+	Boolean dateConflict = dateConflictCache.evaluate(date, () -> {
 	    if (exclusionDates == null || exclusionDates.length() == 0) {
 		return false;
 	    }
@@ -68,6 +74,11 @@ public class Engineer {
 
 	    return conflict;
 	});
+	if (dateConflict) {
+//	    String conflict = name + ": " + date + " " + exclusionDates;
+//	    System.out.println("conflict=" + (conflict));
+	}
+	return dateConflict;
     }
 
     public void setScheduler(Scheduler scheduler) {

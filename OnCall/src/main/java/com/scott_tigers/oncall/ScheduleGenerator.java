@@ -18,7 +18,7 @@ import java.util.List;
  * @author bruscob
  */
 
-public class Main {
+public class ScheduleGenerator {
 
     public static void main(String[] args) throws IOException {
 	if (args.length == 0) {
@@ -34,15 +34,19 @@ public class Main {
 	    System.exit(1);
 	}
 	List<Engineer> engineers = new Engineers().getEngineers();
+	System.out.println("engineers=" + (engineers));
 
-	ScheduleType.ON_CALL.
-
-//	ScheduleType scheduleType = ScheduleType.ON_CALL;
-		ScheduleType scheduleType = ScheduleType.PRIORITY;
-	Schedule schedule = scheduleType.getSchedue(startDate, engineers);
-	scheduleType.getSchedueRows(startDate, engineers);
-//	System.out.println("schedule=" + (schedule));
-
+	ScheduleType scheduleType = ScheduleType.ON_CALL;
+//	ScheduleType scheduleType = ScheduleType.PRIORITY;
+	System.out.println("startDate=" + (startDate));
+	System.out.println("engineers=" + (engineers));
+	scheduleType.build()
+		.searchByRandom()
+		.startDate(startDate)
+		.engineers(engineers)
+		.passes(2)
+		.timeLimit(10)
+		.run()
+		.writeToCSV(Constants.ENGINEERS_SCHEDULE_FILE);
     }
-
 }
