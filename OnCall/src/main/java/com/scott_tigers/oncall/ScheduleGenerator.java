@@ -36,17 +36,20 @@ public class ScheduleGenerator {
 	List<Engineer> engineers = new Engineers().getEngineers();
 	System.out.println("engineers=" + (engineers));
 
-	ScheduleType scheduleType = ScheduleType.ON_CALL;
-//	ScheduleType scheduleType = ScheduleType.PRIORITY;
 	System.out.println("startDate=" + (startDate));
 	System.out.println("engineers=" + (engineers));
-	scheduleType.build()
+	new Scheduler()
 		.searchByRandom()
+		.teamSize(6)
+		.miniumPercentile(20)
+		.shiftSize(5)
+		.shiftFrequency(7)
+		.minimumStandardDeviation(1.0)
 		.startDate(startDate)
 		.engineers(engineers)
-		.passes(2)
-		.timeLimit(10)
-		.run()
-		.writeToCSV(Constants.ENGINEERS_SCHEDULE_FILE);
+		.passes(1)
+		.timeLimit(20)
+		.run();
+//		.writeToCSV(Constants.ENGINEERS_SCHEDULE_FILE);
     }
 }

@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -27,7 +29,6 @@ import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 public class Scheduler {
 
     private Schedule schedule;
-    protected ScheduleType scheduleType;
     private Map<Integer, Double> percentileMap = new HashMap<Integer, Double>();
     private Executer search = () -> searchByCombination();
     private double[] sortedLevels;
@@ -38,13 +39,14 @@ public class Scheduler {
     private ArrayList<ScheduleRow> scheduleRows;
     private Date startDate;
     private List<Engineer> originalEngineers;
-
-    public Scheduler(ScheduleType scheduleType) {
-	this.scheduleType = scheduleType;
-    }
+    private int teamSize = 3;
+    private Predicate<Engineer> engineerFilter = engineer -> true;
+    private Supplier<Boolean> standardDeviationCheck = () -> false;
+    private int shiftSize = 1;
+    private int shiftFrequency = 1;
 
     private synchronized void processCandidateSchedule(List<Engineer> candidateSchedule) {
-	schedule = new Schedule(candidateSchedule, startDate, scheduleType)
+	schedule = new Schedule(this, candidateSchedule, startDate)
 		.getBestSchedule(schedule);
     }
 
@@ -72,11 +74,11 @@ public class Scheduler {
     }
 
     private boolean checkPrefix(List<Engineer> prefix) {
-	return new Schedule(prefix, startDate, scheduleType).getBestSchedule(null) != null;
+	return new Schedule(this, prefix, startDate).getBestSchedule(null) != null;
     }
 
     private String getDateString(int daySchedule) {
-	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+	SimpleDateFormat sdf = new SimpleDateFormat(Constants.SORTABLE_DATE_FORMAT);
 	Calendar c = Calendar.getInstance();
 	c.setTime(startDate);
 	c.add(Calendar.DATE, daySchedule);
@@ -110,15 +112,14 @@ public class Scheduler {
     }
 
     public Scheduler run() {
-	prepareEngines();
-
-	resultSize = engineers.size() / scheduleType.getRotationSize() * scheduleType.getRotationSize();
+	prepareEngineers();
 
 	scheduleRows = new ArrayList<ScheduleRow>();
 
 	IntStream.range(0, passes).forEach(pass -> {
 	    prepareForSearch();
-	    System.out.println("pass=" + (pass));
+	    int engByTeamSize = engineers.size() / teamSize;
+	    resultSize = engByTeamSize * teamSize;
 	    search.run();
 	    scheduleRows.addAll(schedule.getScheduleRows());
 	    printScheduled();
@@ -130,35 +131,56 @@ public class Scheduler {
     private void prepareForSearch() {
 	engineers = originalEngineers
 		.parallelStream()
-		.filter(scheduleType.getEngineerFilter())
-		.sorted((eng1, eng2) -> eng2.getExclusionDates().length() - eng1.getExclusionDates().length())
+		.filter(engineerFilter::test)
+		.sorted((eng1, eng2) -> eng2.getOoo().length() - eng1.getOoo().length())
 		.collect(Collectors.toList());
 
-	int days = engineers.size() / scheduleType.getRotationSize();
-
-	List<Engineer> excludedEngineers = engineers
-		.stream()
-		.filter(eng -> IntStream.range(0, days)
-			.mapToObj(this::getDateString)
-			.allMatch(eng::hasDateConflict))
-		.collect(Collectors.toList());
-
-	System.out.println("excludedEngineers=" + (excludedEngineers));
+	int shifts = engineers.size() / teamSize;
+	List<Engineer> excludedEngineers = getOOOConflictedEngineers(shifts);
+	System.out.println("EXCLUDED ENGINEERS");
+	excludedEngineers.stream().forEach(eng -> System.out.println(eng.getFirstName()
+		+ ": "
+		+ eng.getOoo()));
 
 	engineers = engineers.stream().filter(eng -> {
-	    return !excludedEngineers.stream().map(Engineer::getName)
-		    .anyMatch(name -> name.equals(eng.getName()));
+	    return !excludedEngineers.stream().map(Engineer::getFirstName)
+		    .anyMatch(name -> name.equals(eng.getFirstName()));
 	}).collect(Collectors.toList());
     }
 
-    private void prepareEngines() {
+    private List<Engineer> getOOOConflictedEngineers(int shifts) {
+	Stream<Engineer> t1 = engineers.stream();
+
+	Stream<Engineer> t2 = t1.filter(eng -> {
+	    IntStream t3 = IntStream.range(0, shifts);
+
+	    boolean t4 = t3.allMatch(shift -> {
+		IntStream t6 = IntStream.range(0, getShiftSize());
+		boolean t7 = t6.anyMatch(shiftDay -> {
+		    int dayOffset = (shift * getShiftFrequency()) + shiftDay;
+		    String dateOfShift = getDateString(dayOffset);
+		    return eng.hasDateConflict(dateOfShift);
+		});
+
+		return t7;
+	    });
+	    return t4;
+	});
+
+	List<Engineer> t5 = t2.collect(Collectors.toList());
+
+	return t5;
+    }
+
+    private void prepareEngineers() {
 	sortedLevels = originalEngineers.stream().map(Engineer::getLevel).sorted().mapToDouble(x -> x).toArray();
 	originalEngineers.forEach(engineer -> engineer.setScheduler(this));
-	engineers = engineers.parallelStream().filter(scheduleType.getEngineerFilter()).collect(Collectors.toList());
+	engineers = engineers.parallelStream().filter(engineerFilter::test).collect(Collectors.toList());
     }
 
     private void printScheduled() {
-	scheduleRows.stream().forEach(day -> System.out.println("Day Schedule=" + day));
+	scheduleRows.stream()
+		.forEach(day -> System.out.println("Day Schedule=" + day));
     }
 
     private void searchByRamdom() {
@@ -169,16 +191,15 @@ public class Scheduler {
 	while (true) {
 	    long elapsed = System.currentTimeMillis() - startTimeInMillis;
 	    if (elapsed > maximumElapsedMillis) {
+		System.out.println("Time limit of " + timeLimit + " minutes reached");
 		break;
 	    }
 	    ArrayList<Engineer> candidate = new ArrayList<Engineer>(engineers.subList(0, resultSize));
 	    Collections.shuffle(candidate, random);
 	    processCandidateSchedule(candidate);
-//	    if (schedule != null) {
-//		double std = schedule.getStandardDeviation();
-//		System.out.println("Standard Deviation: " + (std));
-//	    }
-
+	    if (standardDeviationCheck.get()) {
+		break;
+	    }
 	}
     }
 
@@ -186,12 +207,12 @@ public class Scheduler {
 	System.out.println("Writing to CSV File");
 	printScheduled();
 	List<Engineer> sortedEngineers = engineers.stream()
-		.sorted((eng1, eng2) -> eng2.getExclusionDates().length() - eng1.getExclusionDates().length())
+		.sorted((eng1, eng2) -> eng2.getOoo().length() - eng1.getOoo().length())
 		.collect(Collectors.toList());
-	int days = engineers.size() / scheduleType.getRotationSize();
+	int days = engineers.size() / teamSize;
 	Stream<Engineer> engineersWithNoMatch = sortedEngineers.stream().filter(eng -> IntStream.range(0, days)
 		.mapToObj(day -> getDateString(day)).allMatch(date -> eng.hasDateConflict(date)));
-	System.out.println("Number of Engineers That don't match" + (engineersWithNoMatch.count()));
+//	System.out.println("Number of Engineers That don't match" + (engineersWithNoMatch.count()));
 	new CombinationFinder<Engineer>()
 		.timeLimit(timeLimit)
 		.input(sortedEngineers)
@@ -224,4 +245,53 @@ public class Scheduler {
 	}
 	return this;
     }
+
+    public Scheduler teamSize(int teamSize) {
+	this.teamSize = teamSize;
+	return this;
+    }
+
+    public int getTeamSize() {
+	return teamSize;
+    }
+
+    public Scheduler miniumPercentile(int percentile) {
+	engineerFilter = engineer -> engineer.isGreaterThanPercentile(percentile);
+	return this;
+    }
+
+    public Scheduler minimumStandardDeviation(double minimumStandardDeviation) {
+	standardDeviationCheck = () -> {
+	    boolean standardDeviationReached = schedule != null
+		    && schedule.getStandardDeviation() < minimumStandardDeviation;
+	    if (standardDeviationReached) {
+		System.out.println("STANDARD DEVIATION ACHIEVED");
+	    }
+	    return standardDeviationReached;
+	};
+	return this;
+    }
+
+    public Scheduler shiftSize(int shiftSize) {
+	this.shiftSize = shiftSize;
+	return this;
+    }
+
+    public Date getStartDate() {
+	return startDate;
+    }
+
+    public int getShiftSize() {
+	return shiftSize;
+    }
+
+    public Scheduler shiftFrequency(int shiftFrequency) {
+	this.shiftFrequency = shiftFrequency;
+	return this;
+    }
+
+    public int getShiftFrequency() {
+	return shiftFrequency;
+    }
+
 }

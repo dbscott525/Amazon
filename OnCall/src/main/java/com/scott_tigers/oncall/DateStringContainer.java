@@ -32,4 +32,9 @@ public class DateStringContainer {
 	System.out.println("json=" + (json));
     }
 
+    @Override
+    public String toString() {
+	return new Gson().toJson(this);
+    }
+
 }

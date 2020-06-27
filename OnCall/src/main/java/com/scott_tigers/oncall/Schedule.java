@@ -3,7 +3,6 @@ package com.scott_tigers.oncall;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
@@ -23,12 +22,12 @@ public class Schedule {
 
     private List<Engineer> engineers;
     private List<List<Engineer>> daySchedules;
-    private Date startDate = new Date();
-    private ScheduleType scheduleType;
+//    private Date startDate = new Date();
+    private Scheduler scheduler;
 
-    public Schedule(List<Engineer> candidateSchedule, Date startDate, ScheduleType scheduleType) {
-	this.startDate = startDate;
-	this.scheduleType = scheduleType;
+    public Schedule(Scheduler scheduler, List<Engineer> candidateSchedule, Date startDate) {
+	this.scheduler = scheduler;
+//	this.startDate = startDate;
 	this.engineers = candidateSchedule;
 	daySchedules = IntStream
 		.range(0, candidateSchedule.size())
@@ -50,20 +49,33 @@ public class Schedule {
 
 	double standardDeviation = getStandardDeviation();
 	boolean betterStandardDeviation = standardDeviation < bestSchedule.getStandardDeviation();
+
 	if (betterStandardDeviation) {
 	    System.out.println(new Date() + ": standardDeviation=" + (standardDeviation));
 	}
+
 	return betterStandardDeviation ? this : bestSchedule;
 
     }
 
     private boolean hasDateConflict() {
-	return dayRange().anyMatch(day -> {
-	    String date = getDateString(day);
-	    return daySchedules.get(day).stream().anyMatch(eng -> {
-		return eng.hasDateConflict(date);
-	    });
-	});
+	return scheduleRange()
+		.anyMatch(scheduleNumber -> {
+		    int scheduleDayOne = scheduleNumber * scheduler.getShiftFrequency();
+		    return IntStream
+			    .range(0, scheduler.getShiftSize())
+			    .anyMatch(shiftDay -> {
+				String date = getDateString(scheduleDayOne + shiftDay);
+				return daySchedules.get(scheduleNumber)
+					.stream().anyMatch(eng -> eng.hasDateConflict(date));
+			    });
+		});
+//	return scheduleRange().anyMatch(day -> {
+//	    String date = getDateString(day);
+//	    return daySchedules.get(day).stream().anyMatch(eng -> {
+//		return eng.hasDateConflict(date);
+//	    });
+//	});
     }
 
     public double getStandardDeviation() {
@@ -84,7 +96,7 @@ public class Schedule {
 	Supplier<List<List<Engineer>>> supplier = () -> new ArrayList<List<Engineer>>();
 
 	BiConsumer<List<List<Engineer>>, Integer> accumlator = (result, index) -> {
-	    int i = (int) index / scheduleType.getRotationSize();
+	    int i = (int) index / scheduler.getTeamSize();
 	    while (result.size() < i + 1) {
 		result.add(new ArrayList<Engineer>());
 	    }
@@ -116,55 +128,44 @@ public class Schedule {
     private void getScheduleString(PrintStream ps) {
 	ps.println();
 	ps.println("getStandardDeviation()=" + (getStandardDeviation()));
-	dayRange()
+	scheduleRange()
 		.forEach(day -> {
 		    String engineers = daySchedules
 			    .get(day)
 			    .stream()
-			    .map(Engineer::getName)
+			    .map(Engineer::getFirstName)
 			    .collect(Collectors.joining(","));
 		    ps.println(getAdjustedDate(day) + ": " + engineers);
 		});
     }
 
     private String getAdjustedDate(int day) {
-	return getDateString(day * scheduleType.getDaysPerInterval());
+	return getDateString(day * scheduler.getShiftFrequency());
     }
 
-    private IntStream dayRange() {
+    private IntStream scheduleRange() {
 	return IntStream
 		.range(0, daySchedules.size());
     }
 
     private String getDateString(int daySchedule) {
-	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-	Calendar c = Calendar.getInstance();
-	c.setTime(startDate);
-	c.add(Calendar.DATE, daySchedule);
-	return sdf.format(c.getTime());
+	return Util.getDateIncrementString(scheduler.getStartDate(), daySchedule, Constants.SORTABLE_DATE_FORMAT);
     }
 
     public List<ScheduleRow> getScheduleRows() {
-	return dayRange().mapToObj(day -> {
-	    ScheduleRow scheduleRow = new ScheduleRow(getAdjustedDate(day));
-
-	    List<Engineer> sortedEngineesRow = daySchedules.get(day)
+	return scheduleRange().mapToObj(day -> {
+	    return new ScheduleRow(getAdjustedDate(day), daySchedules.get(day)
 		    .stream()
-		    .sorted(Comparator.comparingDouble(Engineer::getLevel).reversed())
-		    .collect(Collectors.toList());
-
-	    IntStream.range(0, sortedEngineesRow.size())
-		    .forEach(index -> scheduleType.getEngineerMaps()
-			    .get(index)
-			    .accept(scheduleRow, sortedEngineesRow.get(index).getName()));
-
-	    return scheduleRow;
-	}).collect(Collectors.toList());
+		    .sorted(Comparator.comparingDouble(Engineer::getLevel)
+			    .reversed())
+		    .collect(Collectors.toList()));
+	})
+		.collect(Collectors.toList());
     }
 
     public Date getNextDate() {
 	Calendar c = Calendar.getInstance();
-	c.setTime(startDate);
+	c.setTime(scheduler.getStartDate());
 	c.add(Calendar.DATE, daySchedules.size());
 	return c.getTime();
     }

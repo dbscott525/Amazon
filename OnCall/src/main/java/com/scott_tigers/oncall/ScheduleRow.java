@@ -1,43 +1,17 @@
 package com.scott_tigers.oncall;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.List;
+
+import com.google.gson.GsonBuilder;
 
 public class ScheduleRow {
 
-    private String onCallLead;
-    private String OnCall2;
-    private String OnCall3;
     private String date;
+    private List<Engineer> engineers;
 
-    public ScheduleRow(String date) {
+    public ScheduleRow(String date, List<Engineer> engineers) {
 	this.date = date;
-    }
-
-    @JsonProperty("On Call Lead")
-    public String getOnCallLead() {
-	return onCallLead;
-    }
-
-    public void setOnCallLead(String onCallLead) {
-	this.onCallLead = onCallLead;
-    }
-
-    @JsonProperty("Primary 1")
-    public String getOnCall2() {
-	return OnCall2;
-    }
-
-    public void setOnCall2(String onCall2) {
-	OnCall2 = onCall2;
-    }
-
-    @JsonProperty("Primary 2")
-    public String getOnCall3() {
-	return OnCall3;
-    }
-
-    public void setOnCall3(String onCall3) {
-	OnCall3 = onCall3;
+	this.setEngineers(engineers);
     }
 
     public String getDate() {
@@ -48,10 +22,22 @@ public class ScheduleRow {
 	this.date = date;
     }
 
+    public List<Engineer> getEngineers() {
+	return engineers;
+    }
+
+    public void setEngineers(List<Engineer> engineers) {
+	this.engineers = engineers;
+    }
+
+//    @Override
+//    public String toString() {
+//	return "ScheduleRow [date=" + date + ", engineers=" + engineers + "]";
+//    }
+
     @Override
     public String toString() {
-	return "ScheduleRow [date=" + date + ", onCallLead=" + onCallLead + ", OnCall2=" + OnCall2 + ", OnCall3="
-		+ OnCall3 + "]";
+	return new GsonBuilder().setPrettyPrinting().create().toJson(this);
     }
 
 }

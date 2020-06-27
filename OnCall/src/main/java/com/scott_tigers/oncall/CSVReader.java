@@ -29,7 +29,8 @@ public class CSVReader<T> {
 	    return new CsvMapper()
 		    .reader()
 		    .forType(type)
-		    .with(CsvSchema.emptySchema().withHeader())
+		    .with(CsvSchema.emptySchema()
+			    .withHeader())
 		    .<T>readValues(new File(inputFile))
 		    .readAll();
 	} catch (IOException e) {

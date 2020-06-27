@@ -6,7 +6,6 @@
 package com.scott_tigers.oncall;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.Gson;
 
 /**
@@ -18,67 +17,86 @@ import com.google.gson.Gson;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Engineer {
 
-    private String name;
-    private double level;
-    private String exclusionDates;
-    private Scheduler scheduler;
-    private DateStringContainer dates;
-    private ResultCache<String, Boolean> dateConflictCache = new ResultCache<String, Boolean>();
-    private ResultCache<Integer, Boolean> percentileCache = new ResultCache<Integer, Boolean>();
+    private String firstName;
+    private String lastName;
+    private String type;
+    private String uid;
+    private Double level;
+    private String ooo;
 
-    @JsonProperty("First Name")
-    public String getName() {
-	return name;
+    private transient Scheduler scheduler;
+    private transient DateStringContainer dates;
+    private transient ResultCache<String, Boolean> dateConflictCache = new ResultCache<String, Boolean>();
+    private transient ResultCache<Integer, Boolean> percentileCache = new ResultCache<Integer, Boolean>();
+
+    public String getFirstName() {
+	return firstName;
     }
 
-    public void setName(String name) {
-	this.name = name;
+    public void setFirstName(String firstName) {
+	this.firstName = firstName;
     }
 
-    @JsonProperty("Level")
-    public double getLevel() {
+    public String getLastName() {
+	return lastName;
+    }
+
+    public void setLastName(String lastName) {
+	this.lastName = lastName;
+    }
+
+    public String getType() {
+	return type;
+    }
+
+    public void setType(String type) {
+	this.type = type;
+    }
+
+    public String getUid() {
+	return uid;
+    }
+
+    public void setUid(String uid) {
+	this.uid = uid;
+    }
+
+    public Double getLevel() {
 	return level;
     }
 
-    public void setLevel(double level) {
+    public void setLevel(Double level) {
 	this.level = level;
     }
 
-    @JsonProperty("OOO")
-    public String getExclusionDates() {
-	return exclusionDates;
+    public String getOoo() {
+	return ooo;
     }
 
-    public void setExclusionDates(String exclusionDates) {
-	this.exclusionDates = exclusionDates;
+    public void setOoo(String ooo) {
+	this.ooo = ooo;
     }
 
     @Override
     public String toString() {
-	return "Engineer [name=" + name + ", level=" + level + ", exclusionDates=" + exclusionDates + "]";
+	return "Engineer [name=" + firstName + ", level=" + level + ", exclusionDates=" + ooo + "]";
     }
 
     public boolean hasDateConflict(String date) {
-	Boolean dateConflict = dateConflictCache.evaluate(date, () -> {
-	    if (exclusionDates == null || exclusionDates.length() == 0) {
+	return dateConflictCache.evaluate(date, () -> {
+	    if (ooo == null || ooo.length() == 0) {
 		return false;
 	    }
 
 	    if (dates == null) {
-		dates = new Gson().fromJson("{\"dates\":" + exclusionDates + "}", DateStringContainer.class);
+		dates = new Gson().fromJson("{\"dates\":" + ooo + "}", DateStringContainer.class);
 	    }
 
 	    boolean conflict = dates
 		    .getDates().stream()
 		    .anyMatch(exclusion -> exclusion.equals(date));
-
 	    return conflict;
 	});
-	if (dateConflict) {
-//	    String conflict = name + ": " + date + " " + exclusionDates;
-//	    System.out.println("conflict=" + (conflict));
-	}
-	return dateConflict;
     }
 
     public void setScheduler(Scheduler scheduler) {
@@ -89,8 +107,6 @@ public class Engineer {
 	return percentileCache
 		.evaluate(percentile,
 			() -> scheduler.isGreaterThanPercnetile(percentile, level));
-
-//	return scheduler.isGreaterThanPercnetile(percentile, level);
     }
 
 }

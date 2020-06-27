@@ -1,15 +1,13 @@
 package com.scott_tigers.oncall;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 public class OnlineRow {
 
@@ -50,7 +48,7 @@ public class OnlineRow {
 
     @Override
     public String toString() {
-	return new Gson().toJson(this);
+	return new GsonBuilder().setPrettyPrinting().create().toJson(this);
     }
 
     public void setStartDateTime(String startDateTime) {
@@ -70,11 +68,6 @@ public class OnlineRow {
     }
 
     String getDate(Date date, int dayIncrement) {
-	SimpleDateFormat sdf = new SimpleDateFormat("M/d/yy");
-	Calendar c = Calendar.getInstance();
-	c.setTime(date);
-	c.add(Calendar.DATE, dayIncrement + 1);
-	String dateString = sdf.format(c.getTime()) + " 10:00";
-	return dateString;
+	return Util.getDateIncrementString(date, dayIncrement, "M/d/yy") + " 10:00";
     }
 }
