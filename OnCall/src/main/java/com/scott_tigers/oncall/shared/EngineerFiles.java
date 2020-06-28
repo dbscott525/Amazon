@@ -12,6 +12,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
+
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
@@ -33,7 +35,11 @@ public enum EngineerFiles {
 	}
     },
     SCHEDULE_CSV("Schedule"),
-    CUSTOMER_ISSUE_EMAIL("Customer Issue Emails");
+    CUSTOMER_ISSUE_EMAIL("Customer Issue Emails"),
+    TT_DOWNLOAD("TT Download"),
+    ASSIGNED_TICKETS("Assigned Tickets"),
+    CUSTOMER_ISSUE_BACKLOG("Customer Issue Backlog"),
+    KEYWORD_POINTS("Keyword Points"), TOP_100_COMPANIES("Top 100 Companies");
 
     private String fileName;
 
@@ -53,6 +59,14 @@ public enum EngineerFiles {
 	return new CSVReader<Engineer>()
 		.inputFile(getFileName())
 		.type(Engineer.class)
+		.read();
+    }
+
+    public <T> List<T> readCSVToPojo(Class<T> pojoClass) {
+
+	return new CSVReader<T>()
+		.inputFile(getFileName())
+		.type(pojoClass)
 		.read();
     }
 
@@ -163,6 +177,15 @@ public enum EngineerFiles {
 		    .writer(schema)
 		    .writeValue(writerOutputStream, list);
 	} catch (IOException e) {
+	    e.printStackTrace();
+	}
+    }
+
+    public void writeLines(List<String> lines) {
+	try {
+	    FileUtils.writeLines(new File(getFileName()), lines);
+	} catch (IOException e) {
+	    System.out.println("e=" + (e));
 	    e.printStackTrace();
 	}
     }
