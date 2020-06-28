@@ -1,4 +1,4 @@
-package com.scott_tigers.oncall;
+package com.scott_tigers.oncall.shared;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

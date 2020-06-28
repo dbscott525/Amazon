@@ -1,4 +1,4 @@
-package com.scott_tigers.oncall;
+package com.scott_tigers.oncall.schedule;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -25,6 +25,9 @@ import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+import com.scott_tigers.oncall.shared.Constants;
+import com.scott_tigers.oncall.shared.EngineerFiles;
+import com.scott_tigers.oncall.shared.Executer;
 
 public class Scheduler {
 
@@ -210,7 +213,7 @@ public class Scheduler {
 		.sorted((eng1, eng2) -> eng2.getOoo().length() - eng1.getOoo().length())
 		.collect(Collectors.toList());
 	int days = engineers.size() / teamSize;
-	Stream<Engineer> engineersWithNoMatch = sortedEngineers.stream().filter(eng -> IntStream.range(0, days)
+	sortedEngineers.stream().filter(eng -> IntStream.range(0, days)
 		.mapToObj(day -> getDateString(day)).allMatch(date -> eng.hasDateConflict(date)));
 //	System.out.println("Number of Engineers That don't match" + (engineersWithNoMatch.count()));
 	new CombinationFinder<Engineer>()
@@ -292,6 +295,11 @@ public class Scheduler {
 
     public int getShiftFrequency() {
 	return shiftFrequency;
+    }
+
+    public void save(EngineerFiles scheduleJson) {
+	ScheduleContainer scheduleContainer = new ScheduleContainer(scheduleRows);
+	scheduleJson.writeJson(scheduleContainer);
     }
 
 }

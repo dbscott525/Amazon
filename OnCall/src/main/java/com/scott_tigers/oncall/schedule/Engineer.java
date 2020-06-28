@@ -3,10 +3,11 @@
  *
  * Created on Jun 19, 2020
  */
-package com.scott_tigers.oncall;
+package com.scott_tigers.oncall.schedule;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.gson.Gson;
+import com.scott_tigers.oncall.shared.ResultCache;
 
 /**
  * (Put description here)
@@ -107,6 +108,10 @@ public class Engineer {
 	return percentileCache
 		.evaluate(percentile,
 			() -> scheduler.isGreaterThanPercnetile(percentile, level));
+    }
+
+    public String getFullName() {
+	return firstName + " " + lastName;
     }
 
 }

@@ -1,4 +1,4 @@
-package com.scott_tigers.oncall;
+package com.scott_tigers.oncall.schedule;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

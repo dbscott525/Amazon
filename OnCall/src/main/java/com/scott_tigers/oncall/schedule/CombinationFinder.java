@@ -1,4 +1,4 @@
-package com.scott_tigers.oncall;
+package com.scott_tigers.oncall.schedule;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,6 +9,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import com.scott_tigers.oncall.shared.Executer;
 
 public class CombinationFinder<T> {
 

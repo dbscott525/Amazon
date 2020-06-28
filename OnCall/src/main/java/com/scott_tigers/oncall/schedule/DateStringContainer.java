@@ -1,4 +1,4 @@
-package com.scott_tigers.oncall;
+package com.scott_tigers.oncall.schedule;
 
 import java.util.ArrayList;
 import java.util.List;

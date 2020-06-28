@@ -1,17 +1,18 @@
-package com.scott_tigers.oncall;
+package com.scott_tigers.oncall.schedule;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import com.scott_tigers.oncall.shared.Constants;
+import com.scott_tigers.oncall.shared.Util;
+
 public class DateConflictDetector {
 
     private Date startDate;
     private List<List<Engineer>> schedule;
     private int daysBetweenShifts;
-    private int days;
-
     public boolean hasConflict() {
 	return IntStream
 		.range(0, schedule.size())
@@ -57,7 +58,6 @@ public class DateConflictDetector {
     }
 
     public DateConflictDetector days(int days) {
-	this.days = days;
 	// TODO Auto-generated method stub
 	return null;
     }

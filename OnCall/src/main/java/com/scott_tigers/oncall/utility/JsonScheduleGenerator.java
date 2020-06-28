@@ -1,4 +1,4 @@
-package com.scott_tigers.oncall;
+package com.scott_tigers.oncall.utility;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -8,6 +8,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.google.gson.GsonBuilder;
+import com.scott_tigers.oncall.schedule.EngineerDetail;
+import com.scott_tigers.oncall.schedule.OnCallSchedule;
+import com.scott_tigers.oncall.schedule.OnlineRow;
+import com.scott_tigers.oncall.shared.CSVReader;
+import com.scott_tigers.oncall.shared.Constants;
 
 public class JsonScheduleGenerator {
 

@@ -1,10 +1,15 @@
-package com.scott_tigers.oncall;
+package com.scott_tigers.oncall.utility;
 
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+
+import com.scott_tigers.oncall.schedule.Engineer;
+import com.scott_tigers.oncall.schedule.Engineers;
+import com.scott_tigers.oncall.schedule.Scheduler;
+import com.scott_tigers.oncall.shared.EngineerFiles;
 
 /*
  * COPYRIGHT (C) 2017 Aktana, Inc. All Rights Reserved.
@@ -41,15 +46,16 @@ public class ScheduleGenerator {
 	new Scheduler()
 		.searchByRandom()
 		.teamSize(6)
-		.miniumPercentile(20)
+//		.miniumPercentile(0)
 		.shiftSize(5)
 		.shiftFrequency(7)
-		.minimumStandardDeviation(1.0)
+		.minimumStandardDeviation(.1)
 		.startDate(startDate)
 		.engineers(engineers)
 		.passes(1)
 		.timeLimit(20)
-		.run();
+		.run()
+		.save(EngineerFiles.SCHEDULE_JSON);
 //		.writeToCSV(Constants.ENGINEERS_SCHEDULE_FILE);
     }
 }

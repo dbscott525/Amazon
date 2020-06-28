@@ -1,4 +1,4 @@
-package com.scott_tigers.oncall;
+package com.scott_tigers.oncall.schedule;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -8,6 +8,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import com.google.gson.GsonBuilder;
+import com.scott_tigers.oncall.shared.Util;
 
 public class OnlineRow {
 
