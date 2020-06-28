@@ -114,4 +114,8 @@ public class Engineer {
 	return firstName + " " + lastName;
     }
 
+    public String getEmail() {
+	return uid + "@amazon.com";
+    }
+
 }

@@ -12,9 +12,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 
-//import org.apache.commons.io.Charsets;
-import org.apache.commons.io.FilenameUtils;
-
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
@@ -35,7 +32,8 @@ public enum EngineerFiles {
 	    return ".json";
 	}
     },
-    SCHEDULE_CSV("Schedule");
+    SCHEDULE_CSV("Schedule"),
+    CUSTOMER_ISSUE_EMAIL("Customer Issue Emails");
 
     private String fileName;
 
@@ -77,19 +75,17 @@ public enum EngineerFiles {
 	    return true;
 	}
 
-	String path = file.getPath();
-	String extension = FilenameUtils.getExtension(path);
-	int dotpos = path.length() - extension.length() - 1;
-	String prefix = path.substring(0, dotpos);
-
-	String timeStampPath = prefix + " " + Dates.TIME_STAMP.getFormattedDate() + "." + extension;
+	String timeStampPath = file
+		.getPath()
+		.replaceAll(
+			"(.+)(\\..+)",
+			"$1 " + Dates.TIME_STAMP.getFormattedDate() + "$2");
 
 	boolean renameResult = file.renameTo(new File(timeStampPath));
 
 	if (!renameResult) {
 	    System.out.println("Cannot rename file [" + file.getPath() + "] to [" + timeStampPath + "]");
 	}
-
 	return renameResult;
     }
 
@@ -147,6 +143,28 @@ public enum EngineerFiles {
 	    e.printStackTrace();
 	}
 	return null;
+    }
+
+    public <T> void writeCSV(List<T> list, Class<?> pojoClass) {
+	try {
+	    CsvMapper mapper = new CsvMapper();
+	    CsvSchema schema = mapper.schemaFor(pojoClass);
+	    schema = schema.withColumnSeparator(',').withHeader();
+
+	    // output writer
+	    OutputStreamWriter writerOutputStream = new OutputStreamWriter(
+		    new BufferedOutputStream(
+			    new FileOutputStream(
+				    new File(getFileName())),
+			    1024),
+		    "UTF-8");
+
+	    mapper
+		    .writer(schema)
+		    .writeValue(writerOutputStream, list);
+	} catch (IOException e) {
+	    e.printStackTrace();
+	}
     }
 
 }
