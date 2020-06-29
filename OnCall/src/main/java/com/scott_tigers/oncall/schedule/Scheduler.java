@@ -29,6 +29,11 @@ import com.scott_tigers.oncall.shared.Constants;
 import com.scott_tigers.oncall.shared.EngineerFiles;
 import com.scott_tigers.oncall.shared.Executer;
 
+import beans.Engineer;
+import beans.Schedule;
+import beans.ScheduleContainer;
+import beans.ScheduleRow;
+
 public class Scheduler {
 
     private Schedule schedule;

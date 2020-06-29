@@ -1,9 +1,6 @@
-package com.scott_tigers.oncall.utility;
+package beans;
 
 import java.util.stream.Collectors;
-
-import com.scott_tigers.oncall.schedule.Engineer;
-import com.scott_tigers.oncall.schedule.ScheduleRow;
 
 public class ScheduleEmail {
 

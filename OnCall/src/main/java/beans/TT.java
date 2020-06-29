@@ -1,4 +1,4 @@
-package com.scott_tigers.oncall.test;
+package beans;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -10,7 +10,9 @@ public class TT {
     private String description;
     private String createDate;
     private String age;
+    private String owner;
     private String url;
+    private String rootCauseDetails;
     private Integer weight;
 
     @JsonProperty("Case ID")
@@ -41,11 +43,6 @@ public class TT {
 	this.createDate = createDate;
     }
 
-    @Override
-    public String toString() {
-	return new GsonBuilder().setPrettyPrinting().create().toJson(this);
-    }
-
     @JsonProperty("Age")
     public String getAge() {
 	return age;
@@ -73,4 +70,25 @@ public class TT {
 	this.weight = weight;
     }
 
+    @JsonProperty("Root Cause Details")
+    public String getRootCauseDetails() {
+	return rootCauseDetails;
+    }
+
+    public void setRootCauseDetails(String rootCauseDetails) {
+	this.rootCauseDetails = rootCauseDetails;
+    }
+
+    public String getOwner() {
+	return owner;
+    }
+
+    public void setOwner(String owner) {
+	this.owner = owner;
+    }
+
+    @Override
+    public String toString() {
+	return new GsonBuilder().setPrettyPrinting().create().toJson(this);
+    }
 }

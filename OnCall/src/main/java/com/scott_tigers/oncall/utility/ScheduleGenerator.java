@@ -6,10 +6,11 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-import com.scott_tigers.oncall.schedule.Engineer;
 import com.scott_tigers.oncall.schedule.Engineers;
 import com.scott_tigers.oncall.schedule.Scheduler;
 import com.scott_tigers.oncall.shared.EngineerFiles;
+
+import beans.Engineer;
 
 /*
  * COPYRIGHT (C) 2017 Aktana, Inc. All Rights Reserved.
@@ -55,7 +56,8 @@ public class ScheduleGenerator {
 		.passes(1)
 		.timeLimit(20)
 		.run()
-		.save(EngineerFiles.SCHEDULE_JSON);
-//		.writeToCSV(Constants.ENGINEERS_SCHEDULE_FILE);
+		.save(EngineerFiles.NEW_SCHEDULE);
+	
+	pm
     }
 }

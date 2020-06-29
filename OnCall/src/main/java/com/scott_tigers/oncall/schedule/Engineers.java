@@ -13,6 +13,8 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.scott_tigers.oncall.shared.EngineerFiles;
 
+import beans.Engineer;
+
 /**
  * (Put description here)
  * 

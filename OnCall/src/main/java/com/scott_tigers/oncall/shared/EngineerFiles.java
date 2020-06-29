@@ -19,8 +19,9 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.google.gson.Gson;
-import com.scott_tigers.oncall.schedule.Engineer;
-import com.scott_tigers.oncall.schedule.ScheduleContainer;
+
+import beans.Engineer;
+import beans.ScheduleContainer;
 
 public enum EngineerFiles {
     MASTER_LIST("Engineer Master List"),
@@ -28,7 +29,7 @@ public enum EngineerFiles {
     FOO("foo"),
     LEVELS_FROM_QUIP("Levels From Quip"),
     NEW_LEVEL_ENGINEERS("New Level Engineers"),
-    SCHEDULE_JSON("Schedule") {
+    CURRENT_SCHEDULE("Current Customer Issue Schedule") {
 	@Override
 	protected String extension() {
 	    return ".json";
@@ -39,7 +40,15 @@ public enum EngineerFiles {
     TT_DOWNLOAD("TT Download"),
     ASSIGNED_TICKETS("Assigned Tickets"),
     CUSTOMER_ISSUE_BACKLOG("Customer Issue Backlog"),
-    KEYWORD_POINTS("Keyword Points"), TOP_100_COMPANIES("Top 100 Companies");
+    KEYWORD_POINTS("Keyword Points"), TOP_100_COMPANIES("Top 100 Companies"),
+    ROOT_CAUSE_TO_DO("Root Cause To Do"),
+    CURRENT_CUSTOMER_ISSUE_SCHEDULE("Current Customer Issue Schedule") {
+	@Override
+	protected String extension() {
+	    return ".json";
+	}
+    },
+    NEW_SCHEDULE("New Schedule");
 
     private String fileName;
 
@@ -152,6 +161,7 @@ public enum EngineerFiles {
 
     public <T> T readJson(Class<T> clazz) {
 	try {
+	    System.out.println("getFileName()=" + (getFileName()));
 	    return new Gson().fromJson(Files.readString(Paths.get(getFileName()), StandardCharsets.US_ASCII), clazz);
 	} catch (IOException e) {
 	    e.printStackTrace();

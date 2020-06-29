@@ -1,24 +1,20 @@
 package com.scott_tigers.oncall.utility;
 
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import com.scott_tigers.oncall.schedule.KeywordPoints;
 import com.scott_tigers.oncall.shared.EngineerFiles;
-import com.scott_tigers.oncall.test.TT;
+import com.scott_tigers.oncall.shared.Util;
 import com.scott_tigers.oncall.test.Top100Company;
 
-public class GenerateCustomerIssueBacklog {
+import beans.KeywordPoints;
+import beans.TT;
+
+public class CreateCustomerIssueReadyQueue {
 
     public static void main(String[] args) throws Exception {
-	new GenerateCustomerIssueBacklog().run();
+	new CreateCustomerIssueReadyQueue().run();
     }
 
     private List<Integer> assignedTicketIds;
@@ -26,13 +22,14 @@ public class GenerateCustomerIssueBacklog {
     private List<String> top100Companies;
 
     private void run() throws Exception {
-	readAssignedTicets();
-	makeCopyofMostRecentTTDownload();
+	readAssignedTickets();
+	Util.makeCopyofMostRecentTTDownload();
 	readPointData();
 	readtop100CompanyData();
 	createReadyQueue();
 
-	System.out.println("TT Ready Queue Created");
+	System.out.println("TT Ready Queue Created at "
+		+ EngineerFiles.CUSTOMER_ISSUE_BACKLOG.getFileName());
 
     }
 
@@ -47,7 +44,7 @@ public class GenerateCustomerIssueBacklog {
 		.collect(Collectors.toList()), TT.class);
     }
 
-    private void readAssignedTicets() {
+    private void readAssignedTickets() {
 	assignedTicketIds = EngineerFiles.ASSIGNED_TICKETS
 		.readCSVToPojo(TT.class)
 		.stream()
@@ -88,35 +85,6 @@ public class GenerateCustomerIssueBacklog {
 
     private boolean notAssigned(TT tt) {
 	return !assignedTicketIds.contains(tt.getCaseId());
-    }
-
-    private void makeCopyofMostRecentTTDownload() throws IOException {
-	String homePath = System.getenv("HOMEDRIVE") + System.getenv("HOMEPATH");
-	Path path = Paths.get(homePath, "Downloads");
-
-	String latestTTFile;
-
-	try (Stream<Path> downloadFileList = Files.list(path)) {
-	    latestTTFile = downloadFileList
-		    .filter(t -> isTT(t))
-		    .sorted()
-		    .reduce((first, second) -> second)
-		    .orElse(null)
-		    .toString();
-
-	}
-
-	Path wiki_path = Paths.get(latestTTFile);
-
-	Charset charset = Charset.forName("ISO-8859-1");
-	List<String> lines = Files.readAllLines(wiki_path, charset);
-	lines.remove(0);
-
-	EngineerFiles.TT_DOWNLOAD.writeLines(lines);
-    }
-
-    private boolean isTT(Path p) {
-	return p.getFileName().toString().matches("^ticket_results - .*\\.csv");
     }
 
 }

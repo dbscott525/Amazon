@@ -5,8 +5,9 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import com.scott_tigers.oncall.schedule.Engineer;
 import com.scott_tigers.oncall.shared.EngineerFiles;
+
+import beans.Engineer;
 
 public class UpdateLevelsFromQuip {
 

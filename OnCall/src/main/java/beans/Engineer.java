@@ -3,10 +3,12 @@
  *
  * Created on Jun 19, 2020
  */
-package com.scott_tigers.oncall.schedule;
+package beans;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.gson.Gson;
+import com.scott_tigers.oncall.schedule.DateStringContainer;
+import com.scott_tigers.oncall.schedule.Scheduler;
 import com.scott_tigers.oncall.shared.ResultCache;
 
 /**

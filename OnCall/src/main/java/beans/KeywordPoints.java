@@ -1,4 +1,4 @@
-package com.scott_tigers.oncall.schedule;
+package beans;
 
 public class KeywordPoints {
     String keyword;

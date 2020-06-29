@@ -2,10 +2,11 @@ package com.scott_tigers.oncall.utility;
 
 import java.util.List;
 
-import com.scott_tigers.oncall.schedule.Engineer;
 import com.scott_tigers.oncall.shared.EngineerFiles;
 import com.scott_tigers.oncall.shared.Json;
 import com.scott_tigers.oncall.shared.Transform;
+
+import beans.Engineer;
 
 public class FindNewLevelsEngineers {
 

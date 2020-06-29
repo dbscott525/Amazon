@@ -8,11 +8,12 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.google.gson.GsonBuilder;
-import com.scott_tigers.oncall.schedule.EngineerDetail;
-import com.scott_tigers.oncall.schedule.OnCallSchedule;
-import com.scott_tigers.oncall.schedule.OnlineRow;
 import com.scott_tigers.oncall.shared.CSVReader;
 import com.scott_tigers.oncall.shared.Constants;
+
+import deprecate.EngineerDetail;
+import deprecate.OnCallSchedule;
+import deprecate.OnlineRow;
 
 public class JsonScheduleGenerator {
 
