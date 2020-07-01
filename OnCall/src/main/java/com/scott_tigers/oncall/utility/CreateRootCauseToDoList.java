@@ -1,5 +1,6 @@
 package com.scott_tigers.oncall.utility;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -9,18 +10,16 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import com.scott_tigers.oncall.bean.Engineer;
+import com.scott_tigers.oncall.bean.ScheduleContainer;
+import com.scott_tigers.oncall.bean.ScheduleRow;
+import com.scott_tigers.oncall.bean.TT;
 import com.scott_tigers.oncall.shared.Dates;
 import com.scott_tigers.oncall.shared.EngineerFiles;
-import com.scott_tigers.oncall.shared.Util;
+import com.scott_tigers.oncall.shared.Properties;
 
-import beans.Engineer;
-import beans.ScheduleContainer;
-import beans.ScheduleRow;
-import beans.TT;
+public class CreateRootCauseToDoList extends Utility {
 
-public class CreateRootCauseToDoList {
-
-    private static final String CURRENT_CUSTOMER_ISSUE_SCHEDULE = "Current Customer Issue Schedule";
     static String[] validRootCauseMarkers = {
 	    "https://sim.amazon.com/AURORA",
 	    "https://issues.amazon.com/issues/AURORA",
@@ -28,6 +27,11 @@ public class CreateRootCauseToDoList {
 	    "https://i.amazon.com/issues/AURORA",
 	    "https://rds-jira.amazon.com/browse/AURORA"
     };
+
+    private static final List<String> ROOT_CAUSE_REVIEW_COLUMNS = Arrays.asList(
+	    Properties.OWNER,
+	    Properties.URL,
+	    Properties.ROOT_CAUSE_DETAILS);
 
     public static void main(String[] args) throws Exception {
 	new CreateRootCauseToDoList().run();
@@ -37,7 +41,7 @@ public class CreateRootCauseToDoList {
     private List<TT> rootCauseNeededTTs;
 
     private void run() throws Exception {
-	Util.makeCopyofMostRecentTTDownload();
+	copyMostRecentDownloadedTTs();
 
 	rootCauseNeededTTs = EngineerFiles.TT_DOWNLOAD
 		.readCSVToPojo(TT.class)
@@ -66,14 +70,13 @@ public class CreateRootCauseToDoList {
 
 	Collections.shuffle(engineerNames);
 
-	IntStream t1 = IntStream.range(0, rootCauseNeededTTs.size());
-	t1.forEach(this::assignOwner);
+	IntStream.range(0, rootCauseNeededTTs.size()).forEach(this::assignOwner);
 
-	EngineerFiles.ROOT_CAUSE_TO_DO.writeCSV(rootCauseNeededTTs, TT.class);
+//	EngineerFiles.ROOT_CAUSE_TO_DO.writeCSV(rootCauseNeededTTs, TT.class);
+	EngineerFiles.ROOT_CAUSE_TO_DO.writeCSV(rootCauseNeededTTs,
+		ROOT_CAUSE_REVIEW_COLUMNS);
 
-	System.out.println("Root Cause To Do ticket list has been created at "
-		+ EngineerFiles.ROOT_CAUSE_TO_DO.getFileName());
-
+	successfulFileCreation(EngineerFiles.ROOT_CAUSE_TO_DO);
     }
 
     private void assignOwner(int index) {

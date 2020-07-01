@@ -1,6 +1,9 @@
 package com.scott_tigers.oncall.shared;
 
+import java.awt.Desktop;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -46,6 +49,16 @@ public class Util {
 
     private static boolean isTT(Path path) {
 	return path.getFileName().toString().matches("^ticket_results - .*\\.csv");
+    }
+
+    public static void launchURL(String url) {
+        try {
+    
+            java.awt.Desktop.getDesktop().browse(new URI(
+        	    url));
+        } catch (IOException | URISyntaxException e) {
+            e.printStackTrace();
+        }
     }
 
 }

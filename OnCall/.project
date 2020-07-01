@@ -20,4 +20,76 @@
 		<nature>org.eclipse.jdt.core.javanature</nature>
 		<nature>org.eclipse.m2e.core.maven2Nature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>EngineeringSupportData/Assigned Tickets.csv</name>
+			<type>1</type>
+			<location>J:/SupportEngineering/OnCallData/Assigned Tickets.csv</location>
+		</link>
+		<link>
+			<name>EngineeringSupportData/Current Customer Issue Schedule.json</name>
+			<type>1</type>
+			<location>J:/SupportEngineering/OnCallData/Current Customer Issue Schedule.json</location>
+		</link>
+		<link>
+			<name>EngineeringSupportData/Customer Issue Backlog.csv</name>
+			<type>1</type>
+			<location>J:/SupportEngineering/OnCallData/Customer Issue Backlog.csv</location>
+		</link>
+		<link>
+			<name>EngineeringSupportData/Customer Issue Emails.csv</name>
+			<type>1</type>
+			<location>J:/SupportEngineering/OnCallData/Customer Issue Emails.csv</location>
+		</link>
+		<link>
+			<name>EngineeringSupportData/Engine Ticket Daily Review.csv</name>
+			<type>1</type>
+			<location>J:/SupportEngineering/OnCallData/Engine Ticket Daily Review.csv</location>
+		</link>
+		<link>
+			<name>EngineeringSupportData/Engineer Master List.csv</name>
+			<type>1</type>
+			<location>J:/SupportEngineering/OnCallData/Engineer Master List.csv</location>
+		</link>
+		<link>
+			<name>EngineeringSupportData/EngineerRating.csv</name>
+			<type>1</type>
+			<location>J:/SupportEngineering/OnCallData/EngineerRating.csv</location>
+		</link>
+		<link>
+			<name>EngineeringSupportData/Keyword Points.csv</name>
+			<type>1</type>
+			<location>J:/SupportEngineering/OnCallData/Keyword Points.csv</location>
+		</link>
+		<link>
+			<name>EngineeringSupportData/Levels From Quip.csv</name>
+			<type>1</type>
+			<location>J:/SupportEngineering/OnCallData/Levels From Quip.csv</location>
+		</link>
+		<link>
+			<name>EngineeringSupportData/On Call Engineers Data.csv</name>
+			<type>1</type>
+			<location>J:/SupportEngineering/OnCallData/On Call Engineers Data.csv</location>
+		</link>
+		<link>
+			<name>EngineeringSupportData/Root Cause To Do.csv</name>
+			<type>1</type>
+			<location>J:/SupportEngineering/OnCallData/Root Cause To Do.csv</location>
+		</link>
+		<link>
+			<name>EngineeringSupportData/Schedule.csv</name>
+			<type>1</type>
+			<location>J:/SupportEngineering/OnCallData/Schedule.csv</location>
+		</link>
+		<link>
+			<name>EngineeringSupportData/TT Download.csv</name>
+			<type>1</type>
+			<location>J:/SupportEngineering/OnCallData/TT Download.csv</location>
+		</link>
+		<link>
+			<name>EngineeringSupportData/Top 100 Companies.csv</name>
+			<type>1</type>
+			<location>J:/SupportEngineering/OnCallData/Top 100 Companies.csv</location>
+		</link>
+	</linkedResources>
 </projectDescription>

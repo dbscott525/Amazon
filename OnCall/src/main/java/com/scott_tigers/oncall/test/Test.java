@@ -1,14 +1,22 @@
 package com.scott_tigers.oncall.test;
 
-import java.util.List;
-
-import com.scott_tigers.oncall.shared.EngineerFiles;
+import java.io.IOException;
 
 public class Test {
 
     public static void main(String[] args) {
-	List<Top100Company> t1 = EngineerFiles.TOP_100_COMPANIES.readCSVToPojo(Top100Company.class);
-	System.out.println("t1=" + (t1));
+	Runtime runtime = Runtime.getRuntime(); // getting Runtime object
+
+	String[] s = new String[] {
+		"C:\\Program Files (x86)\\Microsoft Office\\Office16\\excel.exe",
+		"J:\\SupportEngineering\\OnCallData\\Customer Issue Backlog.csv"
+	};
+
+	try {
+	    runtime.exec(s); // opens "https://javaconceptoftheday.com/" in chrome browser
+	} catch (IOException e) {
+	    e.printStackTrace();
+	}
     }
 
 }

@@ -1,10 +1,9 @@
 package com.scott_tigers.oncall.utility;
 
+import com.scott_tigers.oncall.bean.ScheduleContainer;
+import com.scott_tigers.oncall.bean.ScheduleEmail;
 import com.scott_tigers.oncall.shared.EngineerFiles;
 import com.scott_tigers.oncall.shared.Transform;
-
-import beans.ScheduleContainer;
-import beans.ScheduleEmail;
 
 public class GenerateCustomerIssueEmails {
 

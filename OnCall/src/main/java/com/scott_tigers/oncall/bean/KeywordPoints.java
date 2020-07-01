@@ -1,4 +1,4 @@
-package beans;
+package com.scott_tigers.oncall.bean;
 
 public class KeywordPoints {
     String keyword;

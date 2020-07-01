@@ -25,14 +25,12 @@ import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+import com.scott_tigers.oncall.bean.Engineer;
+import com.scott_tigers.oncall.bean.ScheduleContainer;
+import com.scott_tigers.oncall.bean.ScheduleRow;
 import com.scott_tigers.oncall.shared.Constants;
 import com.scott_tigers.oncall.shared.EngineerFiles;
 import com.scott_tigers.oncall.shared.Executer;
-
-import beans.Engineer;
-import beans.Schedule;
-import beans.ScheduleContainer;
-import beans.ScheduleRow;
 
 public class Scheduler {
 

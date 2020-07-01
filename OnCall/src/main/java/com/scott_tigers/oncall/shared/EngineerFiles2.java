@@ -11,7 +11,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.function.Function;
 
 import org.apache.commons.io.FileUtils;
 
@@ -20,13 +19,11 @@ import com.fasterxml.jackson.core.JsonGenerator.Feature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema.Builder;
 import com.google.gson.Gson;
 import com.scott_tigers.oncall.bean.Engineer;
 import com.scott_tigers.oncall.bean.ScheduleContainer;
-import com.scott_tigers.oncall.bean.TT;
 
-public enum EngineerFiles {
+public enum EngineerFiles2 {
     MASTER_LIST("Engineer Master List"),
     ENGINEER_ADDS("Engineers to be Added"),
     FOO("foo"),
@@ -64,7 +61,7 @@ public enum EngineerFiles {
 	return ".csv";
     }
 
-    EngineerFiles(String fileName) {
+    EngineerFiles2(String fileName) {
 	this.fileName = fileName;
     }
 
@@ -173,17 +170,11 @@ public enum EngineerFiles {
 	return null;
     }
 
-    public <T> void writeCSV(List<T> list, Class<T> pojoClass) {
-	Function<CsvMapper, CsvSchema> t1 = mapper -> mapper.schemaFor(pojoClass);
-	writeCSV(list, t1);
-    }
-
-    private <T> void writeCSV(List<T> list, Function<CsvMapper, CsvSchema> schemaMaker) {
+    public <T> void writeCSV(List<T> list, Class<?> pojoClass) {
 	try {
 	    CsvMapper mapper = new CsvMapper();
-//	CsvSchema schema = mapper.schemaFor(pojoClass);
-	    CsvSchema schema = schemaMaker.apply(mapper);
 	    mapper.configure(Feature.IGNORE_UNKNOWN, true);
+	    CsvSchema schema = mapper.schemaFor(pojoClass);
 //	    CsvSchema schema = CsvSchema.builder().addColumn("Description").build();
 
 	    schema = schema.withColumnSeparator(',').withHeader();
@@ -209,27 +200,6 @@ public enum EngineerFiles {
 	    FileUtils.writeLines(new File(getFileName()), lines);
 	} catch (IOException e) {
 	    System.out.println("e=" + (e));
-	    e.printStackTrace();
-	}
-    }
-
-    public void writeCSV(List<TT> list, List<String> columnNames) {
-	Function<CsvMapper, CsvSchema> t1 = mapper -> {
-	    Builder builder = CsvSchema.builder();
-	    columnNames.stream().forEach(builder::addColumn);
-	    return builder.build();
-	};
-	writeCSV(list, t1);
-    }
-
-    public void launch() {
-
-	try {
-	    Runtime.getRuntime().exec(new String[] {
-		    "C:\\Program Files (x86)\\Microsoft Office\\Office16\\excel.exe",
-		    getFileName()
-	    });
-	} catch (IOException e) {
 	    e.printStackTrace();
 	}
     }

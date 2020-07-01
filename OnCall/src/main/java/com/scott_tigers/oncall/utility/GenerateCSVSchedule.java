@@ -4,11 +4,10 @@ import java.io.IOException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.scott_tigers.oncall.bean.Engineer;
+import com.scott_tigers.oncall.bean.ScheduleContainer;
+import com.scott_tigers.oncall.bean.ScheduleRow;
 import com.scott_tigers.oncall.shared.EngineerFiles;
-
-import beans.Engineer;
-import beans.ScheduleContainer;
-import beans.ScheduleRow;
 
 public class GenerateCSVSchedule {
 

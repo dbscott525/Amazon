@@ -1,15 +1,16 @@
 package com.scott_tigers.oncall.utility;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.scott_tigers.oncall.bean.KeywordPoints;
+import com.scott_tigers.oncall.bean.TT;
 import com.scott_tigers.oncall.shared.EngineerFiles;
+import com.scott_tigers.oncall.shared.TicketStatuses;
 import com.scott_tigers.oncall.shared.Util;
 import com.scott_tigers.oncall.test.Top100Company;
-
-import beans.KeywordPoints;
-import beans.TT;
 
 public class CreateCustomerIssueReadyQueue {
 
@@ -20,6 +21,10 @@ public class CreateCustomerIssueReadyQueue {
     private List<Integer> assignedTicketIds;
     private List<KeywordPoints> keywordPoints;
     private List<String> top100Companies;
+    private static List<String> unavailableStutes = Arrays.asList(
+	    TicketStatuses.PENDING_REQUESTER_INFO_7_DAY_AUTO_RESOLVE,
+	    TicketStatuses.PENDING_PENDING_CUSTOMER_RESPONSE,
+	    TicketStatuses.PENDING_ANY_INFO_7_DAY_AUTO_RESOLVE);
 
     private void run() throws Exception {
 	readAssignedTickets();
@@ -38,10 +43,15 @@ public class CreateCustomerIssueReadyQueue {
 		.readCSVToPojo(TT.class)
 		.stream()
 		.filter(this::notAssigned)
+		.filter(this::allowableStatus)
 		.peek(tt -> assignedWeight(tt))
 		.sorted(Comparator.comparing(TT::getWeight)
 			.reversed())
 		.collect(Collectors.toList()), TT.class);
+    }
+
+    private boolean allowableStatus(TT tt) {
+	return !unavailableStutes.contains(tt.getStatus());
     }
 
     private void readAssignedTickets() {

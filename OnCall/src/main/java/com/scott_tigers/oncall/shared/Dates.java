@@ -6,7 +6,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 public enum Dates {
-    TIME_STAMP("yyyy-MM-dd-HH-mm-ss"), SORTABLE_DAY_DATE("yyyy-MM-dd");
+    TIME_STAMP("yyyy-MM-dd-HH-mm-ss"), SORTABLE_DAY_DATE("yyyy-MM-dd"), LTTR_URL("yyyy-ww"), TT_SEARCH("M/d/y");
 
     private String format;
 
@@ -31,6 +31,14 @@ public enum Dates {
 	c.setTime(date);
 	c.add(Calendar.DATE, delta);
 	return c.getTime();
+    }
+
+    public static Date getWeekDelta(Date date, int delta) {
+	return getDateDelta(date, delta * 7);
+    }
+
+    public String getFormattedString(Date date) {
+	return new SimpleDateFormat(format).format(date);
     }
 
 }

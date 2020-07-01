@@ -1,8 +1,9 @@
-package beans;
+package com.scott_tigers.oncall.bean;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.GsonBuilder;
+import com.scott_tigers.oncall.shared.Properties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TT {
@@ -14,8 +15,12 @@ public class TT {
     private String url;
     private String rootCauseDetails;
     private Integer weight;
+    private String comments;
+    private String review;
+    private String status;
+    private String link;
 
-    @JsonProperty("Case ID")
+    @JsonProperty(Properties.CASE_ID)
     public Integer getCaseId() {
 	return caseId;
     }
@@ -25,7 +30,7 @@ public class TT {
 	this.caseId = caseId;
     }
 
-    @JsonProperty("Description")
+    @JsonProperty(Properties.DESCRIPTION)
     public String getDescription() {
 	return description;
     }
@@ -52,6 +57,7 @@ public class TT {
 	this.age = age;
     }
 
+    @JsonProperty(Properties.URL)
     public String getUrl() {
 	return caseId == null ? url
 		: "https://tt.amazon.com/"
@@ -70,7 +76,7 @@ public class TT {
 	this.weight = weight;
     }
 
-    @JsonProperty("Root Cause Details")
+    @JsonProperty(Properties.ROOT_CAUSE_DETAILS)
     public String getRootCauseDetails() {
 	return rootCauseDetails;
     }
@@ -79,12 +85,54 @@ public class TT {
 	this.rootCauseDetails = rootCauseDetails;
     }
 
+    @JsonProperty(Properties.OWNER)
     public String getOwner() {
 	return owner;
     }
 
     public void setOwner(String owner) {
 	this.owner = owner;
+    }
+
+    @JsonProperty(Properties.COMMENTS)
+    public String getComments() {
+	return comments;
+    }
+
+    public void setComments(String comments) {
+	this.comments = comments;
+    }
+
+    @JsonProperty(Properties.REVIEW)
+    public String getReview() {
+	return review;
+    }
+
+    public void setReview(String review) {
+	this.review = review;
+    }
+
+    @JsonProperty(Properties.STATUS)
+    public String getStatus() {
+	return status;
+    }
+
+    public void setStatus(String status) {
+	this.status = status;
+    }
+
+    @JsonProperty(Properties.LINK)
+    public String getLink() {
+	// =HYPERLINK("https://tt.amazon.com/0503132068", "FOO")
+	return "=HYPERLINK(\"https://tt.amazon.com/"
+		+ caseId
+		+ "\", \""
+		+ caseId
+		+ "\")";
+    }
+
+    public void setLink(String link) {
+	this.link = link;
     }
 
     @Override

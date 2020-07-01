@@ -3,7 +3,7 @@
  *
  * Created on Jun 19, 2020
  */
-package beans;
+package com.scott_tigers.oncall.bean;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.gson.Gson;

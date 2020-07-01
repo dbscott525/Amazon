@@ -1,4 +1,4 @@
-package beans;
+package com.scott_tigers.oncall.bean;
 
 import java.util.stream.Collectors;
 
