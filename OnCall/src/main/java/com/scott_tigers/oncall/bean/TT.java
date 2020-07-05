@@ -18,6 +18,7 @@ public class TT {
     private String comments;
     private String review;
     private String status;
+    @SuppressWarnings("unused")
     private String link;
 
     @JsonProperty(Properties.CASE_ID)
@@ -39,7 +40,7 @@ public class TT {
 	this.description = description;
     }
 
-    @JsonProperty("Create Date")
+    @JsonProperty(Properties.CREATE_DATE)
     public String getCreateDate() {
 	return createDate;
     }

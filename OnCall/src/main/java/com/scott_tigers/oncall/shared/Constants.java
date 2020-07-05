@@ -21,5 +21,6 @@ public class Constants {
     public static final String ENGINEER_DETAIL_FILE = "J:\\SupportEngineering\\OnCallData\\On Call Engineers Data.csv";
     public static final String EXISTING_PUBLISHED_SCHEDULE = "J:\\SupportEngineering\\OnCallData\\Published Schedues\\2020-06-29 On Call Schedule.csv";
     public static final String SORTABLE_DATE_FORMAT = "yyyy-MM-dd";
+    public static final String AMAZON_EMAIL_POSTFIX = "@amazon.com";
 
 }

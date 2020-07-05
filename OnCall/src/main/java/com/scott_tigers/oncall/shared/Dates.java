@@ -6,7 +6,11 @@ import java.util.Calendar;
 import java.util.Date;
 
 public enum Dates {
-    TIME_STAMP("yyyy-MM-dd-HH-mm-ss"), SORTABLE_DAY_DATE("yyyy-MM-dd"), LTTR_URL("yyyy-ww"), TT_SEARCH("M/d/y");
+    TIME_STAMP("yyyy-MM-dd-HH-mm-ss"),
+    SORTABLE("yyyy-MM-dd"),
+    LTTR_URL("yyyy-ww"),
+    TT_SEARCH("M/d/y"),
+    ONLINE_SCHEDULE("M/d/yy");
 
     private String format;
 

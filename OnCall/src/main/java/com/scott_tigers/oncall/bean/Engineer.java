@@ -7,6 +7,7 @@ package com.scott_tigers.oncall.bean;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.scott_tigers.oncall.schedule.DateStringContainer;
 import com.scott_tigers.oncall.schedule.Scheduler;
 import com.scott_tigers.oncall.shared.ResultCache;
@@ -80,11 +81,6 @@ public class Engineer {
 	this.ooo = ooo;
     }
 
-    @Override
-    public String toString() {
-	return "Engineer [name=" + firstName + ", level=" + level + ", exclusionDates=" + ooo + "]";
-    }
-
     public boolean hasDateConflict(String date) {
 	return dateConflictCache.evaluate(date, () -> {
 	    if (ooo == null || ooo.length() == 0) {
@@ -118,6 +114,36 @@ public class Engineer {
 
     public String getEmail() {
 	return uid + "@amazon.com";
+    }
+
+    @Override
+    public int hashCode() {
+	final int prime = 31;
+	int result = 1;
+	result = prime * result + ((uid == null) ? 0 : uid.hashCode());
+	return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+	if (this == obj)
+	    return true;
+	if (obj == null)
+	    return false;
+	if (getClass() != obj.getClass())
+	    return false;
+	Engineer other = (Engineer) obj;
+	if (uid == null) {
+	    if (other.uid != null)
+		return false;
+	} else if (!uid.equals(other.uid))
+	    return false;
+	return true;
+    }
+
+    @Override
+    public String toString() {
+	return new GsonBuilder().setPrettyPrinting().create().toJson(this);
     }
 
 }

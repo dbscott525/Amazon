@@ -11,7 +11,7 @@ public class ScheduleRow {
 
     public ScheduleRow(String date, List<Engineer> engineers) {
 	this.date = date;
-	this.setEngineers(engineers);
+	this.engineers = engineers;
     }
 
     public String getDate() {
@@ -29,11 +29,6 @@ public class ScheduleRow {
     public void setEngineers(List<Engineer> engineers) {
 	this.engineers = engineers;
     }
-
-//    @Override
-//    public String toString() {
-//	return "ScheduleRow [date=" + date + ", engineers=" + engineers + "]";
-//    }
 
     @Override
     public String toString() {

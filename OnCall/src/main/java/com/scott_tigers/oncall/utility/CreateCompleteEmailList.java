@@ -5,10 +5,10 @@ import java.util.stream.Collectors;
 import com.scott_tigers.oncall.bean.Engineer;
 import com.scott_tigers.oncall.shared.EngineerFiles;
 
-public class GenerateCompleteEmailList {
+public class CreateCompleteEmailList {
 
     public static void main(String[] args) {
-	new GenerateCompleteEmailList().run();
+	new CreateCompleteEmailList().run();
     }
 
     private void run() {

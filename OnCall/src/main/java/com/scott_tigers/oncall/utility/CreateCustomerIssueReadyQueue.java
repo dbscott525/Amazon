@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 import com.scott_tigers.oncall.bean.KeywordPoints;
 import com.scott_tigers.oncall.bean.TT;
 import com.scott_tigers.oncall.shared.EngineerFiles;
-import com.scott_tigers.oncall.shared.TicketStatuses;
 import com.scott_tigers.oncall.shared.Util;
 import com.scott_tigers.oncall.test.Top100Company;
 
@@ -22,9 +21,14 @@ public class CreateCustomerIssueReadyQueue {
     private List<KeywordPoints> keywordPoints;
     private List<String> top100Companies;
     private static List<String> unavailableStutes = Arrays.asList(
-	    TicketStatuses.PENDING_REQUESTER_INFO_7_DAY_AUTO_RESOLVE,
-	    TicketStatuses.PENDING_PENDING_CUSTOMER_RESPONSE,
-	    TicketStatuses.PENDING_ANY_INFO_7_DAY_AUTO_RESOLVE);
+	    "Pending Any Info - 7 Day Auto Resolve",
+//	    "Pending Pending Customer Response",
+//	    "Pending Related Item",
+	    "Pending Requester Info - 3 Day Auto Resolve",
+	    "Pending Requester Info - 7 Day Auto Resolve",
+//	    "Pending Requester Information",
+//	    "Pending Verification of fix",
+	    "nop");
 
     private void run() throws Exception {
 	readAssignedTickets();

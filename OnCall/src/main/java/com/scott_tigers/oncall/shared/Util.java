@@ -1,6 +1,5 @@
 package com.scott_tigers.oncall.shared;
 
-import java.awt.Desktop;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -52,13 +51,13 @@ public class Util {
     }
 
     public static void launchURL(String url) {
-        try {
-    
-            java.awt.Desktop.getDesktop().browse(new URI(
-        	    url));
-        } catch (IOException | URISyntaxException e) {
-            e.printStackTrace();
-        }
+	try {
+
+	    java.awt.Desktop.getDesktop().browse(new URI(
+		    url));
+	} catch (IOException | URISyntaxException e) {
+	    e.printStackTrace();
+	}
     }
 
 }

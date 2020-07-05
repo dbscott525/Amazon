@@ -9,10 +9,10 @@ import com.scott_tigers.oncall.bean.ScheduleContainer;
 import com.scott_tigers.oncall.bean.ScheduleRow;
 import com.scott_tigers.oncall.shared.EngineerFiles;
 
-public class GenerateCSVSchedule {
+public class CreateCSVSchedule {
 
     public static void main(String[] args) throws IOException {
-	new GenerateCSVSchedule().run();
+	new CreateCSVSchedule().run();
     }
 
     private void run() throws IOException {

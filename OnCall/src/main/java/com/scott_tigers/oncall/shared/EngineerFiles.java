@@ -23,7 +23,6 @@ import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema.Builder;
 import com.google.gson.Gson;
 import com.scott_tigers.oncall.bean.Engineer;
-import com.scott_tigers.oncall.bean.ScheduleContainer;
 import com.scott_tigers.oncall.bean.TT;
 
 public enum EngineerFiles {
@@ -43,7 +42,8 @@ public enum EngineerFiles {
     TT_DOWNLOAD("TT Download"),
     ASSIGNED_TICKETS("Assigned Tickets"),
     CUSTOMER_ISSUE_BACKLOG("Customer Issue Backlog"),
-    KEYWORD_POINTS("Keyword Points"), TOP_100_COMPANIES("Top 100 Companies"),
+    KEYWORD_POINTS("Keyword Points"),
+    TOP_100_COMPANIES("Top 100 Companies"),
     ROOT_CAUSE_TO_DO("Root Cause To Do"),
     CURRENT_CUSTOMER_ISSUE_SCHEDULE("Current Customer Issue Schedule") {
 	@Override
@@ -52,7 +52,18 @@ public enum EngineerFiles {
 	}
     },
     NEW_SCHEDULE("New Schedule"),
-    ENGINE_TICKET_DAILY_REVIEW("Engine Ticket Daily Review");
+    ONLINE_SCHEDULE("Online Schedule") {
+	@Override
+	protected String extension() {
+	    return ".json";
+	}
+    },
+    ENGINE_TICKET_DAILY_REVIEW("Engine Ticket Daily Review"),
+    FROM_ONLINE_SCHEDULE("From Online Schedule"),
+    CIT_CANDIDATES_FROM_POOYA("CIT Candidates From Pooya"),
+    ON_CALL_SCHEDULE("On Call Schedule"),
+    DAILY_STAND_UP_EMAILS("Daily Stand Up Emails"),
+    RESOLVED_TICKET_SUMMARY("Resolved Ticket Summary");
 
     private String fileName;
 
@@ -138,10 +149,10 @@ public enum EngineerFiles {
 	return Transform.list(readCSV(), x -> x.map(Engineer::getFirstName));
     }
 
-    public void writeJson(ScheduleContainer scheduleContainer) {
+    public <T> void writeJson(T object) {
 	try {
 	    if (renameFileToTimeStampFile()) {
-		writeJsonFile(scheduleContainer);
+		writeJsonFile(object);
 	    }
 
 	} catch (Exception e) {
@@ -150,9 +161,9 @@ public enum EngineerFiles {
 	}
     }
 
-    void writeJsonFile(ScheduleContainer scheduleContainer) {
+    <T> void writeJsonFile(T object) {
 	try {
-	    writeText(Json.getJsonString(scheduleContainer));
+	    writeText(Json.getJsonString(object));
 	} catch (IOException e) {
 	    System.out.println("Cannot write to file " + getFileName());
 	    e.printStackTrace();
@@ -165,7 +176,6 @@ public enum EngineerFiles {
 
     public <T> T readJson(Class<T> clazz) {
 	try {
-	    System.out.println("getFileName()=" + (getFileName()));
 	    return new Gson().fromJson(Files.readString(Paths.get(getFileName()), StandardCharsets.US_ASCII), clazz);
 	} catch (IOException e) {
 	    e.printStackTrace();

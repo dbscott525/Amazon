@@ -30,6 +30,7 @@ public class CreateRootCauseToDoList extends Utility {
 
     private static final List<String> ROOT_CAUSE_REVIEW_COLUMNS = Arrays.asList(
 	    Properties.OWNER,
+	    Properties.CREATE_DATE,
 	    Properties.URL,
 	    Properties.ROOT_CAUSE_DETAILS);
 
@@ -84,7 +85,7 @@ public class CreateRootCauseToDoList extends Utility {
     }
 
     private boolean forToday(ScheduleRow scheduleRow) {
-	Date scheduleStartDate = Dates.SORTABLE_DAY_DATE.getDateFromString(scheduleRow.getDate());
+	Date scheduleStartDate = Dates.SORTABLE.getDateFromString(scheduleRow.getDate());
 
 	Date startDate = Dates.getDateDelta(scheduleStartDate, -2);
 	Date endDate = Dates.getDateDelta(scheduleStartDate, 4);
