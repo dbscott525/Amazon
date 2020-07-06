@@ -17,7 +17,7 @@ public class CreateCustomerIssueEmails extends Utility {
 
     private void run() {
 
-	List<ScheduleEmail> scheduleEmails = EngineerFiles.CURRENT_SCHEDULE
+	List<ScheduleEmail> scheduleEmails = EngineerFiles.CURRENT_CUSTOMER_ISSUE_SCHEDULE
 		.readJson(ScheduleContainer.class)
 		.getScheduleRows()
 		.stream()

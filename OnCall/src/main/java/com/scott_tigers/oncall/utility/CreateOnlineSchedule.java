@@ -14,7 +14,7 @@ public class CreateOnlineSchedule {
     }
 
     private void run() {
-	ScheduleContainer t1 = EngineerFiles.CURRENT_SCHEDULE.readJson(ScheduleContainer.class);
+	ScheduleContainer t1 = EngineerFiles.CURRENT_CUSTOMER_ISSUE_SCHEDULE.readJson(ScheduleContainer.class);
 	List<CitScheduleRow> onlineSchedule = t1.getScheduleRows().stream().map(CitScheduleRow::new)
 		.collect(Collectors.toList());
 	EngineerFiles.ONLINE_SCHEDULE.writeJson(onlineSchedule);

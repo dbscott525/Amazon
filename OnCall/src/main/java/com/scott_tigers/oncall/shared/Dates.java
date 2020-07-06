@@ -2,6 +2,10 @@ package com.scott_tigers.oncall.shared;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.temporal.TemporalAdjusters;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -43,6 +47,33 @@ public enum Dates {
 
     public String getFormattedString(Date date) {
 	return new SimpleDateFormat(format).format(date);
+    }
+
+    public String getFormattedString() {
+	return getFormattedString(new Date());
+    }
+
+    public String getFormattedDelta(String dateString, int delta) {
+	Date d1 = getDateFromString(dateString);
+	Date d2 = getDateDelta(d1, delta);
+	String d3 = getFormattedString(d2);
+	return d3;
+    }
+
+    public static Date getNextMondayDatex() {
+	return Date
+		.from(LocalDate.now()
+			.with(TemporalAdjusters.next(DayOfWeek.MONDAY))
+			.atStartOfDay(ZoneId.systemDefault())
+			.toInstant());
+    }
+
+    public String getNextMondayDate() {
+	return getFormattedString(Date
+		.from(LocalDate.now()
+			.with(TemporalAdjusters.next(DayOfWeek.MONDAY))
+			.atStartOfDay(ZoneId.systemDefault())
+			.toInstant()));
     }
 
 }

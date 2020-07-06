@@ -28,6 +28,7 @@ public class Engineer {
     private Double level;
     private String ooo;
 
+    private int shiftsCompleted;
     private transient Scheduler scheduler;
     private transient DateStringContainer dates;
     private transient ResultCache<String, Boolean> dateConflictCache = new ResultCache<String, Boolean>();
@@ -114,6 +115,18 @@ public class Engineer {
 
     public String getEmail() {
 	return uid + "@amazon.com";
+    }
+
+    public int getShiftsCompleted() {
+	return shiftsCompleted;
+    }
+
+    public void setShiftsCompleted(int shiftsCompleted) {
+	this.shiftsCompleted = shiftsCompleted;
+    }
+
+    public void incrementShiftsCompleted() {
+	shiftsCompleted++;
     }
 
     @Override

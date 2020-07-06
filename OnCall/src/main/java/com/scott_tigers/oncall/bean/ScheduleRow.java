@@ -3,6 +3,7 @@ package com.scott_tigers.oncall.bean;
 import java.util.List;
 
 import com.google.gson.GsonBuilder;
+import com.scott_tigers.oncall.shared.Dates;
 
 public class ScheduleRow {
 
@@ -28,6 +29,14 @@ public class ScheduleRow {
 
     public void setEngineers(List<Engineer> engineers) {
 	this.engineers = engineers;
+    }
+
+    public boolean scheduleComplete() {
+	return Dates.SORTABLE.getFormattedString().compareTo(Dates.SORTABLE.getFormattedDelta(date, -5)) > 0;
+    }
+
+    public boolean scheduleNotComplete() {
+	return !scheduleComplete();
     }
 
     @Override

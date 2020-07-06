@@ -1,20 +1,21 @@
 package com.scott_tigers.oncall.bean;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class ScheduleContainer {
 
-    private ArrayList<ScheduleRow> scheduleRows;
+    private List<ScheduleRow> scheduleRows;
 
     public ScheduleContainer(ArrayList<ScheduleRow> scheduleRows) {
 	this.setScheduleRows(scheduleRows);
     }
 
-    public ArrayList<ScheduleRow> getScheduleRows() {
+    public List<ScheduleRow> getScheduleRows() {
 	return scheduleRows;
     }
 
-    public void setScheduleRows(ArrayList<ScheduleRow> scheduleRows) {
+    public void setScheduleRows(List<ScheduleRow> scheduleRows) {
 	this.scheduleRows = scheduleRows;
     }
 

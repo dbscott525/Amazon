@@ -11,7 +11,7 @@ import com.scott_tigers.oncall.shared.EngineerFiles;
 import com.scott_tigers.oncall.shared.Util;
 import com.scott_tigers.oncall.test.Top100Company;
 
-public class CreateCustomerIssueReadyQueue {
+public class CreateCustomerIssueReadyQueue extends Utility {
 
     public static void main(String[] args) throws Exception {
 	new CreateCustomerIssueReadyQueue().run();
@@ -24,6 +24,7 @@ public class CreateCustomerIssueReadyQueue {
 	    "Pending Any Info - 7 Day Auto Resolve",
 //	    "Pending Pending Customer Response",
 //	    "Pending Related Item",
+//	    "Code Push",
 	    "Pending Requester Info - 3 Day Auto Resolve",
 	    "Pending Requester Info - 7 Day Auto Resolve",
 //	    "Pending Requester Information",
@@ -37,8 +38,9 @@ public class CreateCustomerIssueReadyQueue {
 	readtop100CompanyData();
 	createReadyQueue();
 
-	System.out.println("TT Ready Queue Created at "
-		+ EngineerFiles.CUSTOMER_ISSUE_BACKLOG.getFileName());
+	this.successfulFileCreation(EngineerFiles.CUSTOMER_ISSUE_BACKLOG);
+//	System.out.println("TT Ready Queue Created at "
+//		+ EngineerFiles.CUSTOMER_ISSUE_BACKLOG.getFileName());
 
     }
 

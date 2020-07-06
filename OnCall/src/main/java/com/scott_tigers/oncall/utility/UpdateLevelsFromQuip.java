@@ -24,6 +24,7 @@ public class UpdateLevelsFromQuip {
 	List<Engineer> masterList = EngineerFiles.MASTER_LIST.readCSV();
 	masterList.stream().forEach(this::updateLevel);
 	EngineerFiles.MASTER_LIST.replace(masterList);
+//	EngineerFiles.TEST.replace(masterList);
 
 	System.out.println("Levels updated");
     }
