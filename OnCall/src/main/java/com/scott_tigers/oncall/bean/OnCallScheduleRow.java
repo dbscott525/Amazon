@@ -6,6 +6,7 @@ public class OnCallScheduleRow {
 
     String date;
     String uid;
+    String shift;
 
     public OnCallScheduleRow(String date, String uid) {
 
@@ -24,6 +25,10 @@ public class OnCallScheduleRow {
 	return uid;
     }
 
+    public String getShift() {
+	return shift;
+    }
+
     public OnCallScheduleRow canonicalDate() {
 	date = Dates.SORTABLE.getFormattedString(Dates.ONLINE_SCHEDULE.getDateFromString(date));
 	return this;
@@ -34,8 +39,13 @@ public class OnCallScheduleRow {
 	return "OnCallScheduleRow [date=" + date + ", uid=" + uid + "]";
     }
 
-    public void setDateToDayBefore() {
+    public OnCallScheduleRow adjustDate() {
 	date = Dates.SORTABLE.getFormattedString(Dates.getDateDelta(Dates.SORTABLE.getDateFromString(date), -1));
+	return this;
+    }
+
+    public boolean afterToday() {
+	return date.compareTo(Dates.SORTABLE.getFormattedString()) > 0;
     }
 
 }

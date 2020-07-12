@@ -17,7 +17,7 @@ public class CreateCSVSchedule extends Utility {
 
     private void run() throws IOException {
 	EngineerFiles.SCHEDULE_CSV
-		.writeText(EngineerFiles.CURRENT_CUSTOMER_ISSUE_SCHEDULE
+		.writeText(EngineerFiles.CUSTOMER_ISSUE_TEAM_SCHEDULE
 			.readJson(ScheduleContainer.class)
 			.getScheduleRows()
 			.stream()

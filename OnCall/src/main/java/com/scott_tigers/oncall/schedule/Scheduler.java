@@ -261,7 +261,8 @@ public class Scheduler {
 	long startTimeInMillis = System.currentTimeMillis();
 	long maximumElapsedMillis = TimeUnit.MINUTES.toMillis(timeLimit);
 
-	Random random = new Random(525);
+//	Random random = new Random(525);
+	Random random = new Random();
 	while (true) {
 	    long elapsed = System.currentTimeMillis() - startTimeInMillis;
 	    if (elapsed > maximumElapsedMillis) {

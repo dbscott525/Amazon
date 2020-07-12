@@ -10,7 +10,9 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 import org.apache.commons.io.FileUtils;
@@ -30,11 +32,12 @@ public enum EngineerFiles {
     
     ASSIGNED_TICKETS                   ("Assigned Tickets"),
     CIT_CANDIDATES_FROM_POOYA          ("CIT Candidates From Pooya"),
-//    CURRENT_CUSTOMER_ISSUE_SCHEDULE    ("Current Customer Issue Schedule", Constants.JSON_EXTENSION) ,
     CURRENT_CUSTOMER_ISSUE_SCHEDULE    ("Current Customer Issue Schedule", Constants.JSON_EXTENSION),
     CUSTOMER_ISSUE_BACKLOG             ("Customer Issue Backlog"),
     CUSTOMER_ISSUE_EMAIL               ("Customer Issue Emails"),
-    DAILY_STAND_UP_EMAILS              ("Daily Stand Up Emails"),
+    CUSTOMER_ISSUE_TEAM_SCHEDULE       ("Customer Issue Team Schedule", Constants.JSON_EXTENSION),
+    DAILY_ON_CALL_REMINDER_EMAILS      ("Daily On Call Reminder Emails"),
+    DAILY_STAND_UP_ATTENDEE_EMAILS     ("Daily Stand Up Attendee Emails"), 
     ENGINE_TICKET_DAILY_REVIEW         ("Engine Ticket Daily Review"),
     ENGINEER_ADDS                      ("Engineers to be Added"),
     EXCECUTED_CUSTOMER_ISSUE_SCHEDULES ("Excecuted Customer Issue Schedules", Constants.JSON_EXTENSION),
@@ -50,15 +53,28 @@ public enum EngineerFiles {
     RESOLVED_TICKET_SUMMARY            ("Resolved Ticket Summary"),
     ROOT_CAUSE_TO_DO                   ("Root Cause To Do"),
     SCHEDULE_CSV                       ("Schedule"),
+    SUPPORT_PARTICPANTS                ("Support Particpants",  Constants.XML_EXTENSION),
+    SUPPORT_PARTICPANTS_TEMPLATE       ("Support Particpants Template", Constants.XML_EXTENSION),
+    TECH_ESC                           ("Tech Esc"),
     TEST                               ("Test"),
     TOP_100_COMPANIES                  ("Top 100 Companies"),
+    TRAINEE_EMAILS                     ("Trainee Emails"),
+    TRAINEES                           ("Trainees"),
+    TRAINING_DAILY_SCHEDULE	       ("Training Daily Schedule"),
     TT_DOWNLOAD                        ("TT Download"),
     UNAVAILABILITY                     ("Unavailability");
     
     // @formatter:on
 
+    static Map<String, String> programMap = new HashMap<>() {
+	private static final long serialVersionUID = 1L;
+	{
+	    put(Constants.XML_EXTENSION, "C:\\\\Program Files (x86)\\\\Microsoft Office\\\\Office16\\WINWORD.EXE");
+	    put(Constants.CSV_EXTENSION, "C:\\Program Files (x86)\\Microsoft Office\\Office16\\EXCEL.EXE");
+	}
+    };
+    private String extension = Constants.CSV_EXTENSION;
     private String fileName;
-    private String extension = ".csv";
 
     EngineerFiles(String fileName) {
 	this.fileName = fileName;
@@ -84,9 +100,9 @@ public enum EngineerFiles {
     public void launch() {
 
 	try {
-	    System.out.println("getFileName()=" + (getFileName()));
 	    Runtime.getRuntime().exec(new String[] {
-		    "C:\\Program Files (x86)\\Microsoft Office\\Office16\\EXCEL.EXE",
+		    programMap.get(extension),
+//		    "C:\\Program Files (x86)\\Microsoft Office\\Office16\\EXCEL.EXE",
 		    getFileName()
 	    });
 	} catch (IOException e) {
@@ -116,6 +132,10 @@ public enum EngineerFiles {
 	    e.printStackTrace();
 	}
 	return null;
+    }
+
+    public String readText() throws IOException {
+	return Files.readString(Paths.get(getFileName()));
     }
 
     private boolean renameFileToTimeStampFile() {

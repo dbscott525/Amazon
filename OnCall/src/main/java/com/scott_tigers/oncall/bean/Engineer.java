@@ -27,6 +27,8 @@ public class Engineer {
     private String uid;
     private Double level;
     private String ooo;
+    private String trainingDate;
+    private String timeZone;
 
     private int shiftsCompleted;
     private transient Scheduler scheduler;
@@ -157,6 +159,14 @@ public class Engineer {
     @Override
     public String toString() {
 	return new GsonBuilder().setPrettyPrinting().create().toJson(this);
+    }
+
+    public String getTrainingDate() {
+	return trainingDate;
+    }
+
+    public String getTimeZone() {
+	return timeZone;
     }
 
 }

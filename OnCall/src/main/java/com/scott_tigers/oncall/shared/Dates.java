@@ -14,6 +14,7 @@ public enum Dates {
     SORTABLE("yyyy-MM-dd"),
     LTTR_URL("yyyy-ww"),
     TT_SEARCH("M/d/y"),
+    NICE("MMMM d, yyyy"),
     ONLINE_SCHEDULE("M/d/yy");
 
     private String format;
@@ -74,6 +75,31 @@ public enum Dates {
 			.with(TemporalAdjusters.next(DayOfWeek.MONDAY))
 			.atStartOfDay(ZoneId.systemDefault())
 			.toInstant()));
+    }
+
+    String getNextWeekDay(String dateString) {
+	Date date = getDateFromString(dateString);
+	Calendar cal = Calendar.getInstance();
+	cal.setTime(date);
+	int dayOfTheWeek = cal.get(Calendar.DAY_OF_WEEK);
+	int increment;
+	switch (dayOfTheWeek) {
+	case 7:
+	    increment = 2;
+	    break;
+	case 6:
+	    increment = 3;
+	    break;
+	default:
+	    increment = 1;
+	    break;
+	}
+
+	return getFormattedDelta(dateString, increment);
+    }
+
+    public String convertFormat(String date, Dates dateType) {
+	return dateType.getFormattedString(getDateFromString(date));
     }
 
 }

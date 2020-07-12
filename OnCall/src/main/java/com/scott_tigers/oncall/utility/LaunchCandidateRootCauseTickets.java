@@ -1,4 +1,4 @@
-package com.scott_tigers.oncall.test;
+package com.scott_tigers.oncall.utility;
 
 import java.util.Comparator;
 
@@ -6,9 +6,8 @@ import com.scott_tigers.oncall.bean.TT;
 import com.scott_tigers.oncall.shared.Dates;
 import com.scott_tigers.oncall.shared.EngineerFiles;
 import com.scott_tigers.oncall.shared.Util;
-import com.scott_tigers.oncall.utility.Utility;
 
-public class Test extends Utility {
+public class LaunchCandidateRootCauseTickets extends Utility {
 
     public static void main(String[] args) {
 	Util.launchURL(
@@ -21,7 +20,8 @@ public class Test extends Utility {
 						.map(TT::getCreateDate)
 						.min(Comparator.comparing(String::toString))
 						.orElse("000")
-						.substring(0, 10), -1),
+						.substring(0, 10),
+						-1),
 					Dates.TT_SEARCH)
 			+ "&modified_date=&tags=&case_type=&building_id=&min_impact=2&search=Search%21");
 

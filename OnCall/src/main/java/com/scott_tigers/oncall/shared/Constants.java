@@ -23,5 +23,7 @@ public class Constants {
     public static final String SORTABLE_DATE_FORMAT = "yyyy-MM-dd";
     public static final String AMAZON_EMAIL_POSTFIX = "@amazon.com";
     static final String JSON_EXTENSION = ".json";
+    public static final String XML_EXTENSION = ".xml";
+    public static final String CSV_EXTENSION = ".csv";
 
 }

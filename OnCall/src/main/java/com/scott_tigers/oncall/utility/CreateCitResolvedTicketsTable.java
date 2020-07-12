@@ -20,6 +20,7 @@ public class CreateCitResolvedTicketsTable extends Utility {
 	List<TicketStatusCount> resolvedTickets = EngineerFiles.TT_DOWNLOAD
 		.readCSVToPojo(TT.class)
 		.stream()
+		.filter(tt -> !tt.getStatus().equals("Pending Pending Root Cause"))
 		.collect(Collectors.groupingBy(TT::getStatus))
 		.entrySet()
 		.stream()

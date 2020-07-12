@@ -8,7 +8,7 @@ public class TicketStatusCount {
     private Integer count;
 
     public TicketStatusCount(Entry<String, List<TT>> entry) {
-	status = entry.getKey();
+	status = entry.getKey().replace("Pending Pending", "Pending");
 	count = entry.getValue().size();
     }
 

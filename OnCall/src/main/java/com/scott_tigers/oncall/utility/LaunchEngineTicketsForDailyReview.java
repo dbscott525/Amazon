@@ -6,10 +6,10 @@ import java.util.Date;
 import com.scott_tigers.oncall.shared.Dates;
 import com.scott_tigers.oncall.shared.Util;
 
-public class LaunchEngineTickets {
+public class LaunchEngineTicketsForDailyReview {
 
     public static void main(String[] args) {
-	new LaunchEngineTickets().run();
+	new LaunchEngineTicketsForDailyReview().run();
     }
 
     private void run() {

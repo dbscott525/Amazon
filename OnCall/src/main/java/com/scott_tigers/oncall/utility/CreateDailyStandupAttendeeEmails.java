@@ -11,17 +11,17 @@ import com.scott_tigers.oncall.bean.ScheduleContainer;
 import com.scott_tigers.oncall.shared.Dates;
 import com.scott_tigers.oncall.shared.EngineerFiles;
 
-public class CreateDailyOnCallEmails extends Utility {
+public class CreateDailyStandupAttendeeEmails extends Utility {
 
     public static void main(String[] args) {
-	new CreateDailyOnCallEmails().run();
+	new CreateDailyStandupAttendeeEmails().run();
     }
 
     private void run() {
 
-	List<OnCallScheduleRow> allEmails = getOnCallSchedul();
+	List<OnCallScheduleRow> allEmails = getOnCallSchedule();
 
-	List<OnCallScheduleRow> citEmails = EngineerFiles.CURRENT_CUSTOMER_ISSUE_SCHEDULE
+	List<OnCallScheduleRow> citEmails = EngineerFiles.CUSTOMER_ISSUE_TEAM_SCHEDULE
 		.readJson(ScheduleContainer.class)
 		.getScheduleRows()
 		.stream().map(row -> {
@@ -46,7 +46,7 @@ public class CreateDailyOnCallEmails extends Utility {
 
 	allEmails.addAll(citEmails);
 
-	writeEmailsByDate(allEmails, EngineerFiles.DAILY_STAND_UP_EMAILS);
+	writeEmailsByDate(allEmails, EngineerFiles.DAILY_STAND_UP_ATTENDEE_EMAILS);
     }
 
 }
