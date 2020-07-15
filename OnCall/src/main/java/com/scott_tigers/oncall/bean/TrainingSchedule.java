@@ -1,10 +1,9 @@
-package com.scott_tigers.oncall.utility;
+package com.scott_tigers.oncall.bean;
 
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
-import com.scott_tigers.oncall.bean.Engineer;
 import com.scott_tigers.oncall.shared.WeekDays;
 
 public class TrainingSchedule {

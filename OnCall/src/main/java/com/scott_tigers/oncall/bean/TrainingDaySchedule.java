@@ -1,4 +1,4 @@
-package com.scott_tigers.oncall.utility;
+package com.scott_tigers.oncall.bean;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import com.scott_tigers.oncall.bean.Engineer;
 import com.scott_tigers.oncall.shared.ShadowSlot;
 
 public class TrainingDaySchedule {

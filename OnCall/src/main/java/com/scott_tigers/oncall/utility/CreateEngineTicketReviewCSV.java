@@ -1,11 +1,12 @@
 package com.scott_tigers.oncall.utility;
 
-import java.io.IOException;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.scott_tigers.oncall.bean.TT;
+import com.scott_tigers.oncall.shared.Dates;
 import com.scott_tigers.oncall.shared.EngineerFiles;
 import com.scott_tigers.oncall.shared.Properties;
 import com.scott_tigers.oncall.shared.TicketStatuses;
@@ -20,24 +21,25 @@ public class CreateEngineTicketReviewCSV extends Utility {
 	    Properties.ROOT_CAUSE_DETAILS,
 	    Properties.DESCRIPTION);
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
 	new CreateEngineTicketReviewCSV().run();
     }
 
-    private void run() throws IOException {
-	// Pending Pending Root Cause
-
-	copyMostRecentDownloadedTTs();
-	List<TT> engineTickets = EngineerFiles.TT_DOWNLOAD
-		.readCSVToPojo(TT.class)
-		.stream()
-		.filter(tt -> !tt.getStatus().equals(TicketStatuses.PENDING_PENDING_ROOT_CAUSE))
-		.collect(Collectors.toList());
-
-	EngineerFiles.ENGINE_TICKET_DAILY_REVIEW.writeCSV(engineTickets,
-		ENGINE_REVIEW_COLUMNS);
+    private void run() throws Exception {
+	EngineerFiles.ENGINE_TICKET_DAILY_REVIEW
+		.writeCSV(getTicketStreamFromUrl(getURL())
+			.filter(tt -> !tt.getStatus().equals(TicketStatuses.PENDING_PENDING_ROOT_CAUSE))
+			.collect(Collectors.toList()),
+			ENGINE_REVIEW_COLUMNS);
 
 	successfulFileCreation(EngineerFiles.ENGINE_TICKET_DAILY_REVIEW);
+    }
+
+    private String getURL() {
+	int delta = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) == 2 ? -3 : -1;
+	return "https://tt.amazon.com/search?category=AWS&type=RDS-AuroraMySQL&item=Engine&assigned_group=aurora-head%3Boscar-eng-secondary&status=Assigned%3BResearching%3BWork+In+Progress%3BPending&impact=&assigned_individual=&requester_login=&login_name=&cc_email=&phrase_search_text=&keyword_bq=&exact_bq=&or_bq1=&or_bq2=&or_bq3=&exclude_bq=&create_date="
+		+ Dates.TT_SEARCH.getFormattedString(Dates.getDateDelta(new Date(), delta))
+		+ "&modified_date=&tags=&case_type=&building_id=&min_impact=2&search=Search%21";
     }
 
 }

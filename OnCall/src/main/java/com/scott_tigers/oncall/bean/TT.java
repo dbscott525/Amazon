@@ -20,6 +20,7 @@ public class TT {
     private String status;
     @SuppressWarnings("unused")
     private String link;
+    private String resolvedDate;
 
     @JsonProperty(Properties.CASE_ID)
     public Integer getCaseId() {
@@ -120,6 +121,15 @@ public class TT {
 
     public void setStatus(String status) {
 	this.status = status;
+    }
+
+    @JsonProperty("Resolved Date")
+    public String getResolvedDate() {
+	return resolvedDate;
+    }
+
+    public void setResolvedDate(String resolvedDate) {
+	this.resolvedDate = resolvedDate;
     }
 
     @JsonProperty(Properties.LINK)

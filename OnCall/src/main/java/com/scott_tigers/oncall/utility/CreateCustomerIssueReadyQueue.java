@@ -8,10 +8,11 @@ import java.util.stream.Collectors;
 import com.scott_tigers.oncall.bean.KeywordPoints;
 import com.scott_tigers.oncall.bean.TT;
 import com.scott_tigers.oncall.shared.EngineerFiles;
-import com.scott_tigers.oncall.shared.Util;
 import com.scott_tigers.oncall.test.Top100Company;
 
 public class CreateCustomerIssueReadyQueue extends Utility {
+
+    private static final String RECENT_OPEN_CUSTOMER_ISSUE_SEARCH_URL = "https://tt.amazon.com/search?category=AWS&type=RDS-AuroraMySQL&item=CustomerIssue&assigned_group=aurora-head%3Baurora-head-trx%3Baurora-head-backlog%3Baurora-head-ecosystem%3Baurora-head-partition%3Baurora-head-qp%3Baurora-head-store%3Baurora-head-secondary-wip%3Boscar-eng-secondary%3Baurora-secondary-RCA%3Baurora-head-serverless&status=Assigned%3BResearching%3BWork+In+Progress%3BPending&impact=&assigned_individual=&requester_login=&login_name=&cc_email=&phrase_search_text=&keyword_bq=&exact_bq=&or_bq1=&or_bq2=&or_bq3=&exclude_bq=&create_date=06%2F01%2F2020&modified_date=&tags=&case_type=&building_id=&search=Search%21#";
 
     public static void main(String[] args) throws Exception {
 	new CreateCustomerIssueReadyQueue().run();
@@ -33,27 +34,23 @@ public class CreateCustomerIssueReadyQueue extends Utility {
 
     private void run() throws Exception {
 	readAssignedTickets();
-	Util.makeCopyofMostRecentTTDownload();
 	readPointData();
 	readtop100CompanyData();
 	createReadyQueue();
 
-	this.successfulFileCreation(EngineerFiles.CUSTOMER_ISSUE_BACKLOG);
-//	System.out.println("TT Ready Queue Created at "
-//		+ EngineerFiles.CUSTOMER_ISSUE_BACKLOG.getFileName());
+	successfulFileCreation(EngineerFiles.CUSTOMER_ISSUE_BACKLOG);
 
     }
 
-    private void createReadyQueue() {
-	EngineerFiles.CUSTOMER_ISSUE_BACKLOG.writeCSV(EngineerFiles.TT_DOWNLOAD
-		.readCSVToPojo(TT.class)
-		.stream()
-		.filter(this::notAssigned)
-		.filter(this::allowableStatus)
-		.peek(tt -> assignedWeight(tt))
-		.sorted(Comparator.comparing(TT::getWeight)
-			.reversed())
-		.collect(Collectors.toList()), TT.class);
+    private void createReadyQueue() throws Exception {
+	EngineerFiles.CUSTOMER_ISSUE_BACKLOG
+		.writeCSV(getTicketStreamFromUrl(RECENT_OPEN_CUSTOMER_ISSUE_SEARCH_URL)
+			.filter(this::notAssigned)
+			.filter(this::allowableStatus)
+			.peek(this::assignedWeight)
+			.sorted(Comparator.comparing(TT::getWeight)
+				.reversed())
+			.collect(Collectors.toList()), TT.class);
     }
 
     private boolean allowableStatus(TT tt) {

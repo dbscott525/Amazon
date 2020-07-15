@@ -1,11 +1,18 @@
 package com.scott_tigers.oncall.utility;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -15,9 +22,9 @@ import com.scott_tigers.oncall.bean.Engineer;
 import com.scott_tigers.oncall.bean.OnCallScheduleRow;
 import com.scott_tigers.oncall.bean.ScheduleContainer;
 import com.scott_tigers.oncall.bean.ScheduleRow;
+import com.scott_tigers.oncall.bean.TT;
 import com.scott_tigers.oncall.shared.Dates;
 import com.scott_tigers.oncall.shared.EngineerFiles;
-import com.scott_tigers.oncall.shared.Util;
 
 public class Utility {
 
@@ -28,10 +35,6 @@ public class Utility {
 	System.out.println(fileType.getFileName() + " was successfully created.");
 	System.out.println("File is now be launched");
 	fileType.launch();
-    }
-
-    protected void copyMostRecentDownloadedTTs() throws IOException {
-	Util.makeCopyofMostRecentTTDownload();
     }
 
     protected Function<List<Engineer>, List<Engineer>> getEngineerListTransformer() {
@@ -121,4 +124,61 @@ public class Utility {
 		.collect(Collectors.groupingBy(Engineer::getTrainingDate));
     }
 
+    protected Stream<TT> getTicketStreamFromUrl(String url) throws Exception {
+	return getTicketStream(launchUrlAndWaitForDownload(url));
+    }
+
+    private String launchUrlAndWaitForDownload(String url)
+	    throws Exception {
+	String previousTTFileName = getLatestTTFileName();
+	String ttFileName = previousTTFileName;
+
+	launchUrl(url);
+
+	while (previousTTFileName.equals(ttFileName)) {
+	    TimeUnit.SECONDS.sleep(3);
+	    ttFileName = getLatestTTFileName();
+	}
+	return ttFileName;
+    }
+
+    protected void launchUrl(String url) throws IOException, URISyntaxException {
+	java.awt.Desktop
+		.getDesktop()
+		.browse(new URI(url));
+    }
+
+    private Stream<TT> getTicketStream(String ttFileName) throws IOException {
+	List<String> lines = Files.readAllLines(Paths.get(ttFileName), Charset.forName("ISO-8859-1"));
+	lines.remove(0);
+
+	EngineerFiles.TT_DOWNLOAD.writeLines(lines);
+
+	Stream<TT> ticketStream = EngineerFiles.TT_DOWNLOAD
+		.readCSVToPojo(TT.class)
+		.stream();
+	return ticketStream;
+    }
+
+    private String getLatestTTFileName() throws IOException {
+	String homePath = System.getenv("HOMEDRIVE") + System.getenv("HOMEPATH");
+	Path path = Paths.get(homePath, "Downloads");
+
+	String latestTTFile;
+
+	try (Stream<Path> downloadFileList = Files.list(path)) {
+	    latestTTFile = downloadFileList
+		    .filter(this::isTT)
+		    .sorted()
+		    .reduce((first, second) -> second)
+		    .orElse(null)
+		    .toString();
+
+	}
+	return latestTTFile;
+    }
+
+    private boolean isTT(Path path) {
+	return path.getFileName().toString().matches("^ticket_results - .*\\.csv");
+    }
 }
