@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import com.scott_tigers.oncall.bean.CitScheduleRow;
 import com.scott_tigers.oncall.bean.ScheduleContainer;
 import com.scott_tigers.oncall.shared.EngineerFiles;
+import com.scott_tigers.oncall.shared.Json;
 
 public class CreateOnlineSchedule {
 
@@ -14,9 +15,12 @@ public class CreateOnlineSchedule {
     }
 
     private void run() {
-	ScheduleContainer t1 = EngineerFiles.CURRENT_CUSTOMER_ISSUE_SCHEDULE.readJson(ScheduleContainer.class);
-	List<CitScheduleRow> onlineSchedule = t1.getScheduleRows().stream().map(CitScheduleRow::new)
+	List<CitScheduleRow> onlineSchedule = EngineerFiles.CUSTOMER_ISSUE_TEAM_SCHEDULE
+		.readJson(ScheduleContainer.class)
+		.getScheduleRows()
+		.stream().map(CitScheduleRow::new)
 		.collect(Collectors.toList());
 	EngineerFiles.ONLINE_SCHEDULE.writeJson(onlineSchedule);
+	Json.print(onlineSchedule);
     }
 }

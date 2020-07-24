@@ -12,14 +12,10 @@ public class CreateDailyOnCallReminderEmails extends Utility {
     }
 
     private void run() {
-
-//	allEmails.map(x -> x.setDateToDayBefore());
-
-//	writeEmailsByDate(allEmails, EngineerFiles.DAILY_ON_CALL_REMINDER_EMAILS);
 	writeEmailsByDate(
 		getOnCallSchedule()
 			.stream()
-			.filter(x -> x.afterToday())
+			.filter(OnCallScheduleRow::afterToday)
 			.map(OnCallScheduleRow::adjustDate)
 			.collect(Collectors.toList()),
 		EngineerFiles.DAILY_ON_CALL_REMINDER_EMAILS);

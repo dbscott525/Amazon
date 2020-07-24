@@ -30,6 +30,7 @@ public class Utility {
 
     protected List<Engineer> masterList;
     private Map<String, Engineer> uidToEngMap;
+    private List<Integer> assignedTicketIds;
 
     protected void successfulFileCreation(EngineerFiles fileType) {
 	System.out.println(fileType.getFileName() + " was successfully created.");
@@ -95,16 +96,22 @@ public class Utility {
     }
 
     protected Optional<ScheduleRow> getScheduleForThisWeek() {
-	Optional<ScheduleRow> foundSchedule = Stream
-		.of(EngineerFiles.CURRENT_CUSTOMER_ISSUE_SCHEDULE, EngineerFiles.EXCECUTED_CUSTOMER_ISSUE_SCHEDULES)
-		.flatMap(x -> x.readJson(ScheduleContainer.class)
-			.getScheduleRows()
-			.stream())
-		.collect(Collectors.toList())
+	return EngineerFiles.CUSTOMER_ISSUE_TEAM_SCHEDULE
+		.readJson(ScheduleContainer.class)
+		.getScheduleRows()
 		.stream()
 		.filter(this::forToday)
 		.findFirst();
-	return foundSchedule;
+//	Optional<ScheduleRow> foundSchedule = Stream
+//		.of(EngineerFiles.CURRENT_CUSTOMER_ISSUE_SCHEDULE, EngineerFiles.EXCECUTED_CUSTOMER_ISSUE_SCHEDULES)
+//		.flatMap(x -> x.readJson(ScheduleContainer.class)
+//			.getScheduleRows()
+//			.stream())
+//		.collect(Collectors.toList())
+//		.stream()
+//		.filter(this::forToday)
+//		.findFirst();
+//	return foundSchedule;
     }
 
     protected boolean forToday(ScheduleRow scheduleRow) {
@@ -143,6 +150,7 @@ public class Utility {
     }
 
     protected void launchUrl(String url) throws IOException, URISyntaxException {
+	System.out.println("url=" + (url));
 	java.awt.Desktop
 		.getDesktop()
 		.browse(new URI(url));
@@ -180,5 +188,20 @@ public class Utility {
 
     private boolean isTT(Path path) {
 	return path.getFileName().toString().matches("^ticket_results - .*\\.csv");
+    }
+
+    protected boolean notAssigned(TT tt) {
+	assignedTicketIds = Optional
+		.ofNullable(assignedTicketIds)
+		.orElse(EngineerFiles.ASSIGNED_TICKETS
+			.readCSVToPojo(TT.class)
+			.stream()
+			.map(TT::getUrl)
+			.filter(url -> url.matches("https://tt.amazon.com/[0-9]+"))
+			.map(url -> url.replaceAll("https://tt.amazon.com/0?([0-9]+)", "$1"))
+			.map(Integer::valueOf)
+			.collect(Collectors.toList()));
+
+	return !assignedTicketIds.contains(tt.getCaseId());
     }
 }

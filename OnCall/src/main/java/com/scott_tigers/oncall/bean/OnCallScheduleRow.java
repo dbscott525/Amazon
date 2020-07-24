@@ -69,4 +69,8 @@ public class OnCallScheduleRow {
 	return date.compareTo(Dates.SORTABLE.getFormattedString()) > 0;
     }
 
+    public boolean isCurrent() {
+	return Dates.SORTABLE.getFormattedString().compareTo(date) <= 0;
+    }
+
 }

@@ -56,7 +56,7 @@ public class Scheduler {
     private Supplier<Boolean> standardDeviationCheck = () -> false;
     private int shiftSize = 1;
     private int shiftFrequency = 1;
-    private List<ScheduleRow> executedScheduledRows;
+    private List<ScheduleRow> existingSchedule;
     private List<Engineer> engineersFromCsvFile;
     Predicate<Integer> shiftFilter;
 
@@ -207,7 +207,7 @@ public class Scheduler {
 
     private void readEngineers() {
 
-	executedScheduledRows = EngineerFiles.EXCECUTED_CUSTOMER_ISSUE_SCHEDULES
+	existingSchedule = EngineerFiles.CUSTOMER_ISSUE_TEAM_SCHEDULE
 		.readJson(ScheduleContainer.class)
 		.getScheduleRows();
 
@@ -227,7 +227,7 @@ public class Scheduler {
 		.stream()
 		.forEach(ua -> ua.setOoo(uidToEngineer.get(ua.getUid())));
 
-	executedScheduledRows
+	existingSchedule
 		.stream()
 		.forEach(engineerInSchedule -> engineerInSchedule
 			.getEngineers()
@@ -243,7 +243,7 @@ public class Scheduler {
 
     private void computeStartDate() {
 	startDate = Dates.SORTABLE
-		.getDateFromString(executedScheduledRows
+		.getDateFromString(existingSchedule
 			.stream()
 			.map(ScheduleRow::getDate)
 			.map(x -> Dates.SORTABLE.getFormattedDelta(x, 7))

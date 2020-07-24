@@ -36,7 +36,7 @@ public class ScheduleGenerator {
 		.passes(1)
 		.timeLimit(20)
 		.run()
-		.save(EngineerFiles.CURRENT_CUSTOMER_ISSUE_SCHEDULE);
+		.save(EngineerFiles.CUSTOMER_ISSUE_TEAM_SCHEDULE);
 //	.save(EngineerFiles.NEW_SCHEDULE);
     }
 

@@ -33,7 +33,7 @@ public class TestUnavailbilityUpdater {
 		.stream()
 		.forEach(ua -> ua.setOoo(uidToEngineer.get(ua.getUid())));
 
-	EngineerFiles.EXCECUTED_CUSTOMER_ISSUE_SCHEDULES
+	EngineerFiles.CUSTOMER_ISSUE_TEAM_SCHEDULE
 		.readJson(ScheduleContainer.class)
 		.getScheduleRows()
 		.stream()

@@ -12,5 +12,6 @@ public class Properties {
     public static final String OWNER = "Owner";
     public static final String URL = "URL";
     public static final String CREATE_DATE = "Create Date";
+    public static final String WEIGHT = "weight";
 
 }

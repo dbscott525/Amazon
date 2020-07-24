@@ -44,4 +44,8 @@ public class ScheduleRow {
 	return new GsonBuilder().setPrettyPrinting().create().toJson(this);
     }
 
+    public boolean isCurrent() {
+	return Dates.SORTABLE.getFormattedString().compareTo(date) <= 0;
+    }
+
 }

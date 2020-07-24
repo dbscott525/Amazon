@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 import com.scott_tigers.oncall.bean.Engineer;
 import com.scott_tigers.oncall.bean.OnCallScheduleRow;
 import com.scott_tigers.oncall.bean.ScheduleContainer;
+import com.scott_tigers.oncall.bean.ScheduleRow;
 import com.scott_tigers.oncall.shared.Dates;
 import com.scott_tigers.oncall.shared.EngineerFiles;
 
@@ -19,34 +20,46 @@ public class CreateDailyStandupAttendeeEmails extends Utility {
 
     private void run() {
 
-	List<OnCallScheduleRow> allEmails = getOnCallSchedule();
+	writeEmailsByDate(
+		Stream
+			.of(getCitStream(), getOncallStream())
+			.flatMap(x -> x)
+			.filter(OnCallScheduleRow::isCurrent)
+			.collect(Collectors.toList()),
+		EngineerFiles.DAILY_STAND_UP_ATTENDEE_EMAILS);
+    }
 
-	List<OnCallScheduleRow> citEmails = EngineerFiles.CUSTOMER_ISSUE_TEAM_SCHEDULE
+    private Stream<OnCallScheduleRow> getCitStream() {
+	return EngineerFiles.CUSTOMER_ISSUE_TEAM_SCHEDULE
 		.readJson(ScheduleContainer.class)
 		.getScheduleRows()
-		.stream().map(row -> {
-		    String dateString = row.getDate();
-		    Date schedulDate = Dates.SORTABLE.getDateFromString(dateString);
-		    return Stream.of(0, 1, 2, 3, 4, 7)
-			    .map(day -> Dates.getDateDelta(schedulDate, day))
-			    .map(Dates.SORTABLE::getFormattedString)
-			    .map(date -> {
-				return row.getEngineers()
-					.stream()
-					.map(Engineer::getUid)
-					.map(uid -> new OnCallScheduleRow(date, uid));
-			    })
-			    .collect(Collectors.toList())
-			    .stream()
-			    .flatMap(x -> x)
-			    .collect(Collectors.toList());
-		})
-		.flatMap(List<OnCallScheduleRow>::stream)
+		.stream()
+		.map(this::getCitSingleRowStream)
+		.flatMap(List<OnCallScheduleRow>::stream);
+    }
+
+    private List<OnCallScheduleRow> getCitSingleRowStream(ScheduleRow row) {
+	String dateString = row.getDate();
+	Date schedulDate = Dates.SORTABLE.getDateFromString(dateString);
+	return Stream.of(0, 1, 2, 3, 4, 7)
+		.map(day -> Dates.getDateDelta(schedulDate, day))
+		.map(Dates.SORTABLE::getFormattedString)
+		.map(date -> row
+			.getEngineers()
+			.stream()
+			.map(Engineer::getUid)
+			.map(uid -> new OnCallScheduleRow(date, uid)))
+		.collect(Collectors.toList())
+		.stream()
+		.flatMap(x -> x)
 		.collect(Collectors.toList());
+    }
 
-	allEmails.addAll(citEmails);
-
-	writeEmailsByDate(allEmails, EngineerFiles.DAILY_STAND_UP_ATTENDEE_EMAILS);
+    private Stream<OnCallScheduleRow> getOncallStream() {
+	return EngineerFiles.ON_CALL_SCHEDULE
+		.readCSVToPojo(OnCallScheduleRow.class)
+		.stream()
+		.map(OnCallScheduleRow::canonicalDate);
     }
 
 }
