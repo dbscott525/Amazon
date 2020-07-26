@@ -7,7 +7,6 @@ import java.util.stream.Stream;
 
 import com.scott_tigers.oncall.bean.Engineer;
 import com.scott_tigers.oncall.bean.OnCallScheduleRow;
-import com.scott_tigers.oncall.bean.ScheduleContainer;
 import com.scott_tigers.oncall.bean.ScheduleRow;
 import com.scott_tigers.oncall.shared.Dates;
 import com.scott_tigers.oncall.shared.EngineerFiles;
@@ -30,10 +29,7 @@ public class CreateDailyStandupAttendeeEmails extends Utility {
     }
 
     private Stream<OnCallScheduleRow> getCitStream() {
-	return EngineerFiles.CUSTOMER_ISSUE_TEAM_SCHEDULE
-		.readJson(ScheduleContainer.class)
-		.getScheduleRows()
-		.stream()
+	return EngineerFiles.getScheduleRowsStream()
 		.map(this::getCitSingleRowStream)
 		.flatMap(List<OnCallScheduleRow>::stream);
     }

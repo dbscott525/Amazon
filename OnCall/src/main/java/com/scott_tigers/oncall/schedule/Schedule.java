@@ -27,12 +27,10 @@ public class Schedule {
 
     private List<Engineer> engineers;
     private List<List<Engineer>> daySchedules;
-//    private Date startDate = new Date();
     private Scheduler scheduler;
 
-    public Schedule(Scheduler scheduler, List<Engineer> candidateSchedule, Date startDate) {
+    public Schedule(Scheduler scheduler, List<Engineer> candidateSchedule) {
 	this.scheduler = scheduler;
-//	this.startDate = startDate;
 	this.engineers = candidateSchedule;
 	daySchedules = IntStream
 		.range(0, candidateSchedule.size())
@@ -42,9 +40,7 @@ public class Schedule {
 
     public Schedule getBestSchedule(Schedule bestSchedule) {
 
-	boolean hasDateConflct = hasDateConflict();
-
-	if (hasDateConflct) {
+	if (hasDateConflict() || hasSmeProblem()) {
 	    return bestSchedule;
 	}
 
@@ -61,6 +57,18 @@ public class Schedule {
 
 	return betterStandardDeviation ? this : bestSchedule;
 
+    }
+
+    private boolean hasSmeProblem() {
+	return daySchedules
+		.stream()
+		.anyMatch(daySchedule -> daySchedule
+			.stream()
+			.filter(e -> !e.getExpertise().isEmpty())
+			.collect(Collectors.groupingBy(Engineer::getExpertise, Collectors.counting()))
+			.entrySet()
+			.stream()
+			.anyMatch(scheduler::smeOutOfRang));
     }
 
     private boolean hasDateConflict() {

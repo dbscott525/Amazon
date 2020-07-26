@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import com.scott_tigers.oncall.shared.Executer;
+import com.scott_tigers.oncall.shared.Executor;
 
 public class CombinationFinder<T> {
 
@@ -26,7 +26,7 @@ public class CombinationFinder<T> {
     private Consumer<List<T>> combinationHandler = list -> {
     };
     private Function<List<T>, Boolean> prefixChecker = list -> true;
-    private Executer timeOut = () -> {
+    private Executor timeOut = () -> {
     };
     private long startTimeInMillis;
     private int iterationCounter;

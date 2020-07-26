@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
 
@@ -25,7 +26,8 @@ import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema.Builder;
 import com.google.gson.Gson;
 import com.scott_tigers.oncall.bean.Engineer;
-import com.scott_tigers.oncall.bean.TT;
+import com.scott_tigers.oncall.bean.ScheduleContainer;
+import com.scott_tigers.oncall.bean.ScheduleRow;
 
 public enum EngineerFiles {
     // @formatter:off
@@ -50,7 +52,6 @@ public enum EngineerFiles {
     LEVELS_FROM_QUIP                   ("Levels From Quip"),
     MASTER_LIST                        ("Engineer Master List"),
     NEW_LEVEL_ENGINEERS                ("New Level Engineers"),
-    NEW_SCHEDULE                       ("New Schedule",Constants.JSON_EXTENSION),
     ON_CALL_SCHEDULE                   ("On Call Schedule"),
     ONLINE_SCHEDULE                    ("Online Schedule", Constants.JSON_EXTENSION),
     RESOLVED_TICKET_SUMMARY            ("Resolved Ticket Summary"),
@@ -163,10 +164,15 @@ public enum EngineerFiles {
 	return renameResult;
     }
 
-    public void replace(List<Engineer> exsitingEngineers) {
+    public void replaceEngineerList(List<Engineer> exsitingEngineers) {
+	replaceFile(() -> writeToCSVFile(exsitingEngineers));
+    }
+
+    private void replaceFile(ExceptionExecutor writer) {
 	try {
 	    if (renameFileToTimeStampFile()) {
-		writeToCSVFile(exsitingEngineers);
+		writer.run();
+//		writeToCSVFile(exsitingEngineers);
 	    }
 
 	} catch (Exception e) {
@@ -203,13 +209,14 @@ public enum EngineerFiles {
 	}
     }
 
-    public void writeCSV(List<TT> list, List<String> columnNames) {
-	Function<CsvMapper, CsvSchema> t1 = mapper -> {
+    public <T> void writeCSV(List<T> list, List<String> columnNames) {
+	writeCSV(list, mapper -> {
 	    Builder builder = CsvSchema.builder();
-	    columnNames.stream().forEach(builder::addColumn);
+	    columnNames
+		    .stream()
+		    .forEach(builder::addColumn);
 	    return builder.build();
-	};
-	writeCSV(list, t1);
+	});
     }
 
     public <T> void writeJson(T object) {
@@ -264,4 +271,24 @@ public enum EngineerFiles {
 		.writeValue(writerOutputStream, exsitingEngineers);
     }
 
+    public static Stream<ScheduleRow> getScheduleRowsStream() {
+	return getScheduledRows().stream();
+    }
+
+    public static List<ScheduleRow> getScheduledRows() {
+	return getScheduleContainer().getScheduleRows();
+    }
+
+    public static ScheduleContainer getScheduleContainer() {
+	return CUSTOMER_ISSUE_TEAM_SCHEDULE.readJson(ScheduleContainer.class);
+    }
+
+    public static void writeScheduleRows(List<ScheduleRow> scheduleRows) {
+	CUSTOMER_ISSUE_TEAM_SCHEDULE.replaceJsonFile(new ScheduleContainer(scheduleRows));
+//	CUSTOMER_ISSUE_TEAM_SCHEDULE.writeJsonFile(new ScheduleContainer(scheduleRows));
+    }
+
+    void replaceJsonFile(Object object) {
+	replaceFile(() -> writeJsonFile(object));
+    }
 }

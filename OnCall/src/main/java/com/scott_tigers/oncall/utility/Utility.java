@@ -20,9 +20,9 @@ import java.util.stream.Stream;
 import com.scott_tigers.oncall.bean.EmailsByDate;
 import com.scott_tigers.oncall.bean.Engineer;
 import com.scott_tigers.oncall.bean.OnCallScheduleRow;
-import com.scott_tigers.oncall.bean.ScheduleContainer;
 import com.scott_tigers.oncall.bean.ScheduleRow;
 import com.scott_tigers.oncall.bean.TT;
+import com.scott_tigers.oncall.shared.Constants;
 import com.scott_tigers.oncall.shared.Dates;
 import com.scott_tigers.oncall.shared.EngineerFiles;
 
@@ -96,22 +96,10 @@ public class Utility {
     }
 
     protected Optional<ScheduleRow> getScheduleForThisWeek() {
-	return EngineerFiles.CUSTOMER_ISSUE_TEAM_SCHEDULE
-		.readJson(ScheduleContainer.class)
-		.getScheduleRows()
-		.stream()
+	return EngineerFiles
+		.getScheduleRowsStream()
 		.filter(this::forToday)
 		.findFirst();
-//	Optional<ScheduleRow> foundSchedule = Stream
-//		.of(EngineerFiles.CURRENT_CUSTOMER_ISSUE_SCHEDULE, EngineerFiles.EXCECUTED_CUSTOMER_ISSUE_SCHEDULES)
-//		.flatMap(x -> x.readJson(ScheduleContainer.class)
-//			.getScheduleRows()
-//			.stream())
-//		.collect(Collectors.toList())
-//		.stream()
-//		.filter(this::forToday)
-//		.findFirst();
-//	return foundSchedule;
     }
 
     protected boolean forToday(ScheduleRow scheduleRow) {
@@ -125,9 +113,10 @@ public class Utility {
     }
 
     protected Map<String, List<Engineer>> getTraineesByDate() {
-	return EngineerFiles.TRAINEES
+	return EngineerFiles.MASTER_LIST
 		.readCSV()
 		.stream()
+		.filter(x -> x.getType().equals(Constants.ENGINEER_TYPE_TRAINEE))
 		.collect(Collectors.groupingBy(Engineer::getTrainingDate));
     }
 
@@ -204,4 +193,11 @@ public class Utility {
 
 	return !assignedTicketIds.contains(tt.getCaseId());
     }
+
+//    protected Stream<ScheduleRow> getScheduledRowsStream() {
+//        return EngineerFiles.CUSTOMER_ISSUE_TEAM_SCHEDULE
+//        	.readJson(ScheduleContainer.class)
+//        	.getScheduleRows()
+//        	.stream();
+//    }
 }

@@ -16,7 +16,7 @@ public class CreateShadowingSchedule extends Utility {
 	EngineerFiles.TRAINING_DAILY_SCHEDULE.writeLines(getTraineesByDate()
 		.entrySet()
 		.stream()
-		.map(x -> new TrainingSchedule(x))
+		.map(TrainingSchedule::new)
 		.flatMap(x -> x.getTrainingDays().stream())
 		.map(TrainingDaySchedule::getSchedule)
 		.sorted()

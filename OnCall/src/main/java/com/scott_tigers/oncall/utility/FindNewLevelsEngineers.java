@@ -1,31 +1,40 @@
 package com.scott_tigers.oncall.utility;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.scott_tigers.oncall.bean.Engineer;
 import com.scott_tigers.oncall.shared.EngineerFiles;
-import com.scott_tigers.oncall.shared.Json;
-import com.scott_tigers.oncall.shared.Transform;
+import com.scott_tigers.oncall.shared.Properties;
 
-public class FindNewLevelsEngineers {
+public class FindNewLevelsEngineers extends Utility {
+
+    private static final List<String> NEW_LEVEL_COLUMNS = Arrays.asList(
+	    Properties.FIRST_NAME,
+	    Properties.UID);
 
     public static void main(String[] args) {
 	new FindNewLevelsEngineers().run();
     }
 
     private void run() {
-	List<String> masterFirstNames = EngineerFiles.MASTER_LIST.getFirstNames();
-	List<String> engineersFromLevels = EngineerFiles.LEVELS_FROM_QUIP.getFirstNames();
-	Json.print(masterFirstNames);
-	Json.print(engineersFromLevels);
-	EngineerFiles.NEW_LEVEL_ENGINEERS.replace(Transform.list(masterFirstNames,
-		x -> x.filter(y -> !engineersFromLevels.contains(y)).map(this::engFromName)));
-    }
 
-    private Engineer engFromName(String firstName) {
-	Engineer eng = new Engineer();
-	eng.setFirstName(firstName);
-	return eng;
+	List<String> levelsUid = EngineerFiles.LEVELS_FROM_QUIP
+		.readCSV()
+		.stream()
+		.map(Engineer::getUid)
+		.collect(Collectors.toList());
+
+	EngineerFiles.NEW_LEVEL_ENGINEERS
+		.writeCSV(EngineerFiles.MASTER_LIST
+			.readCSV()
+			.stream()
+			.filter(eng -> !levelsUid.contains(eng.getUid()))
+			.collect(Collectors.toList()),
+			NEW_LEVEL_COLUMNS);
+
+	successfulFileCreation(EngineerFiles.NEW_LEVEL_ENGINEERS);
     }
 
 }

@@ -98,8 +98,8 @@ public enum Dates {
 	return getFormattedDelta(dateString, increment);
     }
 
-    public String convertFormat(String date, Dates dateType) {
-	return dateType.getFormattedString(getDateFromString(date));
+    public String convertFormat(String date, Dates toFormat) {
+	return toFormat.getFormattedString(getDateFromString(date));
     }
 
 }

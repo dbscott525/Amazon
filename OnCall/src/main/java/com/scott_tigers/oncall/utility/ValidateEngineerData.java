@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.scott_tigers.oncall.bean.Engineer;
+import com.scott_tigers.oncall.shared.Constants;
 import com.scott_tigers.oncall.shared.EngineerFiles;
 
 public class ValidateEngineerData {
@@ -15,13 +16,13 @@ public class ValidateEngineerData {
     private void run() {
 	List<Engineer> fromOnCall = EngineerFiles.FROM_ONLINE_SCHEDULE.readCSV();
 	List<Engineer> masterList = EngineerFiles.MASTER_LIST.readCSV();
-	List<Engineer> masterOnCall = masterList.stream().filter(eng -> !eng.getType().equals("Trainee"))
+	List<Engineer> masterOnCall = masterList.stream().filter(eng -> !eng.getType().equals(Constants.ENGINEER_TYPE_TRAINEE))
 		.collect(Collectors.toList());
 
 	compareLists("Master On Call List", masterOnCall, "On Call List", fromOnCall);
 	List<Engineer> quipLevels = EngineerFiles.LEVELS_FROM_QUIP.readCSV();
 	compareLists("Master List", masterList, "Quip Levels", quipLevels);
-	List<Engineer> traineesFromMasterList = masterList.stream().filter(eng -> eng.getType().equals("Trainee"))
+	List<Engineer> traineesFromMasterList = masterList.stream().filter(eng -> eng.getType().equals(Constants.ENGINEER_TYPE_TRAINEE))
 		.collect(Collectors.toList());
 	List<Engineer> citCandidatesFromPooya = EngineerFiles.CIT_CANDIDATES_FROM_POOYA.readCSV();
 	compareLists("Pooya CIT Candidates", citCandidatesFromPooya, "Trainees", traineesFromMasterList);

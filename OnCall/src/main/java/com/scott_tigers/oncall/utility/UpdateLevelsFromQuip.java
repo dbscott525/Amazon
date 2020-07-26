@@ -23,8 +23,7 @@ public class UpdateLevelsFromQuip {
 		.collect(Collectors.toMap(Engineer::getUid, Function.identity()));
 	List<Engineer> masterList = EngineerFiles.MASTER_LIST.readCSV();
 	masterList.stream().forEach(this::updateLevel);
-	EngineerFiles.MASTER_LIST.replace(masterList);
-//	EngineerFiles.TEST.replace(masterList);
+	EngineerFiles.MASTER_LIST.replaceEngineerList(masterList);
 
 	System.out.println("Levels updated");
     }

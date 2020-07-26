@@ -6,7 +6,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import com.scott_tigers.oncall.bean.Engineer;
-import com.scott_tigers.oncall.bean.ScheduleContainer;
 import com.scott_tigers.oncall.bean.Unavailability;
 import com.scott_tigers.oncall.shared.EngineerFiles;
 import com.scott_tigers.oncall.shared.Json;
@@ -33,10 +32,8 @@ public class TestUnavailbilityUpdater {
 		.stream()
 		.forEach(ua -> ua.setOoo(uidToEngineer.get(ua.getUid())));
 
-	EngineerFiles.CUSTOMER_ISSUE_TEAM_SCHEDULE
-		.readJson(ScheduleContainer.class)
-		.getScheduleRows()
-		.stream()
+	EngineerFiles
+		.getScheduleRowsStream()
 		.forEach(engineerInSchedule -> engineerInSchedule
 			.getEngineers()
 			.stream()

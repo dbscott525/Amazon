@@ -28,7 +28,7 @@ public class TrainingDaySchedule {
 	}
 
 	this.schedule = Stream
-		.of(Stream.of(date), schedule.stream().map(Engineer::getFullName))
+		.of(Stream.of(date), schedule.stream().map(t -> t.getFullNameWithUid()))
 		.flatMap(x -> x)
 		.collect(Collectors.joining(","));
 

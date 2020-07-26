@@ -48,4 +48,8 @@ public class ScheduleRow {
 	return Dates.SORTABLE.getFormattedString().compareTo(date) <= 0;
     }
 
+    public boolean isBefore(String lastDate) {
+	return lastDate.compareTo(date) > 0;
+    }
+
 }

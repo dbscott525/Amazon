@@ -1,5 +1,6 @@
 package com.scott_tigers.oncall.utility;
 
+import java.util.Comparator;
 import java.util.stream.Collectors;
 
 import com.scott_tigers.oncall.bean.EmailsByDate;
@@ -18,6 +19,7 @@ public class CreateTraineeEmails extends Utility {
 			.entrySet()
 			.stream()
 			.map(EmailsByDate::fromTrainee)
+			.sorted(Comparator.comparing(EmailsByDate::getDate))
 			.collect(Collectors.toList()), EmailsByDate.class);
 
 	successfulFileCreation(EngineerFiles.TRAINEE_EMAILS);

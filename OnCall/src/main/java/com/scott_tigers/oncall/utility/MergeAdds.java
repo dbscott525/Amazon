@@ -25,7 +25,7 @@ public class MergeAdds {
 	System.out.println("BEFORE exsitingEngineers=" + (exsitingEngineers));
 	exsitingEngineers.addAll(newEngineers);
 	System.out.println("AFTER exsitingEngineers=" + (exsitingEngineers));
-	EngineerFiles.MASTER_LIST.replace(exsitingEngineers);
+	EngineerFiles.MASTER_LIST.replaceEngineerList(exsitingEngineers);
     }
 
 }

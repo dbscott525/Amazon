@@ -1,10 +1,5 @@
 package com.scott_tigers.oncall.schedule;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -14,6 +9,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
@@ -27,25 +23,21 @@ import java.util.stream.Stream;
 
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.scott_tigers.oncall.bean.Engineer;
-import com.scott_tigers.oncall.bean.ScheduleContainer;
 import com.scott_tigers.oncall.bean.ScheduleRow;
 import com.scott_tigers.oncall.bean.Unavailability;
 import com.scott_tigers.oncall.shared.Constants;
 import com.scott_tigers.oncall.shared.Dates;
 import com.scott_tigers.oncall.shared.EngineerFiles;
-import com.scott_tigers.oncall.shared.Executer;
+import com.scott_tigers.oncall.shared.Executor;
 
 public class Scheduler {
 
     private Schedule schedule;
     private Map<Integer, Double> percentileMap = new HashMap<Integer, Double>();
-    private Executer search = () -> searchByCombination();
+    private Executor search = () -> searchByCombination();
     private double[] sortedLevels;
     private List<Engineer> engineers;
-    private int passes;
     private int timeLimit;
     private int resultSize;
     private ArrayList<ScheduleRow> scheduleRows;
@@ -58,10 +50,16 @@ public class Scheduler {
     private int shiftFrequency = 1;
     private List<ScheduleRow> existingSchedule;
     private List<Engineer> engineersFromCsvFile;
-    Predicate<Integer> shiftFilter;
+    private Predicate<Integer> shiftFilter;
+    private Map<String, Engineer> levelEngineers;
+    private int shifts;
+    private Map<String, SmeRange> smeRanges;
+    private String newScheduleStart = Dates.SORTABLE.getFormattedString();
+    private int weeksBetweenShift = 3;
+    private Map<String, Engineer> uidToEngineer;
 
     private synchronized void processCandidateSchedule(List<Engineer> candidateSchedule) {
-	schedule = new Schedule(this, candidateSchedule, startDate)
+	schedule = new Schedule(this, candidateSchedule)
 		.getBestSchedule(schedule);
     }
 
@@ -89,7 +87,7 @@ public class Scheduler {
     }
 
     private boolean checkPrefix(List<Engineer> prefix) {
-	return new Schedule(this, prefix, startDate).getBestSchedule(null) != null;
+	return new Schedule(this, prefix).getBestSchedule(null) != null;
     }
 
     private String getDateString(int daySchedule) {
@@ -102,11 +100,6 @@ public class Scheduler {
 
     public Scheduler startDate(Date startDate) {
 	this.startDate = startDate;
-	return this;
-    }
-
-    public Scheduler passes(int passes) {
-	this.passes = passes;
 	return this;
     }
 
@@ -125,15 +118,11 @@ public class Scheduler {
 
 	scheduleRows = new ArrayList<ScheduleRow>();
 
-	IntStream.range(0, passes).forEach(pass -> {
-	    prepareForSearch();
-	    int engByTeamSize = engineers.size() / teamSize;
-	    resultSize = engByTeamSize * teamSize;
-	    search.run();
-	    scheduleRows.addAll(schedule.getScheduleRows());
-	    printScheduled();
-	    startDate = schedule.getNextDate();
-	});
+	prepareForSearch();
+	int engByTeamSize = engineers.size() / teamSize;
+	resultSize = engByTeamSize * teamSize;
+	search.run();
+	scheduleRows.addAll(schedule.getScheduleRows());
 	return this;
     }
 
@@ -146,17 +135,53 @@ public class Scheduler {
 		.sorted((eng1, eng2) -> eng2.getOoo().length() - eng1.getOoo().length())
 		.collect(Collectors.toList());
 
-	int shifts = engineers.size() / teamSize;
-	List<Engineer> excludedEngineers = getOOOConflictedEngineers(shifts);
-	System.out.println("EXCLUDED ENGINEERS");
-	excludedEngineers.stream().forEach(eng -> System.out.println(eng.getFirstName()
-		+ ": "
-		+ eng.getOoo()));
+	updateStartDateBasedOnShiftGap();
 
-	engineers = engineers.stream().filter(eng -> {
-	    return !excludedEngineers.stream().map(Engineer::getFirstName)
-		    .anyMatch(name -> name.equals(eng.getFirstName()));
-	}).collect(Collectors.toList());
+	List<Engineer> excludedEngineers = getOOOConflictedEngineers(engineers.size() / teamSize);
+	System.out.println("EXCLUDED ENGINEERS:");
+	System.out.println();
+	excludedEngineers.stream().map(eng -> "  " + eng.getFullName()).sorted().forEach(System.out::println);
+	System.out.println();
+
+	engineers = engineers
+		.stream()
+		.filter(eng -> !excludedEngineers
+			.stream()
+			.map(Engineer::getUid)
+			.anyMatch(uid -> uid.equals(eng.getUid())))
+		.collect(Collectors.toList());
+	shifts = engineers.size() / teamSize;
+	System.out.println("shifts=" + (shifts));
+
+	Map<String, Long> smeCounts = engineers.stream()
+		.filter(e -> !e.getExpertise().isEmpty())
+		.collect(Collectors.groupingBy(Engineer::getExpertise, Collectors.counting()));
+
+	String smeString = smeCounts.entrySet().stream().map(entry -> entry.getKey() + ": " + entry.getValue())
+		.collect(Collectors.joining(", "));
+	smeRanges = smeCounts
+		.entrySet()
+		.stream()
+		.collect(Collectors.toMap(Entry<String, Long>::getKey, SmeRange::new));
+
+	System.out.println("Shifts: " + shifts + ", " + smeString);
+//	Json.print(smeRanges);
+//	System.exit(1);
+
+    }
+
+    private void updateStartDateBasedOnShiftGap() {
+	existingSchedule
+		.stream()
+		.forEach(schedule -> {
+		    String newStartDate = Dates.SORTABLE
+			    .getFormattedDelta(schedule.getDate(), weeksBetweenShift * 7);
+		    schedule
+			    .getEngineers()
+			    .stream()
+			    .map(eng -> uidToEngineer.get(eng.getUid()))
+			    .forEach(eng -> eng.candidateStartDate(newStartDate));
+		});
     }
 
     private List<Engineer> getOOOConflictedEngineers(int shifts) {
@@ -177,7 +202,8 @@ public class Scheduler {
 		.stream()
 		.map(Engineer::getLevel)
 		.sorted()
-		.mapToDouble(x -> x).toArray();
+		.mapToDouble(x -> x)
+		.toArray();
 	originalEngineers.forEach(engineer -> engineer.setScheduler(this));
 	engineers = engineers.stream()
 		.filter(engineerFilter::test)
@@ -185,33 +211,33 @@ public class Scheduler {
     }
 
     private void createShiftsFilter() {
-	Integer max = extracted(s -> s.max(Comparator.comparing(x1 -> x1)));
-	Integer min = extracted(s -> s.min(Comparator.comparing(x1 -> x1)));
-	System.out.println("max=" + (max));
-	System.out.println("min=" + (min));
-
-	shiftFilter = min == max ? shifts -> true : shifts -> shifts != max;
-	System.out.println("shiftFilter.test(1)=" + (shiftFilter.test(1)));
+	Integer min = relationalCompare(s -> s.min(Comparator.comparing(x1 -> x1)));
+	shiftFilter = shifts -> shifts <= min + 1;
 
     }
 
-    private Integer extracted(Function<Stream<Integer>, Optional<Integer>> compareType) {
-	Stream<Engineer> e1 = engineersFromCsvFile.stream();
-	Stream<Integer> u1 = e1.map(Engineer::getShiftsCompleted);
-
-	Optional<Integer> u2 = compareType.apply(u1);
-//	Optional<Integer> u2 = u1.max(Comparator.comparing(x1 -> x1));
-	Integer max = u2.orElse(0);
-	return max;
+    private Integer relationalCompare(Function<Stream<Integer>, Optional<Integer>> compareType) {
+	return compareType
+		.apply(engineersFromCsvFile
+			.stream()
+			.map(Engineer::getShiftsCompleted))
+		.orElse(0);
     }
 
     private void readEngineers() {
 
-	existingSchedule = EngineerFiles.CUSTOMER_ISSUE_TEAM_SCHEDULE
-		.readJson(ScheduleContainer.class)
-		.getScheduleRows();
+	existingSchedule = EngineerFiles
+		.getScheduleRowsStream()
+		.filter(row -> row.isBefore(newScheduleStart))
+		.collect(Collectors.toList());
 
 	engineersFromCsvFile = EngineerFiles.MASTER_LIST.readCSV();
+
+	uidToEngineer = engineersFromCsvFile
+		.stream()
+		.collect(Collectors.toMap(Engineer::getUid, Function.identity()));
+
+	populateLevels();
 
 	engineersFromCsvFile.forEach(eng -> {
 	    eng.setOoo("");
@@ -241,6 +267,27 @@ public class Scheduler {
 	computeStartDate();
     }
 
+    private void populateLevels() {
+	levelEngineers = EngineerFiles.LEVELS_FROM_QUIP
+		.readCSV()
+		.stream()
+		.collect(Collectors.toMap(Engineer::getUid, Function.identity()));
+	engineersFromCsvFile
+		.stream()
+		.forEach(this::updateLevel);
+    }
+
+    private void updateLevel(Engineer eng) {
+	Engineer levelEngineer = levelEngineers.get(eng.getUid());
+	if (levelEngineer == null) {
+	    System.out.println("Engineer "
+		    + eng.getUid()
+		    + " does not have level data");
+	} else {
+	    eng.setLevel(levelEngineer.getLevel());
+	}
+    }
+
     private void computeStartDate() {
 	startDate = Dates.SORTABLE
 		.getDateFromString(existingSchedule
@@ -261,8 +308,8 @@ public class Scheduler {
 	long startTimeInMillis = System.currentTimeMillis();
 	long maximumElapsedMillis = TimeUnit.MINUTES.toMillis(timeLimit);
 
-//	Random random = new Random(525);
-	Random random = new Random();
+	Random random = new Random(525);
+//	Random random = new Random();
 	while (true) {
 	    long elapsed = System.currentTimeMillis() - startTimeInMillis;
 	    if (elapsed > maximumElapsedMillis) {
@@ -287,7 +334,6 @@ public class Scheduler {
 	int days = engineers.size() / teamSize;
 	sortedEngineers.stream().filter(eng -> IntStream.range(0, days)
 		.mapToObj(day -> getDateString(day)).allMatch(date -> eng.hasDateConflict(date)));
-//	System.out.println("Number of Engineers That don't match" + (engineersWithNoMatch.count()));
 	new CombinationFinder<Engineer>()
 		.timeLimit(timeLimit)
 		.input(sortedEngineers)
@@ -295,30 +341,6 @@ public class Scheduler {
 		.combinationHandler(this::processCandidateSchedule)
 		.prefixChecker(this::checkPrefix)
 		.generate();
-    }
-
-    public Scheduler writeToCSV(String engineersScedhuleFile) {
-	try {
-	    CsvMapper mapper = new CsvMapper();
-	    CsvSchema schema = mapper.schemaFor(ScheduleRow.class);
-	    schema = schema.withColumnSeparator(',').withHeader();
-
-	    // output writer
-	    OutputStreamWriter writerOutputStream = new OutputStreamWriter(
-		    new BufferedOutputStream(
-			    new FileOutputStream(
-				    new File(engineersScedhuleFile)),
-			    1024),
-		    "UTF-8");
-
-	    mapper
-		    .writer(schema)
-		    .writeValue(writerOutputStream, scheduleRows);
-	} catch (IOException e) {
-	    // TODO Auto-generated catch block
-	    e.printStackTrace();
-	}
-	return this;
     }
 
     public Scheduler teamSize(int teamSize) {
@@ -369,9 +391,47 @@ public class Scheduler {
 	return shiftFrequency;
     }
 
-    public void save(EngineerFiles scheduleJson) {
-	ScheduleContainer scheduleContainer = new ScheduleContainer(scheduleRows);
-	scheduleJson.writeJson(scheduleContainer);
+    public void save() {
+	existingSchedule.addAll(scheduleRows);
+	EngineerFiles.writeScheduleRows(existingSchedule);
     }
 
+    private class SmeRange {
+
+	private int min;
+	private int max;
+
+	public SmeRange(Entry<String, Long> entry) {
+	    double averageSmePerShift = (double) entry.getValue() / shifts;
+	    max = (int) Math.ceil(averageSmePerShift);
+	    min = (int) Math.floor(averageSmePerShift);
+	}
+
+	@Override
+	public String toString() {
+	    return "SmeRange [min=" + min + ", max=" + max + "]";
+	}
+
+	public boolean outOfRange(Long value) {
+	    return value > max || value < min;
+	}
+
+    }
+
+    public boolean smeOutOfRang(Entry<String, Long> entry) {
+	return Optional
+		.ofNullable(smeRanges.get(entry.getKey()))
+		.filter(range -> range.outOfRange(entry.getValue()))
+		.isPresent();
+    }
+
+    public Scheduler newScheduleStart(String newScheduleStart) {
+	this.newScheduleStart = newScheduleStart;
+	return this;
+    }
+
+    public Scheduler weeksBetweenShift(int weeksBetweenShift) {
+	this.weeksBetweenShift = weeksBetweenShift;
+	return this;
+    }
 }

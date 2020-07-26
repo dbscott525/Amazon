@@ -32,7 +32,7 @@ public class CreateCitResolvedTicketsTable extends Utility {
     private String getUrl() {
 	Calendar today = Calendar.getInstance();
 	int dayOfWeek = today.get(Calendar.DAY_OF_WEEK);
-	int delta = dayOfWeek == 7 ? -5 : -(dayOfWeek + 5);
+	int delta = dayOfWeek == 1 ? -6 : 2 - dayOfWeek;
 
 	String startString = Dates.TT_SEARCH.getFormattedString(Dates.getDateDelta(today.getTime(), delta));
 	String endString = Dates.TT_SEARCH

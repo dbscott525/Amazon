@@ -5,11 +5,15 @@
  */
 package com.scott_tigers.oncall.bean;
 
+import java.util.Optional;
+import java.util.function.Predicate;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.scott_tigers.oncall.schedule.DateStringContainer;
 import com.scott_tigers.oncall.schedule.Scheduler;
+import com.scott_tigers.oncall.shared.Dates;
 import com.scott_tigers.oncall.shared.ResultCache;
 
 /**
@@ -21,18 +25,22 @@ import com.scott_tigers.oncall.shared.ResultCache;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Engineer {
 
+    private Double level;
+    private String empDate;
+    private String endDate;
+    private String expertise;
     private String firstName;
     private String lastName;
+    private String ooo;
+    private String startDate;
+    private String timeZone;
+    private String trainingDate;
     private String type;
     private String uid;
-    private Double level;
-    private String ooo;
-    private String trainingDate;
-    private String timeZone;
 
     private int shiftsCompleted;
     private transient Scheduler scheduler;
-    private transient DateStringContainer dates;
+    private transient DateStringContainer oooDates;
     private transient ResultCache<String, Boolean> dateConflictCache = new ResultCache<String, Boolean>();
     private transient ResultCache<Integer, Boolean> percentileCache = new ResultCache<Integer, Boolean>();
 
@@ -86,19 +94,52 @@ public class Engineer {
 
     public boolean hasDateConflict(String date) {
 	return dateConflictCache.evaluate(date, () -> {
-	    if (ooo == null || ooo.length() == 0) {
-		return false;
-	    }
-
-	    if (dates == null) {
-		dates = new Gson().fromJson("{\"dates\":" + ooo + "}", DateStringContainer.class);
-	    }
-
-	    boolean conflict = dates
-		    .getDates().stream()
-		    .anyMatch(exclusion -> exclusion.equals(date));
-	    return conflict;
+	    return outOfOffice(date) || beforeStartDate(date) || afterEndDate(date);
 	});
+    }
+
+    private boolean beforeStartDate(String date) {
+	return dateComparator(startDate, x -> x < 0);
+    }
+
+    private boolean afterEndDate(String date) {
+	return dateComparator(endDate, x -> x >= 0);
+    }
+
+    private boolean dateComparator(String compareDate, Predicate<Integer> comparator) {
+	return optionalString(compareDate)
+		.filter(sd -> comparator
+			.test(sd.compareTo(Dates.ONLINE_SCHEDULE.convertFormat(compareDate, Dates.SORTABLE))))
+		.isPresent();
+    }
+
+    private boolean outOfOffice(String date) {
+	return optionalString(ooo)
+		.filter(t -> oooConflict(date))
+		.isPresent();
+    }
+
+    private Optional<String> optionalString(String string) {
+	return Optional
+		.of(string)
+		.filter(s -> !s.isEmpty());
+    }
+
+    private boolean oooConflict(String date) {
+	return getOOODates()
+		.getDates()
+		.stream()
+		.anyMatch(exclusion -> exclusion.equals(date));
+
+    }
+
+    private DateStringContainer getOOODates() {
+	oooDates = Optional
+		.ofNullable(oooDates)
+		.orElse(new Gson().fromJson("{\"dates\":" + ooo + "}", DateStringContainer.class));
+
+	return oooDates;
+
     }
 
     public void setScheduler(Scheduler scheduler) {
@@ -169,4 +210,46 @@ public class Engineer {
 	return timeZone;
     }
 
+    public String getStartDate() {
+	return startDate;
+    }
+
+    public void setStartDate(String startDate) {
+	this.startDate = startDate;
+    }
+
+    public String getExpertise() {
+	return expertise;
+    }
+
+    public void setExpertise(String expertise) {
+	this.expertise = expertise;
+    }
+
+    public String getFullNameWithUid() {
+	return getFullName() + " (" + uid + ")";
+    }
+
+    public String getEmpDate() {
+	return empDate;
+    }
+
+    public void setEmpDate(String empDate) {
+	this.empDate = empDate;
+    }
+
+    public String getEndDate() {
+	return endDate;
+    }
+
+    public void setEndDate(String endDate) {
+	this.endDate = endDate;
+    }
+
+    public void candidateStartDate(String candidateStartDate) {
+	startDate = optionalString(startDate)
+		.filter(currentStartDate -> Dates.ONLINE_SCHEDULE
+			.convertFormat(currentStartDate, Dates.SORTABLE).compareTo(candidateStartDate) > 0)
+		.orElse(Dates.SORTABLE.convertFormat(candidateStartDate, Dates.ONLINE_SCHEDULE));
+    }
 }

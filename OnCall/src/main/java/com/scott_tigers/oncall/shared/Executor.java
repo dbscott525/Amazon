@@ -1,6 +1,6 @@
 package com.scott_tigers.oncall.shared;
 
-public interface Executer {
+public interface Executor {
 
     void run();
 

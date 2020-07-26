@@ -5,7 +5,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.scott_tigers.oncall.bean.Engineer;
-import com.scott_tigers.oncall.bean.ScheduleContainer;
 import com.scott_tigers.oncall.bean.ScheduleRow;
 import com.scott_tigers.oncall.shared.EngineerFiles;
 
@@ -16,18 +15,14 @@ public class CreateCSVSchedule extends Utility {
     }
 
     private void run() throws IOException {
+
 	EngineerFiles.SCHEDULE_CSV
-		.writeText(EngineerFiles.CUSTOMER_ISSUE_TEAM_SCHEDULE
-			.readJson(ScheduleContainer.class)
-			.getScheduleRows()
-			.stream()
+		.writeText(EngineerFiles
+			.getScheduleRowsStream()
 			.map(this::toCSV)
 			.collect(Collectors.joining("\n")));
 
 	successfulFileCreation(EngineerFiles.SCHEDULE_CSV);
-
-//	System.out.println("CSV schedule created at "
-//		+ EngineerFiles.SCHEDULE_CSV.getFileName());
     }
 
     private String toCSV(ScheduleRow row) {

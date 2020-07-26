@@ -5,6 +5,7 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import com.scott_tigers.oncall.shared.Constants;
+import com.scott_tigers.oncall.shared.Dates;
 import com.scott_tigers.oncall.shared.Util;
 
 public class EmailsByDate {
@@ -19,7 +20,7 @@ public class EmailsByDate {
     }
 
     public EmailsByDate(Entry<String, List<OnCallScheduleRow>> entry) {
-	date = entry.getKey();
+	date = getSortableDate(entry.getKey());
 
 	emails = entry
 		.getValue()
@@ -28,8 +29,12 @@ public class EmailsByDate {
 		.collect(Collectors.joining(";"));
     }
 
+    private String getSortableDate(String date) {
+	return Dates.ONLINE_SCHEDULE.convertFormat(date, Dates.SORTABLE);
+    }
+
     public EmailsByDate trainee(Entry<String, List<Engineer>> entry) {
-	date = entry.getKey();
+	date = getSortableDate(entry.getKey());
 	List<Engineer> engineers = entry.getValue();
 	emails = Util.getEngineerEmails(engineers);
 	to = Util.getEngineerToList(engineers);
@@ -58,5 +63,4 @@ public class EmailsByDate {
     public String getTo() {
 	return to;
     }
-
 }
