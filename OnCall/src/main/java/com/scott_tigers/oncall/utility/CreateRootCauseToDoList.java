@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -11,11 +12,12 @@ import java.util.stream.Stream;
 import com.scott_tigers.oncall.bean.Engineer;
 import com.scott_tigers.oncall.bean.ScheduleRow;
 import com.scott_tigers.oncall.bean.TT;
+import com.scott_tigers.oncall.bean.TTReader;
 import com.scott_tigers.oncall.shared.Dates;
 import com.scott_tigers.oncall.shared.EngineerFiles;
 import com.scott_tigers.oncall.shared.Properties;
 
-public class CreateRootCauseToDoList extends Utility {
+public class CreateRootCauseToDoList extends Utility implements TTReader {
 
     static String[] validRootCauseMarkers = {
 	    "i.amazon.com/aurora",
@@ -70,7 +72,8 @@ public class CreateRootCauseToDoList extends Utility {
 	successfulFileCreation(EngineerFiles.ROOT_CAUSE_TO_DO);
     }
 
-    private String getUrl() {
+    @Override
+    public String getUrl() {
 	String date = Dates.SORTABLE
 		.convertFormat(Dates.SORTABLE
 			.getFormattedDelta(EngineerFiles.ROOT_CAUSE_TO_DO
@@ -101,6 +104,11 @@ public class CreateRootCauseToDoList extends Utility {
 	return Stream
 		.of(validRootCauseMarkers)
 		.noneMatch(rootCauseDetails::contains);
+    }
+
+    @Override
+    public Predicate<TT> getFilter() {
+	return tt -> noRootCause(tt);
     }
 
 }

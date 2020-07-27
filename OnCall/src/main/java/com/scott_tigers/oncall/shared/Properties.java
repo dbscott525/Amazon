@@ -15,5 +15,8 @@ public class Properties {
     public static final String WEIGHT = "weight";
     public static final String FIRST_NAME = "firstName";
     public static final String UID = "uid";
+    public static final String RESOLVED_DATE = "Resolved Date";
+    public static final String AGE = "Age";
+    public static final String ITEM = "Item";
 
 }

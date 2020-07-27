@@ -182,22 +182,15 @@ public class Utility {
     protected boolean notAssigned(TT tt) {
 	assignedTicketIds = Optional
 		.ofNullable(assignedTicketIds)
-		.orElse(EngineerFiles.ASSIGNED_TICKETS
-			.readCSVToPojo(TT.class)
-			.stream()
+		.orElse(Stream.of(EngineerFiles.ASSIGNED_TICKETS, EngineerFiles.SKIPPED_TICKETS)
+			.flatMap(file -> file.readCSVToPojo(TT.class).stream())
 			.map(TT::getUrl)
 			.filter(url -> url.matches("https://tt.amazon.com/[0-9]+"))
 			.map(url -> url.replaceAll("https://tt.amazon.com/0?([0-9]+)", "$1"))
 			.map(Integer::valueOf)
 			.collect(Collectors.toList()));
 
-	return !assignedTicketIds.contains(tt.getCaseId());
+	return !assignedTicketIds.contains(tt.getIntCaseId());
     }
 
-//    protected Stream<ScheduleRow> getScheduledRowsStream() {
-//        return EngineerFiles.CUSTOMER_ISSUE_TEAM_SCHEDULE
-//        	.readJson(ScheduleContainer.class)
-//        	.getScheduleRows()
-//        	.stream();
-//    }
 }

@@ -8,7 +8,7 @@ public class TTStat {
     private String resolvedDate;
 
     public TTStat(TT tt) {
-	caseId = tt.getCaseId();
+	caseId = tt.getIntCaseId();
 	createDate = dateOnly(tt.getCreateDate());
 	resolvedDate = dateOnly(tt.getResolvedDate());
     }

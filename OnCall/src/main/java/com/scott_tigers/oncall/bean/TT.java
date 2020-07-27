@@ -7,7 +7,7 @@ import com.scott_tigers.oncall.shared.Properties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TT {
-    private Integer caseId;
+    private String caseId;
     private String description;
     private String createDate;
     private String age;
@@ -21,13 +21,14 @@ public class TT {
     @SuppressWarnings("unused")
     private String link;
     private String resolvedDate;
+    private String item;
 
     @JsonProperty(Properties.CASE_ID)
-    public Integer getCaseId() {
+    public String getCaseId() {
 	return caseId;
     }
 
-    public void setCaseId(Integer caseId) {
+    public void setCaseId(String caseId) {
 	url = "https://tt.amazon.com/" + caseId;
 	this.caseId = caseId;
     }
@@ -50,7 +51,7 @@ public class TT {
 	this.createDate = createDate;
     }
 
-    @JsonProperty("Age")
+    @JsonProperty(Properties.AGE)
     public String getAge() {
 	return age;
     }
@@ -123,7 +124,7 @@ public class TT {
 	this.status = status;
     }
 
-    @JsonProperty("Resolved Date")
+    @JsonProperty(Properties.RESOLVED_DATE)
     public String getResolvedDate() {
 	return resolvedDate;
     }
@@ -149,5 +150,18 @@ public class TT {
     @Override
     public String toString() {
 	return new GsonBuilder().setPrettyPrinting().create().toJson(this);
+    }
+
+    public String getItem() {
+	return item;
+    }
+
+    @JsonProperty(Properties.ITEM)
+    public void setItem(String item) {
+	this.item = item;
+    }
+
+    public Integer getIntCaseId() {
+	return Integer.parseInt(caseId.replaceAll("E?(.*)", "$1"));
     }
 }

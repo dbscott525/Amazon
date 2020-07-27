@@ -58,6 +58,7 @@ public enum EngineerFiles {
     ROOT_CAUSE_TO_DO                   ("Root Cause To Do"),
     SCHEDULE_CSV                       ("Schedule"),
     SDMS                               ("SDMs"),
+    SKIPPED_TICKETS                    ("Skipped Tickets"),
     TECH_ESC                           ("Tech Esc"),
     TEST                               ("Test"),
     TICKET_STATS                       ("Ticket Stats"),
