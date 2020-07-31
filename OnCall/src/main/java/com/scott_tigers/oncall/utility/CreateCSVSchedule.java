@@ -31,6 +31,7 @@ public class CreateCSVSchedule extends Utility {
 			row
 				.getEngineers()
 				.stream()
+				.map(this.mapToEngineerDetails())
 				.map(Engineer::getFullName))
 		.flatMap(x -> x).collect(Collectors.joining(","));
     }

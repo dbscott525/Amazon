@@ -5,7 +5,7 @@ import java.util.stream.Stream;
 
 import com.google.gson.GsonBuilder;
 
-public class Top100Company {
+public class Company {
     String company;
     static String[] removablePostfixes = { ", inc.", " corp.", ", llc", " inc.",
 	    " aka threewide, realtor.com, listhub.com, moving.com", " co., ltd.", " co. limited", " ltd",

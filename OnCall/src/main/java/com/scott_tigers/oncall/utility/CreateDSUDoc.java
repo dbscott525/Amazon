@@ -71,7 +71,7 @@ public class CreateDSUDoc extends Utility {
 		});
 
 	getScheduleForThisWeek().ifPresent(schedule -> {
-	    List<Engineer> engineers = schedule.getEngineers();
+	    List<Engineer> engineers = getEngineeringDetails(schedule.getEngineers());
 	    List<Engineer> orderedList = new ArrayList<Engineer>(engineers);
 	    Collections.shuffle(engineers);
 	    IntStream.range(0, engineers.size())

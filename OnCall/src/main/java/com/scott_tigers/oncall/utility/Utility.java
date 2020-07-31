@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -25,12 +26,14 @@ import com.scott_tigers.oncall.bean.TT;
 import com.scott_tigers.oncall.shared.Constants;
 import com.scott_tigers.oncall.shared.Dates;
 import com.scott_tigers.oncall.shared.EngineerFiles;
+import com.scott_tigers.oncall.test.Company;
 
 public class Utility {
 
     protected List<Engineer> masterList;
     private Map<String, Engineer> uidToEngMap;
     private List<Integer> assignedTicketIds;
+    private Map<EngineerFiles, List<String>> companyListMap = new HashMap<>();
 
     protected void successfulFileCreation(EngineerFiles fileType) {
 	System.out.println(fileType.getFileName() + " was successfully created.");
@@ -60,16 +63,15 @@ public class Utility {
     }
 
     protected void writeEmailsByDate(List<OnCallScheduleRow> emailList, EngineerFiles fileType) {
-	List<EmailsByDate> dailyEmailAddress = emailList
+	fileType.writeCSV(emailList
 		.stream()
 		.collect(Collectors.groupingBy(OnCallScheduleRow::getDate))
 		.entrySet()
 		.stream()
 		.map(EmailsByDate::new)
 		.sorted(Comparator.comparing(EmailsByDate::getDate))
-		.collect(Collectors.toList());
+		.collect(Collectors.toList()), EmailsByDate.class);
 
-	fileType.writeCSV(dailyEmailAddress, EmailsByDate.class);
 	successfulFileCreation(fileType);
     }
 
@@ -79,9 +81,6 @@ public class Utility {
 		.stream()
 		.map(OnCallScheduleRow::canonicalDate)
 		.collect(Collectors.toList());
-    }
-
-    protected void getFullName(String uid) {
     }
 
     protected Engineer getEngineer(String uid) {
@@ -127,13 +126,16 @@ public class Utility {
     private String launchUrlAndWaitForDownload(String url)
 	    throws Exception {
 	String previousTTFileName = getLatestTTFileName();
+	System.out.println("previousTTFileName=" + (previousTTFileName));
 	String ttFileName = previousTTFileName;
 
 	launchUrl(url);
 
+	System.out.println("previousTTFileName.equals(ttFileName)=" + (previousTTFileName.equals(ttFileName)));
 	while (previousTTFileName.equals(ttFileName)) {
 	    TimeUnit.SECONDS.sleep(3);
 	    ttFileName = getLatestTTFileName();
+	    System.out.println("ttFileName=" + (ttFileName));
 	}
 	return ttFileName;
     }
@@ -193,4 +195,41 @@ public class Utility {
 	return !assignedTicketIds.contains(tt.getIntCaseId());
     }
 
+    protected List<String> getCompanyList(EngineerFiles companyFile) {
+	List<String> list = companyListMap.get(companyFile);
+
+	if (list != null) {
+	    return list;
+	}
+
+	list = companyFile
+		.readCSVToPojo(Company.class)
+		.stream()
+		.map(Company::getCompany)
+		.collect(Collectors.toList());
+
+	companyListMap.put(companyFile, list);
+
+	return list;
+
+    }
+
+    protected boolean foundIn(String target, String searchString) {
+	return target
+		.toLowerCase()
+		.contains(searchString
+			.toLowerCase()
+			.trim());
+    }
+
+    protected List<Engineer> getEngineeringDetails(List<Engineer> engineers) {
+	return engineers
+		.stream()
+		.map(mapToEngineerDetails())
+		.collect(Collectors.toList());
+    }
+
+    protected Function<Engineer, Engineer> mapToEngineerDetails() {
+	return eng -> getEngineer(eng.getUid());
+    }
 }

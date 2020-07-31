@@ -20,7 +20,7 @@ public class EmailsByDate {
     }
 
     public EmailsByDate(Entry<String, List<OnCallScheduleRow>> entry) {
-	date = getSortableDate(entry.getKey());
+	date = entry.getKey();
 
 	emails = entry
 		.getValue()

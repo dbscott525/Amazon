@@ -5,7 +5,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.scott_tigers.oncall.bean.TT;
-import com.scott_tigers.oncall.utility.Utility;
 
 public class CountTTStatuses extends Utility {
 

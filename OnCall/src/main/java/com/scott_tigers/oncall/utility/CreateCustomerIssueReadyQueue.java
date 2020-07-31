@@ -11,19 +11,17 @@ import com.scott_tigers.oncall.bean.KeywordPoints;
 import com.scott_tigers.oncall.bean.TT;
 import com.scott_tigers.oncall.shared.EngineerFiles;
 import com.scott_tigers.oncall.shared.Properties;
-import com.scott_tigers.oncall.test.Top100Company;
 
 public class CreateCustomerIssueReadyQueue extends Utility {
 
     private static final int TOP100_POINTS = 10;
-    private static final int READY_QUEUE_SIZE = 10;
+    private static final int READY_QUEUE_SIZE = 20;
 
     public static void main(String[] args) throws Exception {
 	new CreateCustomerIssueReadyQueue().run();
     }
 
     private List<KeywordPoints> keywordPoints;
-    private List<String> top100Companies;
     private static final List<String> READY_QUEUE_COLUMNS = Arrays.asList(
 	    Properties.ITEM,
 	    Properties.URL,
@@ -34,7 +32,7 @@ public class CreateCustomerIssueReadyQueue extends Utility {
 
     private void run() throws Exception {
 	readPointData();
-	readtop100CompanyData();
+//	readtop100CompanyData();
 	createReadyQueue();
 
 	successfulFileCreation(EngineerFiles.CUSTOMER_ISSUE_BACKLOG);
@@ -87,12 +85,12 @@ public class CreateCustomerIssueReadyQueue extends Utility {
 	}
     }
 
-    private void readtop100CompanyData() {
-	top100Companies = EngineerFiles.TOP_100_COMPANIES
-		.readCSVToPojo(Top100Company.class)
-		.stream().map(Top100Company::getCompany)
-		.collect(Collectors.toList());
-    }
+//    private void readtop100CompanyData() {
+//	top100Companies = EngineerFiles.TOP_100_COMPANIES
+//		.readCSVToPojo(Top100Company.class)
+//		.stream().map(Top100Company::getCompany)
+//		.collect(Collectors.toList());
+//    }
 
     private void readPointData() {
 	keywordPoints = EngineerFiles.KEYWORD_POINTS
@@ -110,7 +108,7 @@ public class CreateCustomerIssueReadyQueue extends Utility {
 	switch (tt.getItem()) {
 
 	case "Engine":
-	    weight = (int) Math.pow(intAge, 1.9);
+	    weight = (int) Math.pow(intAge, 2.5);
 	    break;
 	case "CustomerIssue":
 	    weight += intAge / 7;
@@ -125,11 +123,7 @@ public class CreateCustomerIssueReadyQueue extends Utility {
     }
 
     private long getCompanyWeigthDelta(String description, EngineerFiles companyFile, int pointsPerCompany) {
-	top100Companies = companyFile
-		.readCSVToPojo(Top100Company.class)
-		.stream().map(Top100Company::getCompany)
-		.collect(Collectors.toList());
-	long weightDelta = top100Companies
+	long weightDelta = getCompanyList(companyFile)
 		.stream()
 		.filter(company -> foundIn(description, company))
 		.count()
@@ -139,14 +133,6 @@ public class CreateCustomerIssueReadyQueue extends Utility {
 
     private Predicate<? super KeywordPoints> keywordMatch(String description) {
 	return kw -> foundIn(description, kw.getKeyword());
-    }
-
-    private boolean foundIn(String target, String searchString) {
-	return target
-		.toLowerCase()
-		.contains(searchString
-			.toLowerCase()
-			.trim());
     }
 
     private void normalizeWeight(TT tt) {
