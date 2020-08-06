@@ -8,6 +8,7 @@ import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
 import java.util.function.Supplier;
@@ -31,9 +32,10 @@ public class Schedule {
 
     public Schedule(Scheduler scheduler, List<Engineer> candidateSchedule) {
 	this.scheduler = scheduler;
-	this.engineers = candidateSchedule;
+//	this.engineers = candidateSchedule;
+	this.engineers = candidateSchedule.subList(0, scheduler.getTeamSize() * scheduler.getShifts());
 	daySchedules = IntStream
-		.range(0, candidateSchedule.size())
+		.range(0, engineers.size())
 		.mapToObj(Integer::valueOf)
 		.collect(scheduleCollector());
     }
@@ -52,7 +54,9 @@ public class Schedule {
 	boolean betterStandardDeviation = standardDeviation < bestSchedule.getStandardDeviation();
 
 	if (betterStandardDeviation) {
-	    System.out.println(new Date() + ": standardDeviation=" + (standardDeviation));
+	    System.out.println("try "
+		    + scheduler.getSchedulesTried()
+		    + ", " + new Date() + ": standardDeviation=" + (standardDeviation));
 	}
 
 	return betterStandardDeviation ? this : bestSchedule;
@@ -60,6 +64,14 @@ public class Schedule {
     }
 
     private boolean hasSmeProblem() {
+	Stream<List<Engineer>> x1 = daySchedules
+		.stream();
+	x1.forEach(x -> {
+	    Map<String, Long> map = x
+		    .stream()
+		    .filter(e -> !e.getExpertise().isEmpty())
+		    .collect(Collectors.groupingBy(Engineer::getExpertise, Collectors.counting()));
+	});
 	return daySchedules
 		.stream()
 		.anyMatch(daySchedule -> daySchedule

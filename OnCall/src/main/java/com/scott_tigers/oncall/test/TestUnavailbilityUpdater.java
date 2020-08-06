@@ -9,8 +9,9 @@ import com.scott_tigers.oncall.bean.Engineer;
 import com.scott_tigers.oncall.bean.Unavailability;
 import com.scott_tigers.oncall.shared.EngineerFiles;
 import com.scott_tigers.oncall.shared.Json;
+import com.scott_tigers.oncall.utility.Utility;
 
-public class TestUnavailbilityUpdater {
+public class TestUnavailbilityUpdater extends Utility {
 
     public static void main(String[] args) {
 	new TestUnavailbilityUpdater().run();
@@ -32,8 +33,7 @@ public class TestUnavailbilityUpdater {
 		.stream()
 		.forEach(ua -> ua.setOoo(uidToEngineer.get(ua.getUid())));
 
-	EngineerFiles
-		.getScheduleRowsStream()
+	getScheduleRowStream()
 		.forEach(engineerInSchedule -> engineerInSchedule
 			.getEngineers()
 			.stream()

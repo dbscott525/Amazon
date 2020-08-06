@@ -29,6 +29,7 @@ public class CustomerIssueReader extends Utility implements TTReader {
 
 	    case "Pending Any Info - 7 Day Auto Resolve":
 	    case "Pending Requester Info - 7 Day Auto Resolve":
+	    case "Pending Requester Info - 3 Day Auto Resolve":
 		return false;
 
 	    }

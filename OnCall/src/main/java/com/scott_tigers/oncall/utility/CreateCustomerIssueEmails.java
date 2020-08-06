@@ -16,8 +16,7 @@ public class CreateCustomerIssueEmails extends Utility {
 
     private void run() {
 
-	List<ScheduleEmail> scheduleEmails = EngineerFiles
-		.getScheduleRowsStream()
+	List<ScheduleEmail> scheduleEmails = getScheduleRowStream()
 		.map(scheduleRow -> new ScheduleEmail(scheduleRow, getEngineerListTransformer()))
 		.collect(Collectors.toList());
 

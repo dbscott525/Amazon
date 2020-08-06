@@ -34,6 +34,8 @@ public class Utility {
     private Map<String, Engineer> uidToEngMap;
     private List<Integer> assignedTicketIds;
     private Map<EngineerFiles, List<String>> companyListMap = new HashMap<>();
+    private Map<EngineerFiles, List<Engineer>> fileTypeToListMap = new HashMap<>();
+    private Map<String, Double> uidToLevelMap = null;
 
     protected void successfulFileCreation(EngineerFiles fileType) {
 	System.out.println(fileType.getFileName() + " was successfully created.");
@@ -85,8 +87,9 @@ public class Utility {
 
     protected Engineer getEngineer(String uid) {
 	if (uidToEngMap == null) {
-	    uidToEngMap = EngineerFiles.MASTER_LIST
-		    .readCSVToPojo(Engineer.class)
+	    EngineerFiles fileType = EngineerFiles.MASTER_LIST;
+	    List<Engineer> readCSVToPojo = readCSVByType(fileType);
+	    uidToEngMap = readCSVToPojo
 		    .stream()
 		    .collect(Collectors.toMap(Engineer::getUid, x -> x));
 	}
@@ -94,9 +97,19 @@ public class Utility {
 	return uidToEngMap.get(uid);
     }
 
+    private List<Engineer> readCSVByType(EngineerFiles fileType) {
+	List<Engineer> engineers = fileTypeToListMap.get(fileType);
+
+	if (engineers == null) {
+	    engineers = fileType
+		    .readCSVToPojo(Engineer.class);
+	    fileTypeToListMap.put(fileType, engineers);
+	}
+	return engineers;
+    }
+
     protected Optional<ScheduleRow> getScheduleForThisWeek() {
-	return EngineerFiles
-		.getScheduleRowsStream()
+	return getScheduleRowStream()
 		.filter(this::forToday)
 		.findFirst();
     }
@@ -231,5 +244,32 @@ public class Utility {
 
     protected Function<Engineer, Engineer> mapToEngineerDetails() {
 	return eng -> getEngineer(eng.getUid());
+    }
+
+    protected Engineer getLevel(Engineer eng) {
+	uidToLevelMap = Optional
+		.ofNullable(uidToLevelMap)
+		.orElseGet(() -> readCSVByType(EngineerFiles.LEVELS_FROM_QUIP)
+			.stream()
+			.collect(Collectors.toMap(Engineer::getUid, Engineer::getLevel)));
+
+	eng.setLevel(uidToLevelMap.get(eng.getUid()));
+	return eng;
+    }
+
+    protected Stream<ScheduleRow> getScheduleRowStream() {
+	return EngineerFiles
+		.getScheduleRowStream()
+		.map(this::getOrderedByLeve);
+    }
+
+    private ScheduleRow getOrderedByLeve(ScheduleRow scheduleRow) {
+	scheduleRow.setEngineers(scheduleRow
+		.getEngineers()
+		.stream()
+		.map(this::getLevel)
+		.sorted(Comparator.comparing(Engineer::getLevel).reversed())
+		.collect(Collectors.toList()));
+	return scheduleRow;
     }
 }

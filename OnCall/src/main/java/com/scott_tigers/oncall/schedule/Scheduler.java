@@ -57,8 +57,10 @@ public class Scheduler {
     private String newScheduleStart = Dates.SORTABLE.getFormattedString();
     private int weeksBetweenShift = 3;
     private Map<String, Engineer> uidToEngineer;
+    private long schedulesTried = 0;
 
-    private synchronized void processCandidateSchedule(List<Engineer> candidateSchedule) {
+    private void processCandidateSchedule(List<Engineer> candidateSchedule) {
+	schedulesTried++;
 	schedule = new Schedule(this, candidateSchedule)
 		.getBestSchedule(schedule);
     }
@@ -137,7 +139,8 @@ public class Scheduler {
 
 	updateStartDateBasedOnShiftGap();
 
-	List<Engineer> excludedEngineers = getOOOConflictedEngineers(engineers.size() / teamSize);
+//	shifts = 2;
+	List<Engineer> excludedEngineers = getOOOConflictedEngineers(shifts);
 	System.out.println("EXCLUDED ENGINEERS:");
 	System.out.println();
 	excludedEngineers.stream().map(eng -> "  " + eng.getFullName()).sorted().forEach(System.out::println);
@@ -150,7 +153,9 @@ public class Scheduler {
 			.map(Engineer::getUid)
 			.anyMatch(uid -> uid.equals(eng.getUid())))
 		.collect(Collectors.toList());
-	shifts = engineers.size() / teamSize;
+//	shifts = (engineers.size() / teamSize) - 1;
+	System.out.println("shifts=" + (shifts));
+//	shifts = 2;
 	System.out.println("shifts=" + (shifts));
 
 	Map<String, Long> smeCounts = engineers.stream()
@@ -176,12 +181,15 @@ public class Scheduler {
 		.forEach(schedule -> {
 		    String newStartDate = Dates.SORTABLE
 			    .getFormattedDelta(schedule.getDate(), weeksBetweenShift * 7);
+		    System.out.println("newStartDate=" + (newStartDate));
 		    schedule
 			    .getEngineers()
 			    .stream()
 			    .map(eng -> uidToEngineer.get(eng.getUid()))
 			    .forEach(eng -> eng.candidateStartDate(newStartDate));
 		});
+//	Json.print(engineers);
+//	System.exit(1);
     }
 
     private List<Engineer> getOOOConflictedEngineers(int shifts) {
@@ -227,7 +235,7 @@ public class Scheduler {
     private void readEngineers() {
 
 	existingSchedule = EngineerFiles
-		.getScheduleRowsStream()
+		.getScheduleRowStream()
 		.filter(row -> row.isBefore(newScheduleStart))
 		.collect(Collectors.toList());
 
@@ -402,9 +410,11 @@ public class Scheduler {
 	private int max;
 
 	public SmeRange(Entry<String, Long> entry) {
-	    double averageSmePerShift = (double) entry.getValue() / shifts;
-	    max = (int) Math.ceil(averageSmePerShift);
-	    min = (int) Math.floor(averageSmePerShift);
+	    max = 1;
+	    min = entry.getValue() > shifts ? 1 : 0;
+//	    double averageSmePerShift = (double) entry.getValue() / shifts;
+//	    max = (int) Math.ceil(averageSmePerShift);
+//	    min = (int) Math.floor(averageSmePerShift);
 	}
 
 	@Override
@@ -413,12 +423,15 @@ public class Scheduler {
 	}
 
 	public boolean outOfRange(Long value) {
+//	    return false;
+//	    return value > 1;
 	    return value > max || value < min;
 	}
 
     }
 
     public boolean smeOutOfRang(Entry<String, Long> entry) {
+//	return false;
 	return Optional
 		.ofNullable(smeRanges.get(entry.getKey()))
 		.filter(range -> range.outOfRange(entry.getValue()))
@@ -432,6 +445,19 @@ public class Scheduler {
 
     public Scheduler weeksBetweenShift(int weeksBetweenShift) {
 	this.weeksBetweenShift = weeksBetweenShift;
+	return this;
+    }
+
+    public int getShifts() {
+	return shifts;
+    }
+
+    public long getSchedulesTried() {
+	return schedulesTried;
+    }
+
+    public Scheduler shifts(int shifts) {
+	this.shifts = shifts;
 	return this;
     }
 }

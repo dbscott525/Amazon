@@ -61,6 +61,7 @@ public enum EngineerFiles {
     SKIPPED_TICKETS                    ("Skipped Tickets"),
     TECH_ESC                           ("Tech Esc"),
     TEST                               ("Test"),
+    TICKET_FLOW_REPORT                 ("Ticket Flow Report"),
     TICKET_STATS                       ("Ticket Stats"),
     TOP_100_COMPANIES                  ("Top 100 Companies"),
     TRAINEE_EMAILS                     ("Trainee Emails"),
@@ -78,7 +79,26 @@ public enum EngineerFiles {
 	    put(Constants.CSV_EXTENSION, "C:\\Program Files (x86)\\Microsoft Office\\Office16\\EXCEL.EXE");
 	}
     };
+
+    public static ScheduleContainer getScheduleContainer() {
+	return CUSTOMER_ISSUE_TEAM_SCHEDULE.readJson(ScheduleContainer.class);
+    }
+
+    public static List<ScheduleRow> getScheduledRows() {
+	return getScheduleContainer().getScheduleRows();
+    }
+
+    public static Stream<ScheduleRow> getScheduleRowStream() {
+	return getScheduledRows().stream();
+    }
+
+    public static void writeScheduleRows(List<ScheduleRow> scheduleRows) {
+	CUSTOMER_ISSUE_TEAM_SCHEDULE.replaceJsonFile(new ScheduleContainer(scheduleRows));
+//	CUSTOMER_ISSUE_TEAM_SCHEDULE.writeJsonFile(new ScheduleContainer(scheduleRows));
+    }
+
     private String extension = Constants.CSV_EXTENSION;
+
     private String fileName;
 
     EngineerFiles(String fileName) {
@@ -150,19 +170,25 @@ public enum EngineerFiles {
 	    return true;
 	}
 
+	String archivePath = getArchivePath();
+
+	boolean renameResult = file.renameTo(new File(archivePath));
+
+	if (!renameResult) {
+	    System.out.println("Cannot rename file [" + file.getPath() + "] to [" + archivePath + "]");
+	}
+	return renameResult;
+    }
+
+    private String getArchivePath() {
+	File file = new File(getFileName());
 	var regex = "(.+\\\\)(.+)(\\.)";
 	String replacement = "$1Revisions\\\\$2 " + Dates.TIME_STAMP.getFormattedDate() + "$3";
 
-	String timeStampPath = file
+	String archivePath = file
 		.getPath()
 		.replaceAll(regex, replacement);
-
-	boolean renameResult = file.renameTo(new File(timeStampPath));
-
-	if (!renameResult) {
-	    System.out.println("Cannot rename file [" + file.getPath() + "] to [" + timeStampPath + "]");
-	}
-	return renameResult;
+	return archivePath;
     }
 
     public void replaceEngineerList(List<Engineer> exsitingEngineers) {
@@ -180,6 +206,10 @@ public enum EngineerFiles {
 	    System.out.println("e=" + (e));
 	    e.printStackTrace();
 	}
+    }
+
+    void replaceJsonFile(Object object) {
+	replaceFile(() -> writeJsonFile(object));
     }
 
     public <T> void writeCSV(List<T> list, Class<T> pojoClass) {
@@ -272,24 +302,10 @@ public enum EngineerFiles {
 		.writeValue(writerOutputStream, exsitingEngineers);
     }
 
-    public static Stream<ScheduleRow> getScheduleRowsStream() {
-	return getScheduledRows().stream();
+    public void archive() throws IOException {
+	System.out.println("getArchivePath()=" + (getArchivePath()));
+	System.out.println("fileName=" + (fileName));
+	FileUtils.copyFile(new File(getFileName()), new File(getArchivePath()));
     }
 
-    public static List<ScheduleRow> getScheduledRows() {
-	return getScheduleContainer().getScheduleRows();
-    }
-
-    public static ScheduleContainer getScheduleContainer() {
-	return CUSTOMER_ISSUE_TEAM_SCHEDULE.readJson(ScheduleContainer.class);
-    }
-
-    public static void writeScheduleRows(List<ScheduleRow> scheduleRows) {
-	CUSTOMER_ISSUE_TEAM_SCHEDULE.replaceJsonFile(new ScheduleContainer(scheduleRows));
-//	CUSTOMER_ISSUE_TEAM_SCHEDULE.writeJsonFile(new ScheduleContainer(scheduleRows));
-    }
-
-    void replaceJsonFile(Object object) {
-	replaceFile(() -> writeJsonFile(object));
-    }
 }

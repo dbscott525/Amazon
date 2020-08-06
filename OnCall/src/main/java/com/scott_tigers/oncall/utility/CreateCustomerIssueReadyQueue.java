@@ -32,7 +32,6 @@ public class CreateCustomerIssueReadyQueue extends Utility {
 
     private void run() throws Exception {
 	readPointData();
-//	readtop100CompanyData();
 	createReadyQueue();
 
 	successfulFileCreation(EngineerFiles.CUSTOMER_ISSUE_BACKLOG);
@@ -56,7 +55,7 @@ public class CreateCustomerIssueReadyQueue extends Utility {
 		})
 		.flatMap(x -> x)
 		.filter(this::notAssigned)
-		.peek(this::assignWeight)
+		.peek(this::fixUpForDisplay)
 		.sorted(Comparator.comparing(TT::getWeight)
 			.reversed())
 		.limit(READY_QUEUE_SIZE)
@@ -85,23 +84,18 @@ public class CreateCustomerIssueReadyQueue extends Utility {
 	}
     }
 
-//    private void readtop100CompanyData() {
-//	top100Companies = EngineerFiles.TOP_100_COMPANIES
-//		.readCSVToPojo(Top100Company.class)
-//		.stream().map(Top100Company::getCompany)
-//		.collect(Collectors.toList());
-//    }
-
     private void readPointData() {
 	keywordPoints = EngineerFiles.KEYWORD_POINTS
 		.readCSVToPojo(KeywordPoints.class);
     }
 
-    private void assignWeight(TT tt) {
+    private void fixUpForDisplay(TT tt) {
 	String description = tt.getDescription();
 
-	int weight = keywordPoints.stream().filter(keywordMatch(description))
-		.map(kw -> kw.getPoints()).mapToInt(Integer::intValue)
+	int weight = keywordPoints.stream()
+		.filter(keywordMatch(description))
+		.map(kw -> kw.getPoints())
+		.mapToInt(Integer::intValue)
 		.sum();
 
 	Integer intAge = Integer.valueOf(tt.getAge());
@@ -137,7 +131,9 @@ public class CreateCustomerIssueReadyQueue extends Utility {
 
     private void normalizeWeight(TT tt) {
 	tt.setWeight(tt.getWeight() * 100 / maxWeight);
-
+	if (tt.getItem().equals("Engine")) {
+	    tt.setItem("Root Cause");
+	}
     }
 
 }

@@ -93,20 +93,40 @@ public class Engineer {
     }
 
     public boolean hasDateConflict(String date) {
-	return dateConflictCache.evaluate(date, () -> {
+	Boolean dateConflict = dateConflictCache.evaluate(date, () -> {
 	    return outOfOffice(date) || beforeStartDate(date) || afterEndDate(date);
 	});
+	return dateConflict;
     }
 
     private boolean beforeStartDate(String date) {
-	return dateComparator(startDate, x -> x < 0);
+//	return false;
+	if (!optionalString(startDate).isPresent()) {
+	    return false;
+	}
+	boolean beforeStartDate = Dates.ONLINE_SCHEDULE.convertFormat(startDate, Dates.SORTABLE).compareTo(date) > 0;
+	return beforeStartDate;
     }
 
     private boolean afterEndDate(String date) {
-	return dateComparator(endDate, x -> x >= 0);
+//	return false;
+	if (!optionalString(endDate).isPresent()) {
+	    return false;
+	}
+	return Dates.ONLINE_SCHEDULE.convertFormat(endDate, Dates.SORTABLE).compareTo(date) < 0;
     }
 
+//    private boolean afterEndDate(String date) {
+//	return dateComparator(endDate, x -> x >= 0);
+//    }
+
     private boolean dateComparator(String compareDate, Predicate<Integer> comparator) {
+	if (uid.equals("vibagade")) {
+	    System.out.println("private boolean dateComparator(String compareDate, Predicate<Integer> comparator) {");
+	    System.out.println("compareDate=" + (compareDate));
+	    System.out.println("Dates.ONLINE_SCHEDULE.convertFormat(compareDate, Dates.SORTABLE)="
+		    + (Dates.ONLINE_SCHEDULE.convertFormat(compareDate, Dates.SORTABLE)));
+	}
 	return optionalString(compareDate)
 		.filter(sd -> comparator
 			.test(sd.compareTo(Dates.ONLINE_SCHEDULE.convertFormat(compareDate, Dates.SORTABLE))))
@@ -247,9 +267,17 @@ public class Engineer {
     }
 
     public void candidateStartDate(String candidateStartDate) {
+	if (uid.equals("vibagade")) {
+	    System.out.println("uid=" + (uid));
+	    System.out.println("startDate=" + (startDate));
+	    System.out.println("candidateStartDate=" + (candidateStartDate));
+	}
 	startDate = optionalString(startDate)
 		.filter(currentStartDate -> Dates.ONLINE_SCHEDULE
 			.convertFormat(currentStartDate, Dates.SORTABLE).compareTo(candidateStartDate) > 0)
 		.orElse(Dates.SORTABLE.convertFormat(candidateStartDate, Dates.ONLINE_SCHEDULE));
+	if (uid.equals("vibagade")) {
+	    System.out.println("startDate=" + (startDate));
+	}
     }
 }

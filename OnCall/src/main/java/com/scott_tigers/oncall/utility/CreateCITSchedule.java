@@ -19,12 +19,13 @@ import com.scott_tigers.oncall.schedule.Scheduler;
 public class CreateCITSchedule {
 
     private static final int SHIFT_SIZE = 5;
-    private static final int WEEKS_BETWEEN_SHIFTS = 3;
-    private static final int MINUTE_TIME_LIMIT = 20;
-    private static final String NEW_SCHEDULE_START_DATE = "2020-08-03";
-    private static final double MINIUM_STANDARD_DEVIATION = .05;
+    private static final int WEEKS_BETWEEN_SHIFTS = 2;
+    private static final int MINUTE_TIME_LIMIT = 3;
+    private static final String NEW_SCHEDULE_START_DATE = "2020-09-01";
+    private static final double MINIUM_STANDARD_DEVIATION = .6;
     private static final int SHIFT_FREQUENCY = 7;
     private static final int TEAM_SIZE = 6;
+    private static final int SHIFTS = 4;
 
     public static void main(String[] args) throws IOException {
 	new CreateCITSchedule().run();
@@ -41,9 +42,9 @@ public class CreateCITSchedule {
 		.timeLimit(MINUTE_TIME_LIMIT)
 		.newScheduleStart(NEW_SCHEDULE_START_DATE)
 		.weeksBetweenShift(WEEKS_BETWEEN_SHIFTS)
+		.shifts(SHIFTS)
 		.run()
 		.save();
-//	.save(EngineerFiles.NEW_SCHEDULE);
     }
 
 }

@@ -14,8 +14,7 @@ public class CreateOnlineSchedule extends Utility {
     }
 
     private void run() {
-	List<CitScheduleRow> onlineSchedule = EngineerFiles
-		.getScheduleRowsStream()
+	List<CitScheduleRow> onlineSchedule = getScheduleRowStream()
 		.map(CitScheduleRow::new)
 		.collect(Collectors.toList());
 	EngineerFiles.ONLINE_SCHEDULE.writeJson(onlineSchedule);

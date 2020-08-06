@@ -13,8 +13,7 @@ public class TruncateCustomerIssueTeamSchedule extends Utility {
     }
 
     private void run() {
-	EngineerFiles.writeScheduleRows(EngineerFiles
-		.getScheduleRowsStream()
+	EngineerFiles.writeScheduleRows(getScheduleRowStream()
 		.filter(row -> row.isBefore(LAST_DATE))
 		.collect(Collectors.toList()));
     }

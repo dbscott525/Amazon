@@ -17,8 +17,7 @@ public class CreateCSVSchedule extends Utility {
     private void run() throws IOException {
 
 	EngineerFiles.SCHEDULE_CSV
-		.writeText(EngineerFiles
-			.getScheduleRowsStream()
+		.writeText(getScheduleRowStream()
 			.map(this::toCSV)
 			.collect(Collectors.joining("\n")));
 
@@ -33,6 +32,7 @@ public class CreateCSVSchedule extends Utility {
 				.stream()
 				.map(this.mapToEngineerDetails())
 				.map(Engineer::getFullName))
-		.flatMap(x -> x).collect(Collectors.joining(","));
+		.flatMap(x -> x)
+		.collect(Collectors.joining(","));
     }
 }
