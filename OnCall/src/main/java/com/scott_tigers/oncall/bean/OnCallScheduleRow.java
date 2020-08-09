@@ -1,5 +1,6 @@
 package com.scott_tigers.oncall.bean;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.scott_tigers.oncall.shared.Dates;
 
 public class OnCallScheduleRow {
@@ -69,6 +70,38 @@ public class OnCallScheduleRow {
 	return date.compareTo(Dates.SORTABLE.getFormattedString()) > 0;
     }
 
+    @Override
+    public int hashCode() {
+	final int prime = 31;
+	int result = 1;
+	result = prime * result + ((date == null) ? 0 : date.hashCode());
+	result = prime * result + ((uid == null) ? 0 : uid.hashCode());
+	return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+	if (this == obj)
+	    return true;
+	if (obj == null)
+	    return false;
+	if (getClass() != obj.getClass())
+	    return false;
+	OnCallScheduleRow other = (OnCallScheduleRow) obj;
+	if (date == null) {
+	    if (other.date != null)
+		return false;
+	} else if (!date.equals(other.date))
+	    return false;
+	if (uid == null) {
+	    if (other.uid != null)
+		return false;
+	} else if (!uid.equals(other.uid))
+	    return false;
+	return true;
+    }
+
+    @JsonIgnore
     public boolean isCurrent() {
 	return Dates.SORTABLE.getFormattedString().compareTo(date) <= 0;
     }

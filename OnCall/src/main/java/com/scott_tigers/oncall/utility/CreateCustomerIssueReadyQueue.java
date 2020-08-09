@@ -9,69 +9,67 @@ import java.util.stream.Stream;
 
 import com.scott_tigers.oncall.bean.KeywordPoints;
 import com.scott_tigers.oncall.bean.TT;
+import com.scott_tigers.oncall.shared.Constants;
 import com.scott_tigers.oncall.shared.EngineerFiles;
 import com.scott_tigers.oncall.shared.Properties;
 
 public class CreateCustomerIssueReadyQueue extends Utility {
 
     private static final int TOP100_POINTS = 10;
-    private static final int READY_QUEUE_SIZE = 20;
+    private static final int READY_QUEUE_SIZE = 10;
 
     public static void main(String[] args) throws Exception {
 	new CreateCustomerIssueReadyQueue().run();
     }
 
-    private List<KeywordPoints> keywordPoints;
     private static final List<String> READY_QUEUE_COLUMNS = Arrays.asList(
 	    Properties.ITEM,
 	    Properties.URL,
 	    Properties.CREATE_DATE,
 	    Properties.WEIGHT,
 	    Properties.DESCRIPTION);
+
+    private List<KeywordPoints> keywordPoints;
     private int maxWeight;
+    private List<TT> topTickets;
 
     private void run() throws Exception {
 	readPointData();
 	createReadyQueue();
 
-	successfulFileCreation(EngineerFiles.CUSTOMER_ISSUE_BACKLOG);
+	writeTickets(EngineerFiles.CUSTOMER_ISSUE_BACKLOG, topTickets, READY_QUEUE_COLUMNS);
 
     }
 
     private void createReadyQueue() throws Exception {
 
-	List<TT> topTickets = Stream
+	topTickets = Stream
 		.of(CustomerIssueReader.class, CreateRootCauseToDoList.class)
 		.map(c -> constuct(c))
-		.map(reader -> {
+		.flatMap(reader -> {
 		    try {
-			Predicate<TT> ttFilter = reader.getFilter();
-			return getTicketStreamFromUrl(reader.getUrl()).filter(ttFilter::test);
+			return getTicketStreamFromUrl(reader.getUrl())
+				.filter(tt -> reader.getFilter().test(tt));
 		    } catch (Exception e) {
-			e.printStackTrace();
-			System.exit(1);
-			return null;
+			return Stream.<TT>empty();
 		    }
 		})
-		.flatMap(x -> x)
 		.filter(this::notAssigned)
 		.peek(this::fixUpForDisplay)
-		.sorted(Comparator.comparing(TT::getWeight)
-			.reversed())
+		.sorted(Comparator.comparing(TT::getWeight).reversed())
 		.limit(READY_QUEUE_SIZE)
 		.collect(Collectors.toList());
 
 	maxWeight = topTickets
 		.stream()
-		.map(TT::getWeight)
-		.mapToInt(v -> v)
+		.mapToInt(TT::getWeight)
 		.max()
 		.orElse(1000);
 
-	topTickets.stream().forEach(this::normalizeWeight);
+	topTickets
+		.stream()
+		.forEach(this::normalizeWeight);
 
-	EngineerFiles.CUSTOMER_ISSUE_BACKLOG
-		.writeCSV(topTickets, READY_QUEUE_COLUMNS);
     }
 
     private <T> T constuct(Class<T> c) {
@@ -101,10 +99,11 @@ public class CreateCustomerIssueReadyQueue extends Utility {
 	Integer intAge = Integer.valueOf(tt.getAge());
 	switch (tt.getItem()) {
 
-	case "Engine":
+	case Constants.ITEM_ENGINE:
 	    weight = (int) Math.pow(intAge, 2.5);
 	    break;
-	case "CustomerIssue":
+
+	case Constants.ITEM_CUSTOMER_ISSUE:
 	    weight += intAge / 7;
 	    break;
 
@@ -131,7 +130,7 @@ public class CreateCustomerIssueReadyQueue extends Utility {
 
     private void normalizeWeight(TT tt) {
 	tt.setWeight(tt.getWeight() * 100 / maxWeight);
-	if (tt.getItem().equals("Engine")) {
+	if (tt.getItem().equals(Constants.ITEM_ENGINE)) {
 	    tt.setItem("Root Cause");
 	}
     }

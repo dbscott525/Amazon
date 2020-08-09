@@ -15,7 +15,8 @@ public enum Dates {
     LTTR_URL("yyyy-ww"),
     TT_SEARCH("M/d/y"),
     NICE("MMMM d, yyyy"),
-    ONLINE_SCHEDULE("M/d/yy");
+    ONLINE_SCHEDULE("M/d/yy"),
+    ICS("yyyyMMdd");
 
     private String format;
 

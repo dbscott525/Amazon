@@ -6,7 +6,6 @@
 package com.scott_tigers.oncall.bean;
 
 import java.util.Optional;
-import java.util.function.Predicate;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.gson.Gson;
@@ -119,19 +118,6 @@ public class Engineer {
 //    private boolean afterEndDate(String date) {
 //	return dateComparator(endDate, x -> x >= 0);
 //    }
-
-    private boolean dateComparator(String compareDate, Predicate<Integer> comparator) {
-	if (uid.equals("vibagade")) {
-	    System.out.println("private boolean dateComparator(String compareDate, Predicate<Integer> comparator) {");
-	    System.out.println("compareDate=" + (compareDate));
-	    System.out.println("Dates.ONLINE_SCHEDULE.convertFormat(compareDate, Dates.SORTABLE)="
-		    + (Dates.ONLINE_SCHEDULE.convertFormat(compareDate, Dates.SORTABLE)));
-	}
-	return optionalString(compareDate)
-		.filter(sd -> comparator
-			.test(sd.compareTo(Dates.ONLINE_SCHEDULE.convertFormat(compareDate, Dates.SORTABLE))))
-		.isPresent();
-    }
 
     private boolean outOfOffice(String date) {
 	return optionalString(ooo)

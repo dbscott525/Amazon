@@ -8,7 +8,6 @@ import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
 import java.util.function.Supplier;
@@ -64,14 +63,7 @@ public class Schedule {
     }
 
     private boolean hasSmeProblem() {
-	Stream<List<Engineer>> x1 = daySchedules
-		.stream();
-	x1.forEach(x -> {
-	    Map<String, Long> map = x
-		    .stream()
-		    .filter(e -> !e.getExpertise().isEmpty())
-		    .collect(Collectors.groupingBy(Engineer::getExpertise, Collectors.counting()));
-	});
+
 	return daySchedules
 		.stream()
 		.anyMatch(daySchedule -> daySchedule

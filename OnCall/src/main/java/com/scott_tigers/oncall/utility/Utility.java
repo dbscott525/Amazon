@@ -1,12 +1,13 @@
 package com.scott_tigers.oncall.utility;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -97,7 +98,7 @@ public class Utility {
 	return uidToEngMap.get(uid);
     }
 
-    private List<Engineer> readCSVByType(EngineerFiles fileType) {
+    protected List<Engineer> readCSVByType(EngineerFiles fileType) {
 	List<Engineer> engineers = fileTypeToListMap.get(fileType);
 
 	if (engineers == null) {
@@ -136,21 +137,32 @@ public class Utility {
 	return getTicketStream(launchUrlAndWaitForDownload(url));
     }
 
-    private String launchUrlAndWaitForDownload(String url)
-	    throws Exception {
-	String previousTTFileName = getLatestTTFileName();
-	System.out.println("previousTTFileName=" + (previousTTFileName));
-	String ttFileName = previousTTFileName;
+    protected String launchUrlAndWaitForDownload(String url) {
 
-	launchUrl(url);
+	try {
+	    File newestFile = getNewestFile();
+	    File downloadedFile = newestFile;
 
-	System.out.println("previousTTFileName.equals(ttFileName)=" + (previousTTFileName.equals(ttFileName)));
-	while (previousTTFileName.equals(ttFileName)) {
-	    TimeUnit.SECONDS.sleep(3);
-	    ttFileName = getLatestTTFileName();
-	    System.out.println("ttFileName=" + (ttFileName));
+	    launchUrl(url);
+	    while (downloadedFile.compareTo(newestFile) == 0) {
+		downloadedFile = getNewestFile();
+		System.out.println("downloadedFile=" + (downloadedFile));
+		TimeUnit.SECONDS.sleep(3);
+	    }
+
+	    return downloadedFile.toString();
+	} catch (Exception e) {
+	    return null;
 	}
-	return ttFileName;
+    }
+
+    private File getNewestFile() {
+	return Stream
+		.of(Paths.get(System.getenv("HOMEDRIVE") + System.getenv("HOMEPATH"), "Downloads")
+			.toFile()
+			.listFiles())
+		.sorted(Comparator.comparing(File::lastModified))
+		.reduce((first, second) -> second).orElse(null);
     }
 
     protected void launchUrl(String url) throws IOException, URISyntaxException {
@@ -172,40 +184,39 @@ public class Utility {
 	return ticketStream;
     }
 
-    private String getLatestTTFileName() throws IOException {
-	String homePath = System.getenv("HOMEDRIVE") + System.getenv("HOMEPATH");
-	Path path = Paths.get(homePath, "Downloads");
-
-	String latestTTFile;
-
-	try (Stream<Path> downloadFileList = Files.list(path)) {
-	    latestTTFile = downloadFileList
-		    .filter(this::isTT)
-		    .sorted()
-		    .reduce((first, second) -> second)
-		    .orElse(null)
-		    .toString();
-
-	}
-	return latestTTFile;
-    }
-
-    private boolean isTT(Path path) {
-	return path.getFileName().toString().matches("^ticket_results - .*\\.csv");
-    }
-
     protected boolean notAssigned(TT tt) {
 	assignedTicketIds = Optional
 		.ofNullable(assignedTicketIds)
-		.orElse(Stream.of(EngineerFiles.ASSIGNED_TICKETS, EngineerFiles.SKIPPED_TICKETS)
-			.flatMap(file -> file.readCSVToPojo(TT.class).stream())
-			.map(TT::getUrl)
-			.filter(url -> url.matches("https://tt.amazon.com/[0-9]+"))
-			.map(url -> url.replaceAll("https://tt.amazon.com/0?([0-9]+)", "$1"))
-			.map(Integer::valueOf)
-			.collect(Collectors.toList()));
+		.orElseGet(() -> getAssingedTicketIds());
+//	assignedTicketIds = Optional
+//		.ofNullable(assignedTicketIds)
+//		.orElse(getAssingedTicketIds());
 
 	return !assignedTicketIds.contains(tt.getIntCaseId());
+    }
+
+    private List<Integer> getAssingedTicketIds() {
+	try {
+	    String fileName = launchUrlAndWaitForDownload(
+		    "https://quip-amazon.com/nhftAqjImkQT/Customer-Issues-Ticket-Tracker");
+	    System.out.println("fileName=" + (fileName));
+	    return Files.readAllLines(Paths.get(fileName))
+		    .stream()
+		    .map(this::getCaseId)
+		    .filter(this::isDigits)
+		    .map(Integer::valueOf)
+		    .collect(Collectors.toList());
+	} catch (Exception e) {
+	    return new ArrayList<Integer>();
+	}
+    }
+
+    private boolean isDigits(String line) {
+	return line.matches("[0-9]+");
+    }
+
+    private String getCaseId(String line) {
+	return line.replaceAll(".*,https:.*com/([0-9]+).*", "$1");
     }
 
     protected List<String> getCompanyList(EngineerFiles companyFile) {
@@ -271,5 +282,10 @@ public class Utility {
 		.sorted(Comparator.comparing(Engineer::getLevel).reversed())
 		.collect(Collectors.toList()));
 	return scheduleRow;
+    }
+
+    protected void writeTickets(EngineerFiles fileType, List<TT> ticketList, List<String> columns) {
+	fileType.writeCSV(ticketList, columns);
+	successfulFileCreation(fileType);
     }
 }

@@ -1,7 +1,5 @@
 package com.scott_tigers.oncall.utility;
 
-import java.lang.reflect.Method;
-
 public class TicketMetric implements Comparable<TicketMetric> {
     Integer createDateCount = 0;
     Integer resolvedDateCount = 0;
@@ -13,16 +11,15 @@ public class TicketMetric implements Comparable<TicketMetric> {
 
     public void addDataPoint(String dateType) {
 	try {
-	    System.out.println("dateType");
-	    String getMethodName = "get" + dateType + "Count";
-	    System.out.println("getMethodName=" + (getMethodName));
-	    Method m1 = TicketMetric.class.getMethod(getMethodName);
-	    int count = (int) m1.invoke(this);
+	    int count = (int) TicketMetric.class
+		    .getMethod("get" + dateType + "Count")
+		    .invoke(this);
+
 	    count++;
-	    String setMethodName = "set" + dateType + "Count";
-	    System.out.println("setMethodName=" + (setMethodName));
-	    Method m2 = TicketMetric.class.getMethod(setMethodName, Integer.class);
-	    m2.invoke(this, count);
+
+	    TicketMetric.class
+		    .getMethod("set" + dateType + "Count", Integer.class)
+		    .invoke(this, count);
 
 	} catch (Exception e) {
 	    e.printStackTrace();

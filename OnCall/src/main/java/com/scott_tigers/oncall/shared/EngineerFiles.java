@@ -9,7 +9,9 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,7 +62,7 @@ public enum EngineerFiles {
     SDMS                               ("SDMs"),
     SKIPPED_TICKETS                    ("Skipped Tickets"),
     TECH_ESC                           ("Tech Esc"),
-    TEST                               ("Test"),
+    TEST                               ("Test", ".ics"),
     TICKET_FLOW_REPORT                 ("Ticket Flow Report"),
     TICKET_STATS                       ("Ticket Stats"),
     TOP_100_COMPANIES                  ("Top 100 Companies"),
@@ -152,15 +154,19 @@ public enum EngineerFiles {
 
     public <T> T readJson(Class<T> clazz) {
 	try {
-	    return new Gson().fromJson(Files.readString(Paths.get(getFileName()), StandardCharsets.US_ASCII), clazz);
+	    return new Gson().fromJson(Files.readString(getPath(), StandardCharsets.US_ASCII), clazz);
 	} catch (IOException e) {
 	    e.printStackTrace();
 	}
 	return null;
     }
 
+    private Path getPath() {
+	return Paths.get(getFileName());
+    }
+
     public String readText() throws IOException {
-	return Files.readString(Paths.get(getFileName()));
+	return Files.readString(getPath());
     }
 
     private boolean renameFileToTimeStampFile() {
@@ -281,7 +287,7 @@ public enum EngineerFiles {
     }
 
     public void writeText(String text) throws IOException {
-	Files.write(Paths.get(getFileName()), text.getBytes());
+	Files.write(getPath(), text.getBytes());
     }
 
     private void writeToCSVFile(List<Engineer> exsitingEngineers) throws UnsupportedEncodingException,
@@ -306,6 +312,23 @@ public enum EngineerFiles {
 	System.out.println("getArchivePath()=" + (getArchivePath()));
 	System.out.println("fileName=" + (fileName));
 	FileUtils.copyFile(new File(getFileName()), new File(getArchivePath()));
+    }
+
+    public List<String> readLines() {
+	Path path = getPath();
+	return readLines(path);
+    }
+
+    private static List<String> readLines(Path path) {
+	try {
+	    return Files.readAllLines(path);
+	} catch (IOException e) {
+	    return new ArrayList<String>();
+	}
+    }
+
+    public static List<String> readLines(String fileName) {
+	return readLines(Paths.get(fileName));
     }
 
 }
