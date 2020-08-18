@@ -16,7 +16,7 @@ import com.scott_tigers.oncall.shared.Properties;
 public class CreateCustomerIssueReadyQueue extends Utility {
 
     private static final int TOP100_POINTS = 10;
-    private static final int READY_QUEUE_SIZE = 10;
+    private static final int REQUIRED_NUMBER_OF_CUATOMER_ISSUE_TICKETS_IN_QUEUE = 10;
 
     public static void main(String[] args) throws Exception {
 	new CreateCustomerIssueReadyQueue().run();
@@ -43,6 +43,8 @@ public class CreateCustomerIssueReadyQueue extends Utility {
 
     private void createReadyQueue() throws Exception {
 
+	CustomerIssueLimter limter = new CustomerIssueLimter();
+
 	topTickets = Stream
 		.of(CustomerIssueReader.class, CreateRootCauseToDoList.class)
 		.map(c -> constuct(c))
@@ -57,7 +59,8 @@ public class CreateCustomerIssueReadyQueue extends Utility {
 		.filter(this::notAssigned)
 		.peek(this::fixUpForDisplay)
 		.sorted(Comparator.comparing(TT::getWeight).reversed())
-		.limit(READY_QUEUE_SIZE)
+		.filter(tt -> limter.withinLimit(tt))
+//		.limit(READY_QUEUE_SIZE)
 		.collect(Collectors.toList());
 
 	maxWeight = topTickets
@@ -133,6 +136,16 @@ public class CreateCustomerIssueReadyQueue extends Utility {
 	if (tt.getItem().equals(Constants.ITEM_ENGINE)) {
 	    tt.setItem("Root Cause");
 	}
+    }
+
+    private class CustomerIssueLimter {
+	private int customerIssues = 0;
+
+	public boolean withinLimit(TT tt) {
+	    customerIssues += tt.getItem().equals(Constants.ITEM_CUSTOMER_ISSUE) ? 1 : 0;
+	    return customerIssues <= REQUIRED_NUMBER_OF_CUATOMER_ISSUE_TICKETS_IN_QUEUE;
+	}
+
     }
 
 }

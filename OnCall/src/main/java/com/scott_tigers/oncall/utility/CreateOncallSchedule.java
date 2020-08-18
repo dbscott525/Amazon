@@ -2,6 +2,8 @@ package com.scott_tigers.oncall.utility;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -13,7 +15,7 @@ public class CreateOncallSchedule extends Utility {
     private static final String SUMMARY = "SUMMARY:";
     private static final String DTSTART_TZID = "DTSTART;TZID";
     private static final String BEGIN_VEVENT = "BEGIN:VEVENT";
-    private ArrayList<OnCallScheduleRow> schedules = new ArrayList<OnCallScheduleRow>();
+    private ArrayList<OnCallScheduleRow> onCallSchedules = new ArrayList<OnCallScheduleRow>();
     private OnCallScheduleRow currentEvent;
 
     public static void main(String[] args) throws Exception {
@@ -21,6 +23,44 @@ public class CreateOncallSchedule extends Utility {
     }
 
     private void run() throws Exception {
+
+	Stream<Stream<OnCallScheduleRow>> x1 = Stream.of(getOnCallStream(), getTraineeStream());
+	Stream<OnCallScheduleRow> scheduleStream = x1.flatMap(x -> x);
+
+//	Stream<OnCallScheduleRow> scheduleStream = schedules
+//		.stream();
+
+	EngineerFiles.ON_CALL_SCHEDULE.writeCSV(
+		scheduleStream
+			.distinct()
+			.collect(Collectors.toList()),
+		OnCallScheduleRow.class);
+
+	successfulFileCreation(EngineerFiles.ON_CALL_SCHEDULE);
+    }
+
+    private Stream<OnCallScheduleRow> getTraineeStream() {
+	return EngineerFiles.TRAINING_DAILY_SCHEDULE
+		.readLines()
+		.stream()
+		.flatMap(line -> {
+		    ArrayList<OnCallScheduleRow> lines = new ArrayList<>();
+
+		    String date = line.replaceAll("(.*?),.*", "$1");
+
+		    Pattern p = Pattern.compile("\\(.*?\\)");
+		    Matcher m = p.matcher(line);
+
+		    while (m.find()) {
+			String uid = m.group().replaceAll("\\((.*?)\\)", "$1");
+			lines.add(new OnCallScheduleRow(date, uid));
+		    }
+
+		    return lines.stream();
+		});
+    }
+
+    private Stream<OnCallScheduleRow> getOnCallStream() {
 
 	Stream
 		.of("https://oncall.corp.amazon.com/#/view/aurora-head-primary/schedule",
@@ -48,19 +88,12 @@ public class CreateOncallSchedule extends Utility {
 		    }
 		});
 
-	EngineerFiles.ON_CALL_SCHEDULE.writeCSV(
-		schedules
-			.stream()
-			.distinct()
-			.collect(Collectors.toList()),
-		OnCallScheduleRow.class);
-
-	successfulFileCreation(EngineerFiles.ON_CALL_SCHEDULE);
+	return onCallSchedules.stream();
     }
 
     private void newEvent() {
 	currentEvent = new OnCallScheduleRow();
-	schedules.add(currentEvent);
+	onCallSchedules.add(currentEvent);
     }
 
 }

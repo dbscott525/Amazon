@@ -19,7 +19,11 @@ public class TrainingDaySchedule {
 	boolean found = false;
 	int tries = 0;
 
-	while (!found && tries < 15) {
+	while (!found) {
+	    if (tries > 1000) {
+		System.out.println("too many tries");
+		System.exit(1);
+	    }
 	    tries++;
 	    Collections.shuffle(schedule);
 	    found = IntStream.range(0, schedule.size()).allMatch(index -> ShadowSlot

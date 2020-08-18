@@ -36,16 +36,18 @@ public enum EngineerFiles {
     
     ASSIGNED_TICKETS                   ("Assigned Tickets"),
     CIT_CANDIDATES_FROM_POOYA          ("CIT Candidates From Pooya"),
+    CIT_EVALUATION_TEMPLATE            ("CIT Evaluation Template", Constants.XML_EXTENSION),
+    CIT_EVALUATIONS                    ("CIT Evaluations",Constants.XML_EXTENSION),
     CUSTOMER_ISSUE_BACKLOG             ("Customer Issue Backlog"),
     CUSTOMER_ISSUE_EMAIL               ("Customer Issue Emails"),
     CUSTOMER_ISSUE_TEAM_SCHEDULE       ("Customer Issue Team Schedule", Constants.JSON_EXTENSION),
-    DAILY_ON_CALL_REMINDER_EMAILS      ("Daily On Call Reminder Emails"),
-    DAILY_STAND_UP_ATTENDEE_EMAILS     ("Daily Stand Up Attendee Emails"), 
+    DAILY_ON_CALL_REMINDER_EMAILS      ("Daily On Call Reminder Emails"), 
+    DAILY_STAND_UP_ATTENDEE_EMAILS     ("Daily Stand Up Attendee Emails"),
     DSU                                ("DSU",  Constants.XML_EXTENSION),
     DSU_TEMPLATE                       ("DSU Template", Constants.XML_EXTENSION),
     ENGINE_TICKET_DAILY_REVIEW         ("Engine Ticket Daily Review"),
-    ENGINEER_ADDS                      ("Engineers to be Added"),
-    ESCALATED_COMPANIES                ("Escalated Companies"),    
+    ENGINEER_ADDS                      ("Engineers to be Added"),    
+    ESCALATED_COMPANIES                ("Escalated Companies"),
     ESCALATION_CHOOSER                 ("Escalation Chooser"),
     ESCALATION_OWNERSHIP               ("Escalation Ownership"),
     FOO                                ("foo"),
@@ -94,6 +96,18 @@ public enum EngineerFiles {
 	return getScheduledRows().stream();
     }
 
+    private static List<String> readLines(Path path) {
+	try {
+	    return Files.readAllLines(path);
+	} catch (IOException e) {
+	    return new ArrayList<String>();
+	}
+    }
+
+    public static List<String> readLines(String fileName) {
+	return readLines(Paths.get(fileName));
+    }
+
     public static void writeScheduleRows(List<ScheduleRow> scheduleRows) {
 	CUSTOMER_ISSUE_TEAM_SCHEDULE.replaceJsonFile(new ScheduleContainer(scheduleRows));
 //	CUSTOMER_ISSUE_TEAM_SCHEDULE.writeJsonFile(new ScheduleContainer(scheduleRows));
@@ -112,8 +126,25 @@ public enum EngineerFiles {
 	this.extension = extension;
     }
 
+    public void archive() throws IOException {
+	System.out.println("getArchivePath()=" + (getArchivePath()));
+	System.out.println("fileName=" + (fileName));
+	FileUtils.copyFile(new File(getFileName()), new File(getArchivePath()));
+    }
+
     protected String extension() {
 	return extension;
+    }
+
+    private String getArchivePath() {
+	File file = new File(getFileName());
+	var regex = "(.+\\\\)(.+)(\\.)";
+	String replacement = "$1Revisions\\\\$2 " + Dates.TIME_STAMP.getFormattedDate() + "$3";
+
+	String archivePath = file
+		.getPath()
+		.replaceAll(regex, replacement);
+	return archivePath;
     }
 
     public String getFileName() {
@@ -124,13 +155,17 @@ public enum EngineerFiles {
 	return Transform.list(readCSV(), x -> x.map(Engineer::getFirstName));
     }
 
-    public void launch() {
+    private Path getPath() {
+	return Paths.get(getFileName());
+    }
+
+    public void launch(String fileName) {
 
 	try {
 	    Runtime.getRuntime().exec(new String[] {
 		    programMap.get(extension),
 //		    "C:\\Program Files (x86)\\Microsoft Office\\Office16\\EXCEL.EXE",
-		    getFileName()
+		    fileName
 	    });
 	} catch (IOException e) {
 	    e.printStackTrace();
@@ -161,8 +196,9 @@ public enum EngineerFiles {
 	return null;
     }
 
-    private Path getPath() {
-	return Paths.get(getFileName());
+    public List<String> readLines() {
+	Path path = getPath();
+	return readLines(path);
     }
 
     public String readText() throws IOException {
@@ -184,17 +220,6 @@ public enum EngineerFiles {
 	    System.out.println("Cannot rename file [" + file.getPath() + "] to [" + archivePath + "]");
 	}
 	return renameResult;
-    }
-
-    private String getArchivePath() {
-	File file = new File(getFileName());
-	var regex = "(.+\\\\)(.+)(\\.)";
-	String replacement = "$1Revisions\\\\$2 " + Dates.TIME_STAMP.getFormattedDate() + "$3";
-
-	String archivePath = file
-		.getPath()
-		.replaceAll(regex, replacement);
-	return archivePath;
     }
 
     public void replaceEngineerList(List<Engineer> exsitingEngineers) {
@@ -287,7 +312,12 @@ public enum EngineerFiles {
     }
 
     public void writeText(String text) throws IOException {
-	Files.write(getPath(), text.getBytes());
+	Path path = getPath();
+	writeText(text, path);
+    }
+
+    private void writeText(String text, Path path) throws IOException {
+	Files.write(path, text.getBytes());
     }
 
     private void writeToCSVFile(List<Engineer> exsitingEngineers) throws UnsupportedEncodingException,
@@ -308,27 +338,11 @@ public enum EngineerFiles {
 		.writeValue(writerOutputStream, exsitingEngineers);
     }
 
-    public void archive() throws IOException {
-	System.out.println("getArchivePath()=" + (getArchivePath()));
-	System.out.println("fileName=" + (fileName));
-	FileUtils.copyFile(new File(getFileName()), new File(getArchivePath()));
-    }
-
-    public List<String> readLines() {
-	Path path = getPath();
-	return readLines(path);
-    }
-
-    private static List<String> readLines(Path path) {
-	try {
-	    return Files.readAllLines(path);
-	} catch (IOException e) {
-	    return new ArrayList<String>();
-	}
-    }
-
-    public static List<String> readLines(String fileName) {
-	return readLines(Paths.get(fileName));
+    public String writeText(String string, String directory, String prefix) throws IOException {
+	String fullFileName = directory + prefix + fileName + extension();
+	Path path = Paths.get(fullFileName);
+	writeText(string, path);
+	return fullFileName;
     }
 
 }

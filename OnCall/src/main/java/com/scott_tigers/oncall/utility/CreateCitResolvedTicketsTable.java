@@ -32,11 +32,28 @@ public class CreateCitResolvedTicketsTable extends Utility {
     private String getUrl() {
 	Calendar today = Calendar.getInstance();
 	int dayOfWeek = today.get(Calendar.DAY_OF_WEEK);
-	int delta = dayOfWeek == 1 ? -6 : 2 - dayOfWeek;
+	System.out.println("dayOfWeek=" + (dayOfWeek));
+	int delta;
+	switch (dayOfWeek) {
+
+	case 1:
+	    delta = -6;
+	    break;
+
+	case 2:
+	    delta = -7;
+	    break;
+
+	default:
+	    delta = 2 - dayOfWeek;
+	}
+	System.out.println("delta=" + (delta));
 
 	String startString = Dates.TT_SEARCH.getFormattedString(Dates.getDateDelta(today.getTime(), delta));
+	System.out.println("startString=" + (startString));
 	String endString = Dates.TT_SEARCH
 		.getFormattedString(Dates.getDateDelta(Dates.getDateDelta(today.getTime(), delta), 5));
+	System.out.println("endString=" + (endString));
 
 	return "https://tt.amazon.com/search?category=AWS&type=RDS-AuroraMySQL&item=CustomerIssue&assigned_group=aurora-head%3Baurora-head-trx%3Baurora-head-backlog%3Baurora-head-ecosystem%3Baurora-head-partition%3Baurora-head-qp%3Baurora-head-store%3Baurora-head-secondary-wip%3Boscar-eng-secondary%3Baurora-secondary-RCA%3Baurora-head-serverless&status=Pending%3BResolved%3BClosed&impact=&assigned_individual=&requester_login=&login_name=&cc_email=&phrase_search_text=&keyword_bq=&exact_bq=&or_bq1=&or_bq2=&or_bq3=&exclude_bq=&create_date=&modified_date="
 		+ startString

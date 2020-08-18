@@ -32,7 +32,9 @@ public class OnCallScheduleRow {
     }
 
     public OnCallScheduleRow canonicalDate() {
-	date = Dates.SORTABLE.getFormattedString(Dates.ONLINE_SCHEDULE.getDateFromString(date));
+//	System.out.println("original date=" + (date));
+//	date = Dates.SORTABLE.getFormattedString(Dates.ONLINE_SCHEDULE.getDateFromString(date));
+//	System.out.println("fixed date=" + (date));
 	return this;
     }
 

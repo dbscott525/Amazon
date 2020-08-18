@@ -3,11 +3,11 @@ package com.scott_tigers.oncall.utility;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -17,6 +17,7 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import com.scott_tigers.oncall.bean.EmailsByDate;
@@ -37,11 +38,16 @@ public class Utility {
     private Map<EngineerFiles, List<String>> companyListMap = new HashMap<>();
     private Map<EngineerFiles, List<Engineer>> fileTypeToListMap = new HashMap<>();
     private Map<String, Double> uidToLevelMap = null;
+    protected String templateDoc;
 
     protected void successfulFileCreation(EngineerFiles fileType) {
-	System.out.println(fileType.getFileName() + " was successfully created.");
+	successfulFileCreation(fileType, fileType.getFileName());
+    }
+
+    protected void successfulFileCreation(EngineerFiles fileType, String fileName) {
+	System.out.println(fileName + " was successfully created.");
 	System.out.println("File is now be launched");
-	fileType.launch();
+	fileType.launch(fileName);
     }
 
     protected Function<List<Engineer>, List<Engineer>> getEngineerListTransformer() {
@@ -126,10 +132,11 @@ public class Utility {
     }
 
     protected Map<String, List<Engineer>> getTraineesByDate() {
+	// training date = [date]
 	return EngineerFiles.MASTER_LIST
 		.readCSV()
 		.stream()
-		.filter(x -> x.getType().equals(Constants.ENGINEER_TYPE_TRAINEE))
+		.filter(x -> !x.getTrainingDate().isEmpty())
 		.collect(Collectors.groupingBy(Engineer::getTrainingDate));
     }
 
@@ -165,11 +172,15 @@ public class Utility {
 		.reduce((first, second) -> second).orElse(null);
     }
 
-    protected void launchUrl(String url) throws IOException, URISyntaxException {
-	System.out.println("url=" + (url));
-	java.awt.Desktop
-		.getDesktop()
-		.browse(new URI(url));
+    protected void launchUrl(String url) {
+	try {
+	    System.out.println("url=" + (url));
+	    java.awt.Desktop
+		    .getDesktop()
+		    .browse(new URI(url));
+	} catch (Exception e) {
+	    System.out.println("Cannot lauch " + url + " because of " + e);
+	}
     }
 
     private Stream<TT> getTicketStream(String ttFileName) throws IOException {
@@ -188,9 +199,6 @@ public class Utility {
 	assignedTicketIds = Optional
 		.ofNullable(assignedTicketIds)
 		.orElseGet(() -> getAssingedTicketIds());
-//	assignedTicketIds = Optional
-//		.ofNullable(assignedTicketIds)
-//		.orElse(getAssingedTicketIds());
 
 	return !assignedTicketIds.contains(tt.getIntCaseId());
     }
@@ -216,7 +224,7 @@ public class Utility {
     }
 
     private String getCaseId(String line) {
-	return line.replaceAll(".*,https:.*com/([0-9]+).*", "$1");
+	return line.replaceAll(".*?https://tt\\.amazon\\.com/([0-9]+).*", "$1");
     }
 
     protected List<String> getCompanyList(EngineerFiles companyFile) {
@@ -271,10 +279,10 @@ public class Utility {
     protected Stream<ScheduleRow> getScheduleRowStream() {
 	return EngineerFiles
 		.getScheduleRowStream()
-		.map(this::getOrderedByLeve);
+		.map(this::getOrderedByLevel);
     }
 
-    private ScheduleRow getOrderedByLeve(ScheduleRow scheduleRow) {
+    private ScheduleRow getOrderedByLevel(ScheduleRow scheduleRow) {
 	scheduleRow.setEngineers(scheduleRow
 		.getEngineers()
 		.stream()
@@ -287,5 +295,28 @@ public class Utility {
     protected void writeTickets(EngineerFiles fileType, List<TT> ticketList, List<String> columns) {
 	fileType.writeCSV(ticketList, columns);
 	successfulFileCreation(fileType);
+    }
+
+    protected void makeReplacement(String searchString, String replacement) {
+	String search = Optional.ofNullable(Constants.TEMPLATE_REPLACEMENTS.get(searchString)).orElse(searchString);
+	templateDoc = templateDoc.replace(search,
+		replacement);
+    }
+
+    protected void replaceEngineers() {
+	getScheduleForThisWeek().ifPresent(schedule -> {
+	    List<Engineer> engineers = getEngineeringDetails(schedule.getEngineers());
+	    List<Engineer> orderedList = new ArrayList<Engineer>(engineers);
+	    Collections.shuffle(engineers);
+	    IntStream.range(0, engineers.size())
+		    .forEach(index -> {
+			makeReplacement(engineers, index, "CIT");
+			makeReplacement(orderedList, index, "CITO");
+		    });
+	});
+    }
+
+    void makeReplacement(List<Engineer> engineers, int index, String prefix) {
+	makeReplacement(prefix + index, engineers.get(index).getFullName());
     }
 }

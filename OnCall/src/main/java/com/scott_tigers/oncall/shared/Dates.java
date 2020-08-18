@@ -16,7 +16,8 @@ public enum Dates {
     TT_SEARCH("M/d/y"),
     NICE("MMMM d, yyyy"),
     ONLINE_SCHEDULE("M/d/yy"),
-    ICS("yyyyMMdd");
+    ICS("yyyyMMdd"),
+    DAY_OF_WEEK("EEEE, MMMM d, yyyy");
 
     private String format;
 
