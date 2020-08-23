@@ -1,5 +1,6 @@
 package com.scott_tigers.oncall.utility;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 import com.scott_tigers.oncall.bean.TrainingDaySchedule;
@@ -17,7 +18,8 @@ public class CreateShadowingSchedule extends Utility {
 		.entrySet()
 		.stream()
 		.map(TrainingSchedule::new)
-		.flatMap(x -> x.getTrainingDays().stream())
+		.map(TrainingSchedule::getTrainingDays)
+		.flatMap(List<TrainingDaySchedule>::stream)
 		.map(TrainingDaySchedule::getSchedule)
 		.sorted()
 		.collect(Collectors.toList()));

@@ -6,7 +6,10 @@ import java.util.List;
 import com.scott_tigers.oncall.bean.Engineer;
 
 public enum ShadowSlot {
-    MORNING("PST", "EST", "IST"), AFTERNOON("PST", "EST"), EVENING("PST", "CT");
+    MORNING("PST", "EST", "IST"),
+    AFTERNOON("PST", "EST")
+//    EVENING("PST", "CT")
+    ;
 
     private List<String> timeZones;
 

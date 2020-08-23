@@ -51,13 +51,13 @@ public class Scheduler {
     private List<ScheduleRow> existingSchedule;
     private List<Engineer> engineersFromCsvFile;
     private Predicate<Integer> shiftFilter;
-    private Map<String, Engineer> levelEngineers;
     private int shifts;
     private Map<String, SmeRange> smeRanges;
     private String newScheduleStart = Dates.SORTABLE.getFormattedString();
     private int weeksBetweenShift = 3;
     private Map<String, Engineer> uidToEngineer;
     private long schedulesTried = 0;
+    private int rotationDelta = 1;
 
     private void processCandidateSchedule(List<Engineer> candidateSchedule) {
 	schedulesTried++;
@@ -116,6 +116,7 @@ public class Scheduler {
     }
 
     public Scheduler run() {
+	System.out.println("startDate=" + (startDate));
 	prepareEngineers();
 
 	scheduleRows = new ArrayList<ScheduleRow>();
@@ -139,7 +140,6 @@ public class Scheduler {
 
 	updateStartDateBasedOnShiftGap();
 
-//	shifts = 2;
 	List<Engineer> excludedEngineers = getOOOConflictedEngineers(shifts);
 	System.out.println("EXCLUDED ENGINEERS:");
 	System.out.println();
@@ -153,9 +153,6 @@ public class Scheduler {
 			.map(Engineer::getUid)
 			.anyMatch(uid -> uid.equals(eng.getUid())))
 		.collect(Collectors.toList());
-//	shifts = (engineers.size() / teamSize) - 1;
-	System.out.println("shifts=" + (shifts));
-//	shifts = 2;
 	System.out.println("shifts=" + (shifts));
 
 	Map<String, Long> smeCounts = engineers.stream()
@@ -181,15 +178,12 @@ public class Scheduler {
 		.forEach(schedule -> {
 		    String newStartDate = Dates.SORTABLE
 			    .getFormattedDelta(schedule.getDate(), weeksBetweenShift * 7);
-		    System.out.println("newStartDate=" + (newStartDate));
 		    schedule
 			    .getEngineers()
 			    .stream()
 			    .map(eng -> uidToEngineer.get(eng.getUid()))
 			    .forEach(eng -> eng.candidateStartDate(newStartDate));
 		});
-//	Json.print(engineers);
-//	System.exit(1);
     }
 
     private List<Engineer> getOOOConflictedEngineers(int shifts) {
@@ -220,7 +214,7 @@ public class Scheduler {
 
     private void createShiftsFilter() {
 	Integer min = relationalCompare(s -> s.min(Comparator.comparing(x1 -> x1)));
-	shiftFilter = shifts -> shifts <= min + 1;
+	shiftFilter = shifts -> shifts <= min + rotationDelta;
 
     }
 
@@ -233,28 +227,28 @@ public class Scheduler {
     }
 
     private void readEngineers() {
-
 	existingSchedule = EngineerFiles
 		.getScheduleRowStream()
 		.filter(row -> row.isBefore(newScheduleStart))
 		.collect(Collectors.toList());
 
-	engineersFromCsvFile = EngineerFiles.MASTER_LIST.readCSV();
-
+	engineersFromCsvFile = EngineerFiles.MASTER_LIST
+		.readCSV();
+//		.stream()
+//		.filter(this::endDateAfterScheduleStart)
+//		.collect(Collectors.toList());
+//	System.out.println("engineersFromCsvFile.size()=" + (engineersFromCsvFile.size()));
+//
 	uidToEngineer = engineersFromCsvFile
 		.stream()
 		.collect(Collectors.toMap(Engineer::getUid, Function.identity()));
 
-	populateLevels();
+//	populateLevels();
 
 	engineersFromCsvFile.forEach(eng -> {
 	    eng.setOoo("");
 	    eng.setShiftsCompleted(0);
 	});
-
-	Map<String, Engineer> uidToEngineer = engineersFromCsvFile
-		.stream()
-		.collect(Collectors.toMap(Engineer::getUid, e -> e));
 
 	EngineerFiles.UNAVAILABILITY
 		.readCSVToPojo(Unavailability.class)
@@ -270,31 +264,42 @@ public class Scheduler {
 			.filter(Objects::nonNull)
 			.forEach(Engineer::incrementShiftsCompleted));
 
-	originalEngineers = engineersFromCsvFile;
+	originalEngineers = engineersFromCsvFile.stream().filter(x -> endDateAfterScheduleStart(x))
+		.collect(Collectors.toList());
+//	originalEngineers = engineersFromCsvFile;
 	engineers = originalEngineers;
 	computeStartDate();
     }
 
-    private void populateLevels() {
-	levelEngineers = EngineerFiles.LEVELS_FROM_QUIP
-		.readCSV()
-		.stream()
-		.collect(Collectors.toMap(Engineer::getUid, Function.identity()));
-	engineersFromCsvFile
-		.stream()
-		.forEach(this::updateLevel);
+    private boolean endDateAfterScheduleStart(Engineer engineer) {
+	return !Optional
+		.ofNullable(engineer.getEndDate())
+		.filter(x -> x.length() != 0)
+		.map(date -> Dates.ONLINE_SCHEDULE.convertFormat(date, Dates.SORTABLE))
+		.filter(endDate -> endDate.compareTo(newScheduleStart) <= 0)
+		.isPresent();
     }
 
-    private void updateLevel(Engineer eng) {
-	Engineer levelEngineer = levelEngineers.get(eng.getUid());
-	if (levelEngineer == null) {
-	    System.out.println("Engineer "
-		    + eng.getUid()
-		    + " does not have level data");
-	} else {
-	    eng.setLevel(levelEngineer.getLevel());
-	}
-    }
+//    private void populateLevels() {
+//	levelEngineers = EngineerFiles.LEVELS_FROM_QUIP
+//		.readCSV()
+//		.stream()
+//		.collect(Collectors.toMap(Engineer::getUid, Function.identity()));
+//	engineersFromCsvFile
+//		.stream()
+//		.forEach(this::updateLevel);
+//    }
+
+//    private void updateLevel(Engineer eng) {
+//	Engineer levelEngineer = levelEngineers.get(eng.getUid());
+//	if (levelEngineer == null) {
+//	    System.out.println("Engineer "
+//		    + eng.getUid()
+//		    + " does not have level data");
+//	} else {
+//	    eng.setLevel(levelEngineer.getLevel());
+//	}
+//    }
 
     private void computeStartDate() {
 	startDate = Dates.SORTABLE
@@ -458,6 +463,11 @@ public class Scheduler {
 
     public Scheduler shifts(int shifts) {
 	this.shifts = shifts;
+	return this;
+    }
+
+    public Scheduler rotationDelta(int rotationDelta) {
+	this.rotationDelta = rotationDelta;
 	return this;
     }
 }

@@ -22,6 +22,8 @@ public class TT {
     private String link;
     private String resolvedDate;
     private String item;
+    private String resolvedBy;
+    private String lastModifiedBy;
 
     @JsonProperty(Properties.CASE_ID)
     public String getCaseId() {
@@ -131,6 +133,24 @@ public class TT {
 
     public void setResolvedDate(String resolvedDate) {
 	this.resolvedDate = resolvedDate;
+    }
+
+    @JsonProperty("Resolved By")
+    public String getResolvedBy() {
+	return resolvedBy;
+    }
+
+    public void setResolvedBy(String resolvedBy) {
+	this.resolvedBy = resolvedBy;
+    }
+
+    @JsonProperty("Last Modified By User")
+    public String getLastModifiedBy() {
+	return lastModifiedBy;
+    }
+
+    public void setLastModifiedBy(String lastModifiedBy) {
+	this.lastModifiedBy = lastModifiedBy;
     }
 
     @JsonProperty(Properties.LINK)

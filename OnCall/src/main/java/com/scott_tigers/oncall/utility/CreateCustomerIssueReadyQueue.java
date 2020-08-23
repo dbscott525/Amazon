@@ -60,7 +60,6 @@ public class CreateCustomerIssueReadyQueue extends Utility {
 		.peek(this::fixUpForDisplay)
 		.sorted(Comparator.comparing(TT::getWeight).reversed())
 		.filter(tt -> limter.withinLimit(tt))
-//		.limit(READY_QUEUE_SIZE)
 		.collect(Collectors.toList());
 
 	maxWeight = topTickets
@@ -107,7 +106,8 @@ public class CreateCustomerIssueReadyQueue extends Utility {
 	    break;
 
 	case Constants.ITEM_CUSTOMER_ISSUE:
-	    weight += intAge / 7;
+//	    weight += intAge / 7;
+	    weight += (int) Math.pow(intAge, .6);
 	    break;
 
 	}

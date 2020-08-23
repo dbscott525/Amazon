@@ -58,5 +58,7 @@ public class Constants {
 	    put("Date4", "UnFFhfKk");
 	}
     };
+    public static final int NUMBER_OF_PRIMARY_TRAINING_WEEKS = 3;
+    public static final String AUTOMATICIC_UID = "AR_ESCALATOR";
 
 }

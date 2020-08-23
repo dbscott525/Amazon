@@ -41,6 +41,7 @@ public enum EngineerFiles {
     CUSTOMER_ISSUE_BACKLOG             ("Customer Issue Backlog"),
     CUSTOMER_ISSUE_EMAIL               ("Customer Issue Emails"),
     CUSTOMER_ISSUE_TEAM_SCHEDULE       ("Customer Issue Team Schedule", Constants.JSON_EXTENSION),
+    CIT_SCHEDULE                       ("CIT Schedule",Constants.JSON_EXTENSION),
     DAILY_ON_CALL_REMINDER_EMAILS      ("Daily On Call Reminder Emails"), 
     DAILY_STAND_UP_ATTENDEE_EMAILS     ("Daily Stand Up Attendee Emails"),
     DSU                                ("DSU",  Constants.XML_EXTENSION),
@@ -65,6 +66,7 @@ public enum EngineerFiles {
     SKIPPED_TICKETS                    ("Skipped Tickets"),
     TECH_ESC                           ("Tech Esc"),
     TEST                               ("Test", ".ics"),
+    TICKET_CLOSURES                    ("Ticket Closures"),
     TICKET_FLOW_REPORT                 ("Ticket Flow Report"),
     TICKET_STATS                       ("Ticket Stats"),
     TOP_100_COMPANIES                  ("Top 100 Companies"),
@@ -244,8 +246,7 @@ public enum EngineerFiles {
     }
 
     public <T> void writeCSV(List<T> list, Class<T> pojoClass) {
-	Function<CsvMapper, CsvSchema> t1 = mapper -> mapper.schemaFor(pojoClass);
-	writeCSV(list, t1);
+	writeCSV(list, mapper -> mapper.schemaFor(pojoClass));
     }
 
     private <T> void writeCSV(List<T> list, Function<CsvMapper, CsvSchema> schemaMaker) {
@@ -320,6 +321,13 @@ public enum EngineerFiles {
 	Files.write(path, text.getBytes());
     }
 
+    public String writeText(String string, String directory, String prefix) throws IOException {
+	String fullFileName = directory + prefix + fileName + extension();
+	Path path = Paths.get(fullFileName);
+	writeText(string, path);
+	return fullFileName;
+    }
+
     private void writeToCSVFile(List<Engineer> exsitingEngineers) throws UnsupportedEncodingException,
 	    FileNotFoundException, IOException, JsonGenerationException, JsonMappingException {
 	CsvMapper mapper = new CsvMapper();
@@ -336,13 +344,6 @@ public enum EngineerFiles {
 	mapper
 		.writer(schema)
 		.writeValue(writerOutputStream, exsitingEngineers);
-    }
-
-    public String writeText(String string, String directory, String prefix) throws IOException {
-	String fullFileName = directory + prefix + fileName + extension();
-	Path path = Paths.get(fullFileName);
-	writeText(string, path);
-	return fullFileName;
     }
 
 }

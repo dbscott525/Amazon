@@ -5,14 +5,18 @@
  */
 package com.scott_tigers.oncall.bean;
 
+import java.util.Date;
 import java.util.Optional;
+import java.util.function.Predicate;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.scott_tigers.oncall.schedule.DateStringContainer;
 import com.scott_tigers.oncall.schedule.Scheduler;
 import com.scott_tigers.oncall.shared.Dates;
+import com.scott_tigers.oncall.shared.Expertise;
 import com.scott_tigers.oncall.shared.ResultCache;
 
 /**
@@ -25,6 +29,7 @@ import com.scott_tigers.oncall.shared.ResultCache;
 public class Engineer {
 
     private Double level;
+    private Double levelAdjust;
     private String empDate;
     private String endDate;
     private String expertise;
@@ -83,6 +88,15 @@ public class Engineer {
 	this.level = level;
     }
 
+    public Double getLevelAdjust() {
+	return levelAdjust;
+    }
+
+    public void setLevelAdjust(Double levelAdjust) {
+	this.levelAdjust = levelAdjust;
+    }
+
+    @JsonIgnore
     public String getOoo() {
 	return ooo;
     }
@@ -107,7 +121,7 @@ public class Engineer {
 	return beforeStartDate;
     }
 
-    private boolean afterEndDate(String date) {
+    public boolean afterEndDate(String date) {
 //	return false;
 	if (!optionalString(endDate).isPresent()) {
 	    return false;
@@ -158,14 +172,26 @@ public class Engineer {
 			() -> scheduler.isGreaterThanPercnetile(percentile, level));
     }
 
+    @JsonIgnore
     public String getFullName() {
 	return firstName + " " + lastName;
     }
 
+    @JsonIgnore
+    public String getFullNameWithExertise() {
+//	Expertise.get(expertise);
+//	String expertiseNotation = expertise.length() == 0
+//		? ""
+//		: " (" + expertise + ")";
+	return getFullName() + Expertise.get(expertise).getNotation();
+    }
+
+    @JsonIgnore
     public String getEmail() {
 	return uid + "@amazon.com";
     }
 
+    @JsonIgnore
     public int getShiftsCompleted() {
 	return shiftsCompleted;
     }
@@ -232,6 +258,7 @@ public class Engineer {
 	this.expertise = expertise;
     }
 
+    @JsonIgnore
     public String getFullNameWithUid() {
 	return getFullName() + " (" + uid + ")";
     }
@@ -253,17 +280,26 @@ public class Engineer {
     }
 
     public void candidateStartDate(String candidateStartDate) {
-	if (uid.equals("vibagade")) {
-	    System.out.println("uid=" + (uid));
-	    System.out.println("startDate=" + (startDate));
-	    System.out.println("candidateStartDate=" + (candidateStartDate));
-	}
 	startDate = optionalString(startDate)
 		.filter(currentStartDate -> Dates.ONLINE_SCHEDULE
 			.convertFormat(currentStartDate, Dates.SORTABLE).compareTo(candidateStartDate) > 0)
 		.orElse(Dates.SORTABLE.convertFormat(candidateStartDate, Dates.ONLINE_SCHEDULE));
-	if (uid.equals("vibagade")) {
-	    System.out.println("startDate=" + (startDate));
-	}
+    }
+
+    @JsonIgnore
+    public boolean isValidTrainingDate() {
+	return Optional
+		.ofNullable(trainingDate)
+		.filter(Predicate.not(String::isEmpty))
+		.filter(this::isAfterToday)
+		.isPresent();
+    }
+
+    private boolean isAfterToday(String date) {
+	return new Date().compareTo(Dates.ONLINE_SCHEDULE.getDateFromString(date)) < 0;
+    }
+
+    public int getRequiredOrder() {
+	return Expertise.get(expertise).getRequiredOrder();
     }
 }

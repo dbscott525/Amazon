@@ -27,6 +27,11 @@
 			<location>J:/SupportEngineering/OnCallData/Assigned Tickets.csv</location>
 		</link>
 		<link>
+			<name>EngineeringSupportData/CIT Schedule.json</name>
+			<type>1</type>
+			<location>J:/SupportEngineering/OnCallData/CIT Schedule.json</location>
+		</link>
+		<link>
 			<name>EngineeringSupportData/Customer Issue Backlog.csv</name>
 			<type>1</type>
 			<location>J:/SupportEngineering/OnCallData/Customer Issue Backlog.csv</location>

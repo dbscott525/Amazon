@@ -13,21 +13,25 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import com.scott_tigers.oncall.bean.EmailsByDate;
 import com.scott_tigers.oncall.bean.Engineer;
+import com.scott_tigers.oncall.bean.EngineerMetric;
 import com.scott_tigers.oncall.bean.OnCallScheduleRow;
 import com.scott_tigers.oncall.bean.ScheduleRow;
 import com.scott_tigers.oncall.bean.TT;
 import com.scott_tigers.oncall.shared.Constants;
 import com.scott_tigers.oncall.shared.Dates;
 import com.scott_tigers.oncall.shared.EngineerFiles;
+import com.scott_tigers.oncall.shared.URL;
 import com.scott_tigers.oncall.test.Company;
 
 public class Utility {
@@ -39,6 +43,7 @@ public class Utility {
     private Map<EngineerFiles, List<Engineer>> fileTypeToListMap = new HashMap<>();
     private Map<String, Double> uidToLevelMap = null;
     protected String templateDoc;
+    protected Map<String, EngineerMetric> metricMap = new HashMap<>();
 
     protected void successfulFileCreation(EngineerFiles fileType) {
 	successfulFileCreation(fileType, fileType.getFileName());
@@ -93,15 +98,14 @@ public class Utility {
     }
 
     protected Engineer getEngineer(String uid) {
-	if (uidToEngMap == null) {
-	    EngineerFiles fileType = EngineerFiles.MASTER_LIST;
-	    List<Engineer> readCSVToPojo = readCSVByType(fileType);
-	    uidToEngMap = readCSVToPojo
-		    .stream()
-		    .collect(Collectors.toMap(Engineer::getUid, x -> x));
-	}
-
-	return uidToEngMap.get(uid);
+	return Optional
+		.ofNullable(uidToEngMap)
+		.orElseGet(() -> {
+		    uidToEngMap = readCSVByType(EngineerFiles.MASTER_LIST)
+			    .stream()
+			    .collect(Collectors.toMap(Engineer::getUid, Function.identity()));
+		    return uidToEngMap;
+		}).get(uid);
     }
 
     protected List<Engineer> readCSVByType(EngineerFiles fileType) {
@@ -132,11 +136,10 @@ public class Utility {
     }
 
     protected Map<String, List<Engineer>> getTraineesByDate() {
-	// training date = [date]
 	return EngineerFiles.MASTER_LIST
 		.readCSV()
 		.stream()
-		.filter(x -> !x.getTrainingDate().isEmpty())
+		.filter(Engineer::isValidTrainingDate)
 		.collect(Collectors.groupingBy(Engineer::getTrainingDate));
     }
 
@@ -262,7 +265,12 @@ public class Utility {
     }
 
     protected Function<Engineer, Engineer> mapToEngineerDetails() {
-	return eng -> getEngineer(eng.getUid());
+//	return eng -> getEngineer(eng.getUid());
+	return eng -> getEngineer(getEngineer(eng));
+    }
+
+    private Engineer getEngineer(Engineer eng) {
+	return getEngineer(eng.getUid());
     }
 
     protected Engineer getLevel(Engineer eng) {
@@ -286,7 +294,8 @@ public class Utility {
 	scheduleRow.setEngineers(scheduleRow
 		.getEngineers()
 		.stream()
-		.map(this::getLevel)
+//		.map(this::getLevel)
+		.map(this::getEngineer)
 		.sorted(Comparator.comparing(Engineer::getLevel).reversed())
 		.collect(Collectors.toList()));
 	return scheduleRow;
@@ -318,5 +327,59 @@ public class Utility {
 
     void makeReplacement(List<Engineer> engineers, int index, String prefix) {
 	makeReplacement(prefix + index, engineers.get(index).getFullName());
+    }
+
+    protected void writeCSV(EngineerFiles fileType, List<EngineerMetric> list) {
+	fileType.writeCSV(list, EngineerMetric.class);
+	successfulFileCreation(fileType);
+    }
+
+    protected List<EngineerMetric> getTicketClosedMetrics() throws Exception {
+	getMetricMap();
+
+	List<EngineerMetric> metrics = metricMap
+		.values()
+		.stream()
+		.sorted(Comparator.comparing(EngineerMetric::getTicketsPerWeek).reversed())
+		.collect(Collectors.toList());
+	return metrics;
+    }
+
+    protected void getMetricMap() throws Exception {
+	String lastDate = Dates.SORTABLE
+		.getFormattedDelta(Dates.SORTABLE
+			.getFormattedString(), -4);
+	System.out.println("lastDate=" + (lastDate));
+	getScheduleRowStream()
+		.filter(row -> row.isBefore(lastDate))
+		.peek(row -> System.out.println("row.getDate()=" + (row.getDate())))
+		.map(ScheduleRow::getEngineers)
+		.flatMap(List<Engineer>::stream)
+//		.map(Engineer::getUid)
+		.map(this::getEngineer)
+		.map(this::getEngMetric)
+		.forEach(EngineerMetric::addWeek);
+
+	getTicketStreamFromUrl(URL.CIT_RESOLVED_TICKETS)
+		.map(this::getMetric)
+		.filter(Objects::nonNull)
+		.forEach(EngineerMetric::addTicket);
+    }
+
+    private EngineerMetric getMetric(TT tt) {
+	return metricMap.get(Optional
+		.ofNullable(tt.getResolvedBy())
+		.filter(Predicate.not(Constants.AUTOMATICIC_UID::equals))
+		.orElse(tt.getLastModifiedBy()));
+    }
+
+    private EngineerMetric getEngMetric(Engineer eng) {
+	return Optional
+		.ofNullable(metricMap.get(eng.getUid()))
+		.orElseGet(() -> {
+		    EngineerMetric metric = new EngineerMetric(eng);
+		    metricMap.put(eng.getUid(), metric);
+		    return metric;
+		});
     }
 }
