@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import com.scott_tigers.oncall.bean.Engineer;
-import com.scott_tigers.oncall.bean.ScheduleRow;
+import com.scott_tigers.oncall.newschedule.Shift;
 import com.scott_tigers.oncall.shared.Dates;
 
 public class CreateEmailListFromSchedule extends Utility {
@@ -15,9 +15,9 @@ public class CreateEmailListFromSchedule extends Utility {
 
     private void run() {
 	String today = Dates.SORTABLE.getFormattedString();
-	getScheduleRowStream()
+	getShiftStream()
 		.filter(s -> s.getDate().compareTo(today) >= 0)
-		.map(ScheduleRow::getEngineers)
+		.map(Shift::getEngineers)
 		.flatMap(List<Engineer>::stream)
 		.map(Engineer::getUid)
 		.distinct()

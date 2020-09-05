@@ -19,6 +19,11 @@ public enum Expertise {
 	public int getRequiredOrder() {
 	    return 0;
 	}
+
+	@Override
+	public String getNotation() {
+	    return "";
+	}
     };
 
     public static Expertise get(String expertise) {

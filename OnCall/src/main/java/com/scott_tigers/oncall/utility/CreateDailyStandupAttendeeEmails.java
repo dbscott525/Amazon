@@ -29,7 +29,7 @@ public class CreateDailyStandupAttendeeEmails extends Utility {
     }
 
     private Stream<OnCallScheduleRow> getCitStream() {
-	return getScheduleRowStream()
+	return getScheduleRowStreamDeprecated()
 		.map(this::getCitSingleRowStream)
 		.flatMap(List<OnCallScheduleRow>::stream);
     }

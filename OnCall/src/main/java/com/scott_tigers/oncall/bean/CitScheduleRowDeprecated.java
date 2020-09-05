@@ -5,32 +5,26 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import com.google.gson.GsonBuilder;
-import com.scott_tigers.oncall.newschedule.Shift;
 import com.scott_tigers.oncall.shared.Dates;
 
-public class CitScheduleRow {
+public class CitScheduleRowDeprecated {
 
     private String startDateTime;
     private String endDateTime;
     private List<String> oncallMember;
 
-    public CitScheduleRow(Shift shift) {
-	oncallMember = shift
-		.getEngineers()
-		.stream()
-		.map(Engineer::getUid)
-		.collect(Collectors.toList());
-
-	setDateTime(shift, 0, dateString -> startDateTime = dateString + " 8:00");
-	setDateTime(shift, 4, dateString -> endDateTime = dateString + " 22:00");
+    public CitScheduleRowDeprecated(ScheduleRow scheduleRow) {
+	oncallMember = scheduleRow.getEngineers().stream().map(x -> x.getUid()).collect(Collectors.toList());
+	extracted(scheduleRow, 0, dateString -> startDateTime = dateString + " 8:00");
+	extracted(scheduleRow, 4, dateString -> endDateTime = dateString + " 22:00");
     }
 
-    private void setDateTime(Shift shift, int delta, Consumer<String> dateSetter) {
+    private void extracted(ScheduleRow scheduleRow, int delta, Consumer<String> dateSetter) {
 	dateSetter
 		.accept(Dates.ONLINE_SCHEDULE
 			.getFormattedString(Dates
 				.getDateDelta(Dates.SORTABLE
-					.getDateFromString(shift.getDate()), delta)));
+					.getDateFromString(scheduleRow.getDate()), delta)));
     }
 
     public String getStartDateTime() {

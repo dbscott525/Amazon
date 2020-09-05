@@ -33,8 +33,8 @@ public class Engineer {
     private String empDate;
     private String endDate;
     private String expertise;
-    private String firstName;
-    private String lastName;
+    private String firstName = "";
+    private String lastName = "";
     private String ooo;
     private String startDate;
     private String timeZone;
@@ -301,5 +301,15 @@ public class Engineer {
 
     public int getRequiredOrder() {
 	return Expertise.get(expertise).getRequiredOrder();
+    }
+
+    public boolean isBeforeEndDate() {
+	return !Optional.ofNullable(endDate)
+		.filter(endDate -> Dates.ONLINE_SCHEDULE.getDateFromString(endDate).compareTo(new Date()) < 0)
+		.isPresent();
+    }
+
+    public boolean isNotServerless() {
+	return Expertise.get(expertise) != Expertise.Serverless;
     }
 }

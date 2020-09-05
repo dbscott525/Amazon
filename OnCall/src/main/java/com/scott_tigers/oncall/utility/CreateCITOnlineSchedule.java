@@ -4,17 +4,21 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.scott_tigers.oncall.bean.CitScheduleRow;
+import com.scott_tigers.oncall.shared.Dates;
 import com.scott_tigers.oncall.shared.EngineerFiles;
 import com.scott_tigers.oncall.shared.Json;
 
-public class CreateOnlineSchedule extends Utility {
+public class CreateCITOnlineSchedule extends Utility {
 
     public static void main(String[] args) {
-	new CreateOnlineSchedule().run();
+	new CreateCITOnlineSchedule().run();
     }
 
     private void run() {
-	List<CitScheduleRow> onlineSchedule = getScheduleRowStream()
+	String startDate = Dates.SORTABLE.getFormattedDelta(Dates.SORTABLE.getFormattedString(), -7);
+
+	List<CitScheduleRow> onlineSchedule = getShiftStream()
+		.filter(shift -> shift.isAfter(startDate))
 		.map(CitScheduleRow::new)
 		.collect(Collectors.toList());
 	EngineerFiles.ONLINE_SCHEDULE.writeJson(onlineSchedule);

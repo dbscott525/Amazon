@@ -1,12 +1,14 @@
 package com.scott_tigers.oncall.newschedule;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.scott_tigers.oncall.bean.Engineer;
 import com.scott_tigers.oncall.bean.ScheduleRow;
+import com.scott_tigers.oncall.shared.Expertise;
 
 public class Shift {
 
@@ -29,6 +31,10 @@ public class Shift {
 
 	engineers = new ArrayList<>(candidateEngineers);
 
+	updateUids();
+    }
+
+    private void updateUids() {
 	uids = engineers.stream()
 		.map(Engineer::getUid)
 		.collect(Collectors.toList());
@@ -41,7 +47,7 @@ public class Shift {
 		.sum();
     }
 
-    List<Engineer> getEngineers() {
+    public List<Engineer> getEngineers() {
 	return Optional
 		.ofNullable(engineers)
 		.orElseGet(() -> {
@@ -53,8 +59,12 @@ public class Shift {
 		});
     }
 
-    public boolean before(String startDate) {
+    public boolean isBefore(String startDate) {
 	return startDate.compareTo(date) > 0;
+    }
+
+    public boolean isAfter(String startDate) {
+	return !isBefore(startDate);
     }
 
     public String getDate() {
@@ -67,6 +77,27 @@ public class Shift {
 
     public void setScheduleCreator(ScheduleCreator scheduleCreator) {
 	this.scheduleCreator = scheduleCreator;
+    }
+
+    public void setEngineers(List<Engineer> engineers) {
+	this.engineers = engineers;
+	uids = engineers.stream().map(Engineer::getUid).collect(Collectors.toList());
+    }
+
+    public Collection<Engineer> getEngineers(int shiftSize) {
+	Optional<Engineer> serverless = engineers.stream()
+		.filter(eng -> eng.getExpertise().contentEquals(Expertise.Serverless.toString())).findFirst();
+	if (serverless.isPresent()) {
+	    Engineer serverlessEng = serverless.get();
+	    ArrayList<Engineer> newlist = new ArrayList<Engineer>(engineers);
+	    newlist.remove(serverlessEng);
+	    while (newlist.size() < shiftSize - 1) {
+		newlist.add(new Engineer());
+	    }
+	    newlist.add(serverlessEng);
+	    return newlist;
+	}
+	return engineers;
     }
 
 }

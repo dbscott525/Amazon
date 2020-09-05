@@ -1,5 +1,7 @@
 package com.scott_tigers.oncall.newschedule;
 
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -7,6 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Spliterator;
 import java.util.Spliterators;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -14,12 +17,16 @@ import java.util.stream.StreamSupport;
 
 import com.scott_tigers.oncall.bean.Engineer;
 import com.scott_tigers.oncall.bean.Unavailability;
+import com.scott_tigers.oncall.shared.DateStream;
 import com.scott_tigers.oncall.shared.Dates;
 import com.scott_tigers.oncall.shared.EngineerFiles;
 
 public class ScheduleCreator {
 
-    private static final int MAXIMUM_ITERATIONS = 100000;
+    interface Condition {
+	boolean isTrue();
+    }
+
     private String startDate;
     private int shiftSize;
     private List<Engineer> engineers;
@@ -34,6 +41,10 @@ public class ScheduleCreator {
     private Schedule candidateSchedule;
     private Schedule bestSchedule;
     private long iterations = 0;
+    private long startTime;
+
+    private Condition moreIterations = () -> true;
+    private Condition moreTime = () -> true;
 
     public ScheduleCreator startDate(String startDate) {
 	this.startDate = startDate;
@@ -52,10 +63,16 @@ public class ScheduleCreator {
     }
 
     private void search() {
+	startTime = System.currentTimeMillis();
+	System.out.println("" + new Date() + " Start");
 	getCandidateScheduleStream().forEach(schedule -> {
-	    candidateSchedule = schedule;
-	    addShift(startDate);
-	    bestSchedule = candidateSchedule.getBestSchedule(bestSchedule);
+	    try {
+		candidateSchedule = schedule;
+		addShift(startDate);
+		bestSchedule = candidateSchedule.getBestSchedule(bestSchedule);
+	    } catch (ImpossibleScheduleCombinationException e) {
+		// Nothing to do because and impossible schedule combination was found.
+	    }
 	});
     }
 
@@ -66,7 +83,7 @@ public class ScheduleCreator {
 
 			    @Override
 			    public boolean hasNext() {
-				return iterations < MAXIMUM_ITERATIONS;
+				return moreIterations.isTrue() && moreTime.isTrue();
 			    }
 
 			    @Override
@@ -79,12 +96,13 @@ public class ScheduleCreator {
 		false);
     }
 
-    private void addShift(String date) {
+    private void addShift(String date) throws ImpossibleScheduleCombinationException {
 	if (date.compareTo(endDate) > 0) {
 	    return;
 	}
 
 	List<Engineer> candidates = candidateSchedule.getCandidates(date, dateMap.get(date));
+	Collections.shuffle(candidates);
 
 	candidateSchedule.addShift(new Shift(this, date, candidates));
 	addShift(Dates.SORTABLE.getFormattedDelta(date, daysBetweenShifts));
@@ -125,35 +143,13 @@ public class ScheduleCreator {
 
     private List<Engineer> availableEngs(String startDate) {
 	return engineers.stream()
-		.filter(eng -> getDateStream(startDate, Dates.SORTABLE.getFormattedDelta(startDate, daysInShift), 1)
+		.filter(eng -> DateStream.getStream(startDate, Dates.SORTABLE.getFormattedDelta(startDate, daysInShift), 1)
 			.noneMatch(eng::hasDateConflict))
 		.collect(Collectors.toList());
     }
 
     private Stream<String> getShiftDateStream() {
-	return getDateStream(startDate, endDate, daysBetweenShifts);
-    }
-
-    private Stream<String> getDateStream(String startDate, String endDate, int delta) {
-	return StreamSupport.stream(
-		Spliterators.spliteratorUnknownSize(
-			new Iterator<String>() {
-			    String currentDate = startDate;
-
-			    @Override
-			    public boolean hasNext() {
-				return currentDate.compareTo(endDate) <= 0;
-			    }
-
-			    @Override
-			    public String next() {
-				String nextDate = currentDate;
-				currentDate = Dates.SORTABLE.getFormattedDelta(currentDate, delta);
-				return nextDate;
-			    }
-			},
-			Spliterator.ORDERED),
-		false);
+	return DateStream.getStream(startDate, endDate, daysBetweenShifts);
     }
 
     public ScheduleCreator shifts(int shifts) {
@@ -223,5 +219,31 @@ public class ScheduleCreator {
 
     public int getDaysInShifts() {
 	return daysInShift;
+    }
+
+    public ScheduleCreator iterations(long maximumIterations) {
+	moreIterations = () -> {
+	    if (iterations >= maximumIterations) {
+		System.out.println(String.format("%,.0f", (double) maximumIterations)
+			+ " iterations complete");
+		return false;
+
+	    }
+	    return true;
+	};
+	return this;
+    }
+
+    public ScheduleCreator timeLimit(int timeLimit) {
+	long maximumElapsedMillis = TimeUnit.MINUTES.toMillis(timeLimit);
+	moreTime = () -> {
+	    long elapsed = System.currentTimeMillis() - startTime;
+	    if (elapsed > maximumElapsedMillis) {
+		System.out.println("Time limit of " + timeLimit + " minutes reached");
+		return false;
+	    }
+	    return true;
+	};
+	return this;
     }
 }

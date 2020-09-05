@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
-import com.scott_tigers.oncall.bean.ScheduleRow;
+import com.scott_tigers.oncall.newschedule.Shift;
 import com.scott_tigers.oncall.shared.Dates;
 import com.scott_tigers.oncall.shared.EngineerFiles;
 
@@ -17,7 +17,7 @@ public class CreateCITDailyEvaluationDoc extends Utility {
     private String startDate;
 
     private void run() throws IOException {
-	Optional<ScheduleRow> thisWeeksSchedule = getScheduleForThisWeek();
+	Optional<Shift> thisWeeksSchedule = getScheduleForThisWeek();
 	if (thisWeeksSchedule.isPresent()) {
 	    templateDoc = EngineerFiles.CIT_EVALUATION_TEMPLATE.readText();
 	    startDate = Dates.ONLINE_SCHEDULE

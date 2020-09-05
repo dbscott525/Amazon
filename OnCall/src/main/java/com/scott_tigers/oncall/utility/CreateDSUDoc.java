@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import com.scott_tigers.oncall.bean.Engineer;
 import com.scott_tigers.oncall.shared.Dates;
 import com.scott_tigers.oncall.shared.EngineerFiles;
+import com.scott_tigers.oncall.shared.Executor;
 
 public class CreateDSUDoc extends Utility {
 
@@ -18,37 +19,36 @@ public class CreateDSUDoc extends Utility {
     }
 
     private void run() throws IOException {
-	templateDoc = EngineerFiles.DSU_TEMPLATE.readText();
+	Executor replacer = () -> {
 
-	Map<String, String> techEscMap = EngineerFiles.TECH_ESC
-		.readCSVToPojo(Engineer.class)
-		.stream()
-		.collect(Collectors.toMap(Engineer::getUid, Engineer::getFullName));
+	    Map<String, String> techEscMap = EngineerFiles.TECH_ESC
+		    .readCSVToPojo(Engineer.class)
+		    .stream()
+		    .collect(Collectors.toMap(Engineer::getUid, Engineer::getFullName));
 
-	String today = Dates.SORTABLE.getFormattedString();
+	    String today = Dates.SORTABLE.getFormattedString();
 
-	getOnCallSchedule()
-		.stream()
-		.filter(eng -> eng.getDate().equals(today))
-		.forEach(onCall -> {
+	    getOnCallSchedule()
+		    .stream()
+		    .filter(eng -> eng.getDate().equals(today))
+		    .forEach(onCall -> {
 
-		    Optional
-			    .ofNullable(getEngineer(onCall.getUid()))
-			    .ifPresent(this::makeReplacement);
+			Optional
+				.ofNullable(getEngineer(onCall.getUid()))
+				.ifPresent(this::makeReplacement);
 
-		    Optional.ofNullable(techEscMap.get(onCall.getUid()))
-			    .ifPresent(techEscName -> makeReplacement("Tech Esc", techEscName));
-		});
+			Optional.ofNullable(techEscMap.get(onCall.getUid()))
+				.ifPresent(techEscName -> makeReplacement("Tech Esc", techEscName));
+		    });
 
-	replaceEngineers();
+	    makeReplacement("Primary1", "");
 
-	makeReplacement("Primary1", "");
+	    makeReplacement("Today", Dates.NICE.getFormattedString());
 
-	makeReplacement("Today", Dates.NICE.getFormattedString());
+	    replaceEngineers();
+	};
 
-	EngineerFiles.DSU.writeText(templateDoc);
-
-	successfulFileCreation(EngineerFiles.DSU);
+	createFileFromTemplate(EngineerFiles.DSU_TEMPLATE, EngineerFiles.DSU, replacer);
     }
 
     private void makeReplacement(Engineer eng) {
@@ -56,6 +56,9 @@ public class CreateDSUDoc extends Utility {
 	if (type.equals("Primary")) {
 	    type = type + primaryNumber;
 	    primaryNumber++;
+	}
+	if (type.length() == 0) {
+	    return;
 	}
 	makeReplacement(type, eng.getFullName());
     }

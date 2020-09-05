@@ -308,7 +308,7 @@ public class Scheduler {
 			.map(ScheduleRow::getDate)
 			.map(x -> Dates.SORTABLE.getFormattedDelta(x, 7))
 			.max(Comparator.comparing(x -> x))
-			.orElse(Dates.SORTABLE.getNextMondayDate()));
+			.orElse(Dates.SORTABLE.getNextMondayFormattedDate()));
 	System.out.println("startDate=" + (startDate));
     }
 

@@ -17,7 +17,8 @@ public enum Dates {
     NICE("MMMM d, yyyy"),
     ONLINE_SCHEDULE("M/d/yy"),
     ICS("yyyyMMdd"),
-    DAY_OF_WEEK("EEEE, MMMM d, yyyy");
+    DAY_OF_WEEK("EEEE, MMMM d, yyyy"),
+    YEAR_MONTH("yyyy-MM");
 
     private String format;
 
@@ -63,7 +64,7 @@ public enum Dates {
 	return d3;
     }
 
-    public static Date getNextMondayDatex() {
+    public static Date getNextMondayDate() {
 	return Date
 		.from(LocalDate.now()
 			.with(TemporalAdjusters.next(DayOfWeek.MONDAY))
@@ -71,7 +72,7 @@ public enum Dates {
 			.toInstant());
     }
 
-    public String getNextMondayDate() {
+    public String getNextMondayFormattedDate() {
 	return getFormattedString(Date
 		.from(LocalDate.now()
 			.with(TemporalAdjusters.next(DayOfWeek.MONDAY))
@@ -102,6 +103,21 @@ public enum Dates {
 
     public String convertFormat(String date, Dates toFormat) {
 	return toFormat.getFormattedString(getDateFromString(date));
+    }
+
+    public String getCompletedShiftMonday() {
+	String monday = getNextMondayFormattedDate();
+	long mondayTime = getDateFromString(monday).getTime();
+	long nowTime = getDateFromString(getFormattedString()).getTime();
+	long daysDelta = (mondayTime - nowTime) / 60 / 60 / 24 / 1000;
+	return daysDelta >= 3 ? getFormattedDelta(monday, -7) : monday;
+    }
+
+    public static Date addMonth(Date date) {
+	Calendar calendar = Calendar.getInstance();
+	calendar.setTime(date);
+	calendar.add(Calendar.MONTH, 1);
+	return calendar.getTime();
     }
 
 }

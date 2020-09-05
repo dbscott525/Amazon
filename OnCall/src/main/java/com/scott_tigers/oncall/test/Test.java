@@ -1,8 +1,6 @@
 package com.scott_tigers.oncall.test;
 
-import java.util.stream.Stream;
-
-import com.scott_tigers.oncall.shared.Expertise;
+import com.scott_tigers.oncall.shared.Dates;
 import com.scott_tigers.oncall.utility.Utility;
 
 public class Test extends Utility {
@@ -12,12 +10,18 @@ public class Test extends Utility {
     }
 
     private void run() throws Exception {
-	Stream.of("bogus", "MySQL8", "Serverless", "Binlog")
-		.map(e -> Expertise.get(e))
-		.forEach(e -> {
-		    System.out.println("e=" + (e));
-		    System.out.println("e.getNotation()=" + (e.getNotation()));
-		    System.out.println("e.getRequiredOrder()=" + (e.getRequiredOrder()));
-		});
+	String monday = Dates.SORTABLE.getNextMondayFormattedDate();
+//	System.out.println("monday=" + (monday));
+	long mondayTime = Dates.SORTABLE.getDateFromString(monday).getTime();
+	System.out.println("Dates.getNextMondayDatex()=" + (Dates.getNextMondayDate()));
+	long now = Dates.SORTABLE.getDateFromString(Dates.SORTABLE.getFormattedString()).getTime();
+	System.out.println("now=" + (now));
+	long daysDelta = (mondayTime - now) / 60 / 60 / 24 / 1000;
+	System.out.println("daysDelta=" + (daysDelta));
+
+	if (daysDelta >= 3) {
+	    monday = Dates.SORTABLE.getFormattedDelta(monday, -7);
+	}
+
     }
 }

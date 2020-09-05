@@ -10,7 +10,7 @@ import java.util.stream.Stream;
 import com.scott_tigers.oncall.bean.OnCallScheduleRow;
 import com.scott_tigers.oncall.shared.EngineerFiles;
 
-public class CreateOncallSchedule extends Utility {
+public class CreateOncallSchedule extends Utility implements Command {
 
     private static final String SUMMARY = "SUMMARY:";
     private static final String DTSTART_TZID = "DTSTART;TZID";
@@ -22,13 +22,9 @@ public class CreateOncallSchedule extends Utility {
 	new CreateOncallSchedule().run();
     }
 
-    private void run() throws Exception {
+    public void run() throws Exception {
 
-	Stream<Stream<OnCallScheduleRow>> x1 = Stream.of(getOnCallStream(), getTraineeStream());
-	Stream<OnCallScheduleRow> scheduleStream = x1.flatMap(x -> x);
-
-//	Stream<OnCallScheduleRow> scheduleStream = schedules
-//		.stream();
+	Stream<OnCallScheduleRow> scheduleStream = Stream.of(getOnCallStream(), getTraineeStream()).flatMap(x -> x);
 
 	EngineerFiles.ON_CALL_SCHEDULE.writeCSV(
 		scheduleStream

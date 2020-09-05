@@ -10,7 +10,6 @@ import java.util.Random;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 
@@ -24,6 +23,7 @@ public class Schedule {
     private Double levelStandardDeviation;
     private transient ScheduleCreator scheduleCreator;
     private long tryCount;
+//    private transient Random random = new Random();
 
     public Schedule(ScheduleContainer oldSchedule) {
 	shifts = oldSchedule
@@ -45,10 +45,10 @@ public class Schedule {
 		.orElseGet(() -> {
 		    levelStandardDeviation = new StandardDeviation(false)
 			    .evaluate(shifts
-				    .stream()
-				    .filter(s -> !s.before(scheduleCreator.getStartDate()))
-				    .mapToDouble(Shift::getSumOfLevels)
-				    .toArray());
+			        .stream()
+			        .filter(s -> !s.isBefore(scheduleCreator.getStartDate()))
+			        .mapToDouble(Shift::getSumOfLevels)
+			        .toArray());
 		    return levelStandardDeviation;
 		});
     }
@@ -56,7 +56,7 @@ public class Schedule {
     public void truncate() {
 	shifts = shifts
 		.stream()
-		.filter(s -> s.before(scheduleCreator.getStartDate()))
+		.filter(s -> s.isBefore(scheduleCreator.getStartDate()))
 		.collect(Collectors.toList());
 
     }
@@ -70,7 +70,8 @@ public class Schedule {
 	shifts.stream().forEach(shift -> shift.setScheduleCreator(scheduleCreator));
     }
 
-    public List<Engineer> getCandidates(String date, List<Engineer> candidateEngineers) {
+    public List<Engineer> getCandidates(String date, List<Engineer> candidateEngineers)
+	    throws ImpossibleScheduleCombinationException {
 	Integer index = Optional
 		.ofNullable(shifts.size() - scheduleCreator.getMaximumShiftFrequency())
 		.filter(i -> i > 0)
@@ -90,16 +91,20 @@ public class Schedule {
 
 	DuplicateSmeEliminator duplicateSmeEliminator = new DuplicateSmeEliminator();
 
-	Stream<Engineer> foo1 = candidateEngineers
+	List<Engineer> finalList = candidateEngineers
 		.stream()
 		.filter(Predicate.not(excludedEngineers::containsKey))
-		.map(engineer -> new RandomUid(engineer, shiftCounts.get(engineer), random.nextInt()))
+		.map(engineer -> new RandomUid(engineer, shiftCounts.get(engineer), random.nextDouble()))
 		.sorted()
 		.map(RandomUid::getEngineer)
-		.filter(engineer -> duplicateSmeEliminator.notDuplicate(engineer));
+		.filter(engineer -> duplicateSmeEliminator.notDuplicate(engineer))
+		.collect(Collectors.toList());
 
-	return foo1
-		.collect(Collectors.toList())
+	if (finalList.size() < scheduleCreator.getShiftSize()) {
+	    throw new ImpossibleScheduleCombinationException();
+	}
+
+	return finalList
 		.subList(0, scheduleCreator.getShiftSize());
     }
 
@@ -115,17 +120,16 @@ public class Schedule {
 	return scheduleCount;
     }
 
-    public Schedule getBestSchedule(Schedule bestSchedule) {
-	return Optional
-		.ofNullable(bestSchedule)
-		.filter(schedule -> schedule.isBetter(this))
-		.orElseGet(() -> {
-		    new DecimalFormat("#.000").format(getLevelStandardDeviation());
-		    System.out.println(new Date() + " Try="
-			    + String.format("%,12.0f", (double) tryCount)
-			    + " STD=" + new DecimalFormat("0.000").format(getLevelStandardDeviation()));
-		    return Schedule.this;
-		});
+    public Schedule getBestSchedule(Schedule currentBestSchedule) {
+	if (currentBestSchedule == null || isBetter(currentBestSchedule)) {
+	    new DecimalFormat("#.000").format(getLevelStandardDeviation());
+	    System.out.println(new Date() + " Try="
+		    + String.format("%,12.0f", (double) tryCount)
+		    + " STD=" + new DecimalFormat("0.000000000").format(getLevelStandardDeviation()));
+	    return this;
+	} else {
+	    return currentBestSchedule;
+	}
     }
 
     private boolean isBetter(Schedule schedule) {
@@ -144,9 +148,9 @@ public class Schedule {
 
 	private Engineer engineer;
 	private int shifts;
-	private int random;
+	private double random;
 
-	public RandomUid(Engineer engineer, Long shifts, int random) {
+	public RandomUid(Engineer engineer, Long shifts, double random) {
 	    this.engineer = engineer;
 	    this.shifts = Optional
 		    .ofNullable(shifts)
@@ -158,15 +162,17 @@ public class Schedule {
 	@Override
 	public int compareTo(RandomUid o) {
 
-//	    if (engineer.getRequiredOrder() != o.engineer.getRequiredOrder()) {
-//		return engineer.getRequiredOrder() - o.engineer.getRequiredOrder();
-//	    }
-//
+	    if (engineer.getRequiredOrder() != o.engineer.getRequiredOrder()) {
+		return engineer.getRequiredOrder() - o.engineer.getRequiredOrder();
+	    }
+
 	    if (shifts != o.shifts) {
 		return shifts - o.shifts;
 	    }
 
-	    return random - o.random;
+//	    return 0;
+
+	    return (int) ((random - o.random) * 10000);
 	}
 
 	public Engineer getEngineer() {

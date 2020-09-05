@@ -1,5 +1,8 @@
 package com.scott_tigers.oncall.bean;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class KeywordPoints {
     String keyword;
     Integer points;

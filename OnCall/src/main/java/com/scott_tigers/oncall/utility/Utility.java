@@ -28,9 +28,12 @@ import com.scott_tigers.oncall.bean.EngineerMetric;
 import com.scott_tigers.oncall.bean.OnCallScheduleRow;
 import com.scott_tigers.oncall.bean.ScheduleRow;
 import com.scott_tigers.oncall.bean.TT;
+import com.scott_tigers.oncall.newschedule.Schedule;
+import com.scott_tigers.oncall.newschedule.Shift;
 import com.scott_tigers.oncall.shared.Constants;
 import com.scott_tigers.oncall.shared.Dates;
 import com.scott_tigers.oncall.shared.EngineerFiles;
+import com.scott_tigers.oncall.shared.Executor;
 import com.scott_tigers.oncall.shared.URL;
 import com.scott_tigers.oncall.test.Company;
 
@@ -51,11 +54,11 @@ public class Utility {
 
     protected void successfulFileCreation(EngineerFiles fileType, String fileName) {
 	System.out.println(fileName + " was successfully created.");
-	System.out.println("File is now be launched");
+	System.out.println("File is now being launched");
 	fileType.launch(fileName);
     }
 
-    protected Function<List<Engineer>, List<Engineer>> getEngineerListTransformer() {
+    protected Function<List<Engineer>, List<Engineer>> getEngineerListTransformerDeprecated() {
 	return list -> {
 
 	    if (masterList == null) {
@@ -119,14 +122,36 @@ public class Utility {
 	return engineers;
     }
 
-    protected Optional<ScheduleRow> getScheduleForThisWeek() {
-	return getScheduleRowStream()
+    protected Optional<ScheduleRow> getScheduleForThisWeekDeprecated() {
+	return getScheduleRowStreamDeprecated()
+		.filter(this::forTodayDeprecated)
+		.findFirst();
+    }
+
+    protected Optional<Shift> getShiftForThisWeek() {
+	return getShiftStream()
 		.filter(this::forToday)
 		.findFirst();
     }
 
-    protected boolean forToday(ScheduleRow scheduleRow) {
+    protected boolean forTodayDeprecated(ScheduleRow scheduleRow) {
 	Date scheduleStartDate = Dates.SORTABLE.getDateFromString(scheduleRow.getDate());
+
+	Date startDate = Dates.getDateDelta(scheduleStartDate, -2);
+	Date endDate = Dates.getDateDelta(scheduleStartDate, 5);
+
+	Date currentDate = new Date();
+	return startDate.compareTo(currentDate) <= 0 && currentDate.compareTo(endDate) <= 0;
+    }
+
+    protected Optional<Shift> getScheduleForThisWeek() {
+	return getShiftStream()
+		.filter(this::forToday)
+		.findFirst();
+    }
+
+    protected boolean forToday(Shift shift) {
+	Date scheduleStartDate = Dates.SORTABLE.getDateFromString(shift.getDate());
 
 	Date startDate = Dates.getDateDelta(scheduleStartDate, -2);
 	Date endDate = Dates.getDateDelta(scheduleStartDate, 5);
@@ -187,15 +212,16 @@ public class Utility {
     }
 
     private Stream<TT> getTicketStream(String ttFileName) throws IOException {
+	Class<TT> pojoClass = TT.class;
+
 	List<String> lines = Files.readAllLines(Paths.get(ttFileName), Charset.forName("ISO-8859-1"));
 	lines.remove(0);
 
 	EngineerFiles.TT_DOWNLOAD.writeLines(lines);
 
-	Stream<TT> ticketStream = EngineerFiles.TT_DOWNLOAD
-		.readCSVToPojo(TT.class)
+	return EngineerFiles.TT_DOWNLOAD
+		.readCSVToPojo(pojoClass)
 		.stream();
-	return ticketStream;
     }
 
     protected boolean notAssigned(TT tt) {
@@ -209,13 +235,22 @@ public class Utility {
     private List<Integer> getAssingedTicketIds() {
 	try {
 	    String fileName = launchUrlAndWaitForDownload(
-		    "https://quip-amazon.com/nhftAqjImkQT/Customer-Issues-Ticket-Tracker");
+		    URL.CIT_TICKET_TRACKER);
 	    System.out.println("fileName=" + (fileName));
-	    return Files.readAllLines(Paths.get(fileName))
+	    Stream<Integer> assignedStream = Files.readAllLines(Paths.get(fileName))
 		    .stream()
 		    .map(this::getCaseId)
 		    .filter(this::isDigits)
-		    .map(Integer::valueOf)
+		    .map(Integer::valueOf);
+
+	    Stream<Integer> excludedStream = EngineerFiles.EXCLUDED_TICKETS
+		    .readCSVToPojo(TT.class)
+		    .stream()
+		    .map(TT::getUrl)
+		    .map(x -> x.replaceAll("https://tt.amazon.com/(\\d+)", "$1"))
+		    .map(Integer::parseInt);
+
+	    return Stream.concat(assignedStream, excludedStream)
 		    .collect(Collectors.toList());
 	} catch (Exception e) {
 	    return new ArrayList<Integer>();
@@ -284,10 +319,23 @@ public class Utility {
 	return eng;
     }
 
-    protected Stream<ScheduleRow> getScheduleRowStream() {
+    protected Stream<ScheduleRow> getScheduleRowStreamDeprecated() {
 	return EngineerFiles
 		.getScheduleRowStream()
 		.map(this::getOrderedByLevel);
+    }
+
+    protected Stream<Shift> getShiftStream() {
+	return EngineerFiles.CIT_SCHEDULE
+		.readJson(Schedule.class)
+		.getShifts()
+		.stream()
+		.peek(shift -> shift.setEngineers(shift
+			.getUids()
+			.stream()
+			.map(this::getEngineer)
+			.sorted(Comparator.comparing(Engineer::getLevel).reversed())
+			.collect(Collectors.toList())));
     }
 
     private ScheduleRow getOrderedByLevel(ScheduleRow scheduleRow) {
@@ -308,13 +356,17 @@ public class Utility {
 
     protected void makeReplacement(String searchString, String replacement) {
 	String search = Optional.ofNullable(Constants.TEMPLATE_REPLACEMENTS.get(searchString)).orElse(searchString);
-	templateDoc = templateDoc.replace(search,
-		replacement);
+	templateDoc = templateDoc.replace(search, replacement);
     }
 
     protected void replaceEngineers() {
-	getScheduleForThisWeek().ifPresent(schedule -> {
-	    List<Engineer> engineers = getEngineeringDetails(schedule.getEngineers());
+	replaceEngineers(getShiftForThisWeek());
+    }
+
+    protected void replaceEngineers(Optional<Shift> shiftOfWeek) {
+	shiftOfWeek.ifPresent(shift -> {
+//	    List<Engineer> engineers = getEngineeringDetails(shift.getEngineers());
+	    List<Engineer> engineers = shift.getEngineers();
 	    List<Engineer> orderedList = new ArrayList<Engineer>(engineers);
 	    Collections.shuffle(engineers);
 	    IntStream.range(0, engineers.size())
@@ -329,8 +381,8 @@ public class Utility {
 	makeReplacement(prefix + index, engineers.get(index).getFullName());
     }
 
-    protected void writeCSV(EngineerFiles fileType, List<EngineerMetric> list) {
-	fileType.writeCSV(list, EngineerMetric.class);
+    protected <T> void writeCSV(EngineerFiles fileType, Class<T> listClass, List<T> list) {
+	fileType.writeCSV(list, listClass);
 	successfulFileCreation(fileType);
     }
 
@@ -346,17 +398,18 @@ public class Utility {
     }
 
     protected void getMetricMap() throws Exception {
-	String lastDate = Dates.SORTABLE
-		.getFormattedDelta(Dates.SORTABLE
-			.getFormattedString(), -4);
+//	String lastDate = Dates.SORTABLE
+//		.getFormattedDelta(Dates.SORTABLE
+//			.getFormattedString(), -4);
+	String lastDate = Dates.SORTABLE.getCompletedShiftMonday();
 	System.out.println("lastDate=" + (lastDate));
-	getScheduleRowStream()
+	getShiftStream()
 		.filter(row -> row.isBefore(lastDate))
-		.peek(row -> System.out.println("row.getDate()=" + (row.getDate())))
-		.map(ScheduleRow::getEngineers)
+		.map(Shift::getEngineers)
 		.flatMap(List<Engineer>::stream)
-//		.map(Engineer::getUid)
 		.map(this::getEngineer)
+		.filter(Engineer::isBeforeEndDate)
+		.filter(Engineer::isNotServerless)
 		.map(this::getEngMetric)
 		.forEach(EngineerMetric::addWeek);
 
@@ -381,5 +434,45 @@ public class Utility {
 		    metricMap.put(eng.getUid(), metric);
 		    return metric;
 		});
+    }
+
+    protected List<String> getCSVSchedule() {
+	return getShiftStream()
+		.map(shift -> Stream
+			.concat(Stream.of(
+				shift.getDate()),
+				shift
+					.getEngineers(7)
+					.stream()
+					.map(Engineer::getFullNameWithExertise))
+			.collect(Collectors.joining(",")))
+		.collect(Collectors.toList());
+    }
+
+    protected void createCSVCITSchedule() {
+	writeLines(EngineerFiles.SCHEDULE_CSV, getCSVSchedule());
+    }
+
+    protected void writeLines(EngineerFiles fileType, List<String> lines) {
+	fileType.writeLines(lines);
+	successfulFileCreation(fileType);
+    }
+
+    protected void createFileFromTemplate(EngineerFiles inputFile, EngineerFiles outputFile, Executor replacer)
+	    throws IOException {
+	templateDoc = inputFile.readText();
+	replacer.run();
+	outputFile.writeText(templateDoc);
+	successfulFileCreation(outputFile);
+    }
+
+    protected <T> T constuct(Class<T> c) {
+	try {
+	    return c.getConstructor().newInstance();
+	} catch (Exception e) {
+	    e.printStackTrace();
+	    System.exit(1);
+	    return null;
+	}
     }
 }

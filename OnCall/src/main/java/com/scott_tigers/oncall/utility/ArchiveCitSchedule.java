@@ -11,6 +11,6 @@ public class ArchiveCitSchedule extends Util {
     }
 
     private void run() throws IOException {
-	EngineerFiles.CUSTOMER_ISSUE_TEAM_SCHEDULE.archive();
+	EngineerFiles.CIT_SCHEDULE.archive();
     }
 }

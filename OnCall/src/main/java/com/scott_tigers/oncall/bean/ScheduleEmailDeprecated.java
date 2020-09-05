@@ -1,13 +1,12 @@
 package com.scott_tigers.oncall.bean;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.function.Function;
 import java.util.stream.IntStream;
 
-import com.scott_tigers.oncall.newschedule.Shift;
 import com.scott_tigers.oncall.shared.Util;
 
-public class ScheduleEmail {
+public class ScheduleEmailDeprecated {
 
     private String date;
     private String teamEmails;
@@ -21,28 +20,24 @@ public class ScheduleEmail {
     private String engineer5;
     private String engineer6;
 
-    public ScheduleEmail(Shift shift) {
+    public ScheduleEmailDeprecated(ScheduleRow scheduleRow, Function<List<Engineer>, List<Engineer>> transformer) {
 
 	email = "replace@me.com";
 
-//	List<Engineer> engineers = transformer.apply(shift.getEngineers());
-	List<Engineer> engineers = shift.getEngineers();
+	List<Engineer> engineers = transformer.apply(scheduleRow.getEngineers());
 
 	teamEmails = Util.getEngineerEmails(engineers);
 	toList = Util.getEngineerToList(engineers);
 
-	date = shift.getDate();
+	date = scheduleRow.getDate();
 
 	teamLead = engineers.get(0).getFirstName();
 
-	List<Engineer> citEngineers = engineers.stream().filter(eng -> eng.isNotServerless())
-		.collect(Collectors.toList());
-
-	IntStream.range(0, citEngineers.size()).forEach(index -> {
+	IntStream.range(0, engineers.size()).forEach(index -> {
 	    try {
-		ScheduleEmail.class
+		ScheduleEmailDeprecated.class
 			.getMethod("setEngineer" + (index + 1), String.class)
-			.invoke(this, citEngineers.get(index).getFirstName());
+			.invoke(this, engineers.get(index).getFirstName());
 	    } catch (Exception e) {
 		e.printStackTrace();
 	    }

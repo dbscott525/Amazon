@@ -15,7 +15,6 @@ import com.scott_tigers.oncall.shared.Properties;
 
 public class CreateCustomerIssueReadyQueue extends Utility {
 
-    private static final int TOP100_POINTS = 10;
     private static final int REQUIRED_NUMBER_OF_CUATOMER_ISSUE_TICKETS_IN_QUEUE = 10;
 
     public static void main(String[] args) throws Exception {
@@ -74,16 +73,6 @@ public class CreateCustomerIssueReadyQueue extends Utility {
 
     }
 
-    private <T> T constuct(Class<T> c) {
-	try {
-	    return c.getConstructor().newInstance();
-	} catch (Exception e) {
-	    e.printStackTrace();
-	    System.exit(1);
-	    return null;
-	}
-    }
-
     private void readPointData() {
 	keywordPoints = EngineerFiles.KEYWORD_POINTS
 		.readCSVToPojo(KeywordPoints.class);
@@ -102,7 +91,7 @@ public class CreateCustomerIssueReadyQueue extends Utility {
 	switch (tt.getItem()) {
 
 	case Constants.ITEM_ENGINE:
-	    weight = (int) Math.pow(intAge, 2.5);
+	    weight = (int) Math.pow(intAge, 2);
 	    break;
 
 	case Constants.ITEM_CUSTOMER_ISSUE:
@@ -112,20 +101,17 @@ public class CreateCustomerIssueReadyQueue extends Utility {
 
 	}
 
-	weight += getCompanyWeigthDelta(description, EngineerFiles.TOP_100_COMPANIES, TOP100_POINTS);
-	weight += getCompanyWeigthDelta(description, EngineerFiles.ESCALATED_COMPANIES, 10);
-
 	tt.setWeight(weight);
     }
 
-    private long getCompanyWeigthDelta(String description, EngineerFiles companyFile, int pointsPerCompany) {
-	long weightDelta = getCompanyList(companyFile)
-		.stream()
-		.filter(company -> foundIn(description, company))
-		.count()
-		* pointsPerCompany;
-	return weightDelta;
-    }
+//    private long getCompanyWeigthDelta(String description, EngineerFiles companyFile, int pointsPerCompany) {
+//	long weightDelta = getCompanyList(companyFile)
+//		.stream()
+//		.filter(company -> foundIn(description, company))
+//		.count()
+//		* pointsPerCompany;
+//	return weightDelta;
+//    }
 
     private Predicate<? super KeywordPoints> keywordMatch(String description) {
 	return kw -> foundIn(description, kw.getKeyword());

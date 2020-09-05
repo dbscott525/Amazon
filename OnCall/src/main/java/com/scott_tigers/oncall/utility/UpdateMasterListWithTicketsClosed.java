@@ -8,10 +8,10 @@ import com.scott_tigers.oncall.bean.EngineerMetric;
 import com.scott_tigers.oncall.shared.EngineerFiles;
 import com.scott_tigers.oncall.shared.Json;
 
-public class UpdateMastLIstWithTicketsClosed extends Utility {
+public class UpdateMasterListWithTicketsClosed extends Utility {
 
     public static void main(String[] args) throws Exception {
-	new UpdateMastLIstWithTicketsClosed().run();
+	new UpdateMasterListWithTicketsClosed().run();
     }
 
     private void run() throws Exception {

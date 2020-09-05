@@ -50,7 +50,7 @@ public class CreateRootCauseToDoList extends Utility implements TTReader {
 		.sorted(Comparator.comparing(TT::getCreateDate))
 		.collect(Collectors.toList());
 
-	getScheduleForThisWeek().ifPresentOrElse(this::createRootCauseList,
+	getScheduleForThisWeekDeprecated().ifPresentOrElse(this::createRootCauseList,
 		() -> System.out.println("No schedule is within range of today"));
     }
 

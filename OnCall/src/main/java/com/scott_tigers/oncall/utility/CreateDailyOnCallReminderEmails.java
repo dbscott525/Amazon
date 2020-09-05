@@ -5,13 +5,13 @@ import java.util.stream.Collectors;
 import com.scott_tigers.oncall.bean.OnCallScheduleRow;
 import com.scott_tigers.oncall.shared.EngineerFiles;
 
-public class CreateDailyOnCallReminderEmails extends Utility {
+public class CreateDailyOnCallReminderEmails extends Utility implements Command {
 
     public static void main(String[] args) {
 	new CreateDailyOnCallReminderEmails().run();
     }
 
-    private void run() {
+    public void run() {
 	writeEmailsByDate(
 		getOnCallSchedule()
 			.stream()

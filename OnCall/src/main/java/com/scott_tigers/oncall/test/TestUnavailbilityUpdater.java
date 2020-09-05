@@ -33,7 +33,7 @@ public class TestUnavailbilityUpdater extends Utility {
 		.stream()
 		.forEach(ua -> ua.setOoo(uidToEngineer.get(ua.getUid())));
 
-	getScheduleRowStream()
+	getScheduleRowStreamDeprecated()
 		.forEach(engineerInSchedule -> engineerInSchedule
 			.getEngineers()
 			.stream()

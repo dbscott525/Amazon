@@ -35,27 +35,34 @@ public enum EngineerFiles {
     // @formatter:off
     
     ASSIGNED_TICKETS                   ("Assigned Tickets"),
+    AVAILABILTY_SCHEDULE               ("Availabilty Schedule",Constants.XML_EXTENSION),
+    AVAILABILTY_SCHEDULE_TEMPLATE      ("Availabilty Schedule Template",Constants.XML_EXTENSION),
     CIT_CANDIDATES_FROM_POOYA          ("CIT Candidates From Pooya"),
     CIT_EVALUATION_TEMPLATE            ("CIT Evaluation Template", Constants.XML_EXTENSION),
     CIT_EVALUATIONS                    ("CIT Evaluations",Constants.XML_EXTENSION),
+    CIT_SCHEDULE                       ("CIT Schedule",Constants.JSON_EXTENSION),
     CUSTOMER_ISSUE_BACKLOG             ("Customer Issue Backlog"),
     CUSTOMER_ISSUE_EMAIL               ("Customer Issue Emails"),
-    CUSTOMER_ISSUE_TEAM_SCHEDULE       ("Customer Issue Team Schedule", Constants.JSON_EXTENSION),
-    CIT_SCHEDULE                       ("CIT Schedule",Constants.JSON_EXTENSION),
-    DAILY_ON_CALL_REMINDER_EMAILS      ("Daily On Call Reminder Emails"), 
+    CUSTOMER_ISSUE_TEAM_SCHEDULE       ("Customer Issue Team Schedule", Constants.JSON_EXTENSION), 
+    DAILY_ON_CALL_REMINDER_EMAILS      ("Daily On Call Reminder Emails"),
     DAILY_STAND_UP_ATTENDEE_EMAILS     ("Daily Stand Up Attendee Emails"),
     DSU                                ("DSU",  Constants.XML_EXTENSION),
+    DSU_DATA                           ("DSU Data"),
     DSU_TEMPLATE                       ("DSU Template", Constants.XML_EXTENSION),
+    ENGINE_TICKET_COUNTS               ("Engine Ticket Counts"),    
     ENGINE_TICKET_DAILY_REVIEW         ("Engine Ticket Daily Review"),
-    ENGINEER_ADDS                      ("Engineers to be Added"),    
-    ESCALATED_COMPANIES                ("Escalated Companies"),
+    ENGINEER_ADDS                      ("Engineers to be Added"),
     ESCALATION_CHOOSER                 ("Escalation Chooser"),
     ESCALATION_OWNERSHIP               ("Escalation Ownership"),
+    EXCLUDED_TICKETS                   ("Excluded Tickets"),
     FOO                                ("foo"),
     FROM_ONLINE_SCHEDULE               ("From Online Schedule"),
     KEYWORD_POINTS                     ("Keyword Points"),
     LEVELS_FROM_QUIP                   ("Levels From Quip"),
+    LTTR_PLAN_TEST                     ("LTTR Plan Test"),
     MASTER_LIST                        ("Engineer Master List"),
+    MODULE_LABEL_TAXONOMY	       ("Module Label Taxonomy"),
+    MODULE_LABEL_TAXONOMY_RAW_DATA     ("Module Label Taxonomy Raw Data"),
     NEW_LEVEL_ENGINEERS                ("New Level Engineers"),
     ON_CALL_SCHEDULE                   ("On Call Schedule"),
     ONLINE_SCHEDULE                    ("Online Schedule", Constants.JSON_EXTENSION),
@@ -63,17 +70,15 @@ public enum EngineerFiles {
     ROOT_CAUSE_TO_DO                   ("Root Cause To Do"),
     SCHEDULE_CSV                       ("Schedule"),
     SDMS                               ("SDMs"),
-    SKIPPED_TICKETS                    ("Skipped Tickets"),
     TECH_ESC                           ("Tech Esc"),
     TEST                               ("Test", ".ics"),
     TICKET_CLOSURES                    ("Ticket Closures"),
     TICKET_FLOW_REPORT                 ("Ticket Flow Report"),
-    TICKET_STATS                       ("Ticket Stats"),
-    TOP_100_COMPANIES                  ("Top 100 Companies"),
+    TICKET_REDUCTION_PROJECTION        ("Ticket Reduction Projection"),
     TRAINEE_EMAILS                     ("Trainee Emails"),
     TRAINEES                           ("Trainees"),
     TRAINING_DAILY_SCHEDULE	       ("Training Daily Schedule"),
-    TT_DOWNLOAD                        ("TT Download"),
+    TT_DOWNLOAD                        ("TT Download"), 
     UNAVAILABILITY                     ("Unavailability");
     
     // @formatter:on
@@ -96,6 +101,13 @@ public enum EngineerFiles {
 
     public static Stream<ScheduleRow> getScheduleRowStream() {
 	return getScheduledRows().stream();
+    }
+
+    public static <T> List<T> readCSVToPojoByFileName(String fileName, Class<T> pojoClass) {
+	return new CSVReader<T>()
+		.inputFile(fileName)
+		.type(pojoClass)
+		.read();
     }
 
     private static List<String> readLines(Path path) {
@@ -183,10 +195,7 @@ public enum EngineerFiles {
 
     public <T> List<T> readCSVToPojo(Class<T> pojoClass) {
 
-	return new CSVReader<T>()
-		.inputFile(getFileName())
-		.type(pojoClass)
-		.read();
+	return readCSVToPojoByFileName(getFileName(), pojoClass);
     }
 
     public <T> T readJson(Class<T> clazz) {
