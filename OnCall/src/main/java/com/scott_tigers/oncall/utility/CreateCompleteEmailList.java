@@ -12,9 +12,18 @@ public class CreateCompleteEmailList {
     }
 
     private void run() {
-	EngineerFiles.MASTER_LIST.readCSV().stream().map(Engineer::getEmail).forEach(System.out::println);
+	EngineerFiles.MASTER_LIST
+		.readCSV()
+		.stream()
+		.map(Engineer::getEmail)
+		.forEach(System.out::println);
+
 	System.out.println(
-		EngineerFiles.MASTER_LIST.readCSV().stream().map(Engineer::getEmail).collect(Collectors.joining("")));
+		EngineerFiles.MASTER_LIST
+			.readCSV()
+			.stream()
+			.map(Engineer::getEmail)
+			.collect(Collectors.joining("")));
 
     }
 }

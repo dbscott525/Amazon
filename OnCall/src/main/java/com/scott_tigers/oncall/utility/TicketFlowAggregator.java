@@ -2,7 +2,6 @@ package com.scott_tigers.oncall.utility;
 
 import java.time.DayOfWeek;
 import java.time.ZoneId;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
@@ -13,10 +12,12 @@ import com.scott_tigers.oncall.bean.TT;
 import com.scott_tigers.oncall.shared.Dates;
 
 public class TicketFlowAggregator {
+    private static final String RESOLVED_DATE = "ResolvedDate";
+    private static final String CREATE_DATE = "CreateDate";
     private HashMap<String, TicketMetric> metricMap = new HashMap<String, TicketMetric>();
 
     public void newTicket(TT tt) {
-	Stream.of("CreateDate", "ResolvedDate")
+	Stream.of(CREATE_DATE, RESOLVED_DATE)
 		.forEach(dateType -> addMetric(tt, dateType));
     }
 
@@ -37,7 +38,10 @@ public class TicketFlowAggregator {
 
 			metric.addDataPoint(dateType);
 
-		    }, () -> System.out.println("No Create Date"));
+		    }, () -> {
+			if (CREATE_DATE.equals(dateType))
+			    System.out.println("No " + dateType + " Date");
+		    });
 	} catch (Exception e) {
 	    e.printStackTrace();
 	    System.exit(1);
@@ -55,11 +59,11 @@ public class TicketFlowAggregator {
     }
 
     public List<TicketMetric> getMetrics() {
-	Collection<TicketMetric> v1 = metricMap.values();
-	Stream<TicketMetric> v2 = v1.stream();
-	Stream<TicketMetric> v3 = v2.sorted();
-	List<TicketMetric> v4 = v3.collect(Collectors.toList());
-	return v4;
+	return metricMap
+		.values()
+		.stream()
+		.sorted()
+		.collect(Collectors.toList());
     }
 
 }

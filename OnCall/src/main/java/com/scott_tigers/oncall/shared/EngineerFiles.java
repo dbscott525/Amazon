@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -38,18 +39,24 @@ public enum EngineerFiles {
     AVAILABILTY_SCHEDULE               ("Availabilty Schedule",Constants.XML_EXTENSION),
     AVAILABILTY_SCHEDULE_TEMPLATE      ("Availabilty Schedule Template",Constants.XML_EXTENSION),
     CIT_CANDIDATES_FROM_POOYA          ("CIT Candidates From Pooya"),
-    CIT_EVALUATION_TEMPLATE            ("CIT Evaluation Template", Constants.XML_EXTENSION),
+    CIT_DOC_INJECTION_TEMPLATE         ("CIT Doc Injection Template", Constants.DOCX_EXTENSION),
+    CIT_DSU_TEMPLATE                   ("CIT DSU Template",Constants.DOCX_EXTENSION),
+    CIT_END_OF_WEEK_EMAIL              ("CIT End of Week Email",Constants.DOCX_EXTENSION),
+    CIT_EVALUATION_TEMPLATE            ("CIT Evaluation Template", Constants.DOCX_EXTENSION),
     CIT_EVALUATIONS                    ("CIT Evaluations",Constants.XML_EXTENSION),
     CIT_SCHEDULE                       ("CIT Schedule",Constants.JSON_EXTENSION),
+    CIT_WEEK_DATA                      ("CIT Week Data"), 
+    CIT_WEEK_WELCOME                   ("CIT Week Welcome",Constants.DOCX_EXTENSION),
     CUSTOMER_ISSUE_BACKLOG             ("Customer Issue Backlog"),
     CUSTOMER_ISSUE_EMAIL               ("Customer Issue Emails"),
-    CUSTOMER_ISSUE_TEAM_SCHEDULE       ("Customer Issue Team Schedule", Constants.JSON_EXTENSION), 
+    CUSTOMER_ISSUE_TEAM_INTRODUCTION   ("Customer Issue Team Introduction", Constants.PPTX_EXTENSION),
+    CUSTOMER_ISSUE_TEAM_SCHEDULE       ("Customer Issue Team Schedule", Constants.JSON_EXTENSION),
     DAILY_ON_CALL_REMINDER_EMAILS      ("Daily On Call Reminder Emails"),
     DAILY_STAND_UP_ATTENDEE_EMAILS     ("Daily Stand Up Attendee Emails"),
-    DSU                                ("DSU",  Constants.XML_EXTENSION),
+    DSU                                ("DSU",  Constants.XML_EXTENSION),    
     DSU_DATA                           ("DSU Data"),
     DSU_TEMPLATE                       ("DSU Template", Constants.XML_EXTENSION),
-    ENGINE_TICKET_COUNTS               ("Engine Ticket Counts"),    
+    ENGINE_TICKET_COUNTS               ("Engine Ticket Counts"),
     ENGINE_TICKET_DAILY_REVIEW         ("Engine Ticket Daily Review"),
     ENGINEER_ADDS                      ("Engineers to be Added"),
     ESCALATION_CHOOSER                 ("Escalation Chooser"),
@@ -64,6 +71,7 @@ public enum EngineerFiles {
     MODULE_LABEL_TAXONOMY	       ("Module Label Taxonomy"),
     MODULE_LABEL_TAXONOMY_RAW_DATA     ("Module Label Taxonomy Raw Data"),
     NEW_LEVEL_ENGINEERS                ("New Level Engineers"),
+    ON_CALL_DAILY_REMINDER_EMAIL       ("On Call Daily Reminder Email",Constants.DOCX_EXTENSION),
     ON_CALL_SCHEDULE                   ("On Call Schedule"),
     ONLINE_SCHEDULE                    ("Online Schedule", Constants.JSON_EXTENSION),
     RESOLVED_TICKET_SUMMARY            ("Resolved Ticket Summary"),
@@ -72,7 +80,9 @@ public enum EngineerFiles {
     SDMS                               ("SDMs"),
     TECH_ESC                           ("Tech Esc"),
     TEST                               ("Test", ".ics"),
+    TICKET_CLOSURE_BAR_GRAPH           ("Ticket Closure Bar Graph", Constants.XLSX_EXTENSION),
     TICKET_CLOSURES                    ("Ticket Closures"),
+    TICKET_FLOW_GRAPH                  ("Ticket Flow Graph", Constants.XLSX_EXTENSION),
     TICKET_FLOW_REPORT                 ("Ticket Flow Report"),
     TICKET_REDUCTION_PROJECTION        ("Ticket Reduction Projection"),
     TRAINEE_EMAILS                     ("Trainee Emails"),
@@ -87,7 +97,11 @@ public enum EngineerFiles {
 	private static final long serialVersionUID = 1L;
 	{
 	    put(Constants.XML_EXTENSION, "C:\\\\Program Files (x86)\\\\Microsoft Office\\\\Office16\\WINWORD.EXE");
+	    put(Constants.DOCX_EXTENSION, "C:\\\\Program Files (x86)\\\\Microsoft Office\\\\Office16\\WINWORD.EXE");
 	    put(Constants.CSV_EXTENSION, "C:\\Program Files (x86)\\Microsoft Office\\Office16\\EXCEL.EXE");
+	    put(Constants.XLSX_EXTENSION, "C:\\Program Files (x86)\\Microsoft Office\\Office16\\EXCEL.EXE");
+	    put(Constants.PPTX_EXTENSION, "C:\\Program Files (x86)\\Microsoft Office\\Office16\\POWERPNT.EXE");
+	    put(Constants.JSON_EXTENSION, "C:\\Users\\bruscob\\eclipse\\jee-2020-062\\eclipse\\eclipse.exe");
 	}
     };
 
@@ -173,6 +187,10 @@ public enum EngineerFiles {
 	return Paths.get(getFileName());
     }
 
+    public void launch() {
+	launch(getFileName());
+    }
+
     public void launch(String fileName) {
 
 	try {
@@ -216,7 +234,7 @@ public enum EngineerFiles {
 	return Files.readString(getPath());
     }
 
-    private boolean renameFileToTimeStampFile() {
+    boolean renameFileToTimeStampFile() {
 	File file = new File(getFileName());
 
 	if (!file.exists()) {
@@ -252,6 +270,13 @@ public enum EngineerFiles {
 
     void replaceJsonFile(Object object) {
 	replaceFile(() -> writeJsonFile(object));
+    }
+
+    public void write(Consumer<FileWriter> parameterSetter) {
+	FileWriter fileWriter = new FileWriter();
+	fileWriter.fileType(this);
+	parameterSetter.accept(fileWriter);
+	fileWriter.write();
     }
 
     public <T> void writeCSV(List<T> list, Class<T> pojoClass) {

@@ -13,11 +13,12 @@ import com.scott_tigers.oncall.bean.Engineer;
 import com.scott_tigers.oncall.bean.ScheduleRow;
 import com.scott_tigers.oncall.bean.TT;
 import com.scott_tigers.oncall.bean.TTReader;
-import com.scott_tigers.oncall.shared.Dates;
 import com.scott_tigers.oncall.shared.EngineerFiles;
 import com.scott_tigers.oncall.shared.Properties;
 
 public class CreateRootCauseToDoList extends Utility implements TTReader {
+
+    private static final String SEARCH_START_DATE = "8/20/2020";
 
     static String[] validRootCauseMarkers = {
 	    "i.amazon.com/aurora",
@@ -74,27 +75,29 @@ public class CreateRootCauseToDoList extends Utility implements TTReader {
 
     @Override
     public String getUrl() {
-	String date = Dates.SORTABLE
-		.convertFormat(Dates.SORTABLE
-			.getFormattedDelta(EngineerFiles.ROOT_CAUSE_TO_DO
-				.readCSVToPojo(TT.class)
-				.stream()
-				.map(TT::getCreateDate)
-				.min(Comparator.comparing(String::toString))
-				.orElse(getYesterdayDate())
-				.substring(0, 10),
-				-1),
-			Dates.TT_SEARCH);
+//	String date = Dates.SORTABLE
+//		.convertFormat(Dates.SORTABLE
+//			.getFormattedDelta(EngineerFiles.ROOT_CAUSE_TO_DO
+//				.readCSVToPojo(TT.class)
+//				.stream()
+//				.map(TT::getCreateDate)
+//				.min(Comparator.comparing(String::toString))
+//				.orElse(getYesterdayDate())
+//				.substring(0, 10),
+//				-1),
+//			Dates.TT_SEARCH);
+//
+//	System.out.println("date=" + (date));
 
 	return "https://tt.amazon.com/search?category=AWS&type=RDS-AuroraMySQL&item=Engine&assigned_group=aurora-head%3Boscar-eng-secondary&status=Assigned%3BResearching%3BWork+In+Progress%3BPending%3BResolved%3BClosed&impact=&assigned_individual=&requester_login=&login_name=&cc_email=&phrase_search_text=&keyword_bq=&exact_bq=&or_bq1=&or_bq2=&or_bq3=&exclude_bq=&create_date="
-		+ date
-		+ "&modified_date=&tags=&case_type=&building_id=&min_impact=2&search=Search%21#";
+		+ SEARCH_START_DATE
+		+ "&modified_date=&tags=&case_type=&building_id=&min_impact=3&search=Search%21#";
     }
 
-    private String getYesterdayDate() {
-	return Dates.SORTABLE.getFormattedDelta(Dates.SORTABLE.getFormattedString(), -2);
-    }
-
+//    private String getYesterdayDate() {
+//	return Dates.SORTABLE.getFormattedDelta(Dates.SORTABLE.getFormattedString(), -2);
+//    }
+//
     private void assignOwner(int index) {
 	rootCauseNeededTTs.get(index).setOwner(engineerNames.get(index % engineerNames.size()));
     }
@@ -108,7 +111,7 @@ public class CreateRootCauseToDoList extends Utility implements TTReader {
 
     @Override
     public Predicate<TT> getFilter() {
-	return tt -> noRootCause(tt);
+	return tt -> noRootCause(tt) && !tt.getDescription().contains("Cross Issue Event - CIE");
     }
 
 }

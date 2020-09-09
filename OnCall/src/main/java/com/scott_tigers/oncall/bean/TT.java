@@ -184,4 +184,8 @@ public class TT {
     public Integer getIntCaseId() {
 	return Integer.parseInt(caseId.replaceAll("E?(.*)", "$1"));
     }
+
+    public Integer getIntAge() {
+	return Integer.valueOf(age);
+    }
 }

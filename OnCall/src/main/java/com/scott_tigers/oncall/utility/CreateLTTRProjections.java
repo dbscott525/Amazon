@@ -62,8 +62,7 @@ public class CreateLTTRProjections extends Utility {
 		.limit(NUMBER_OF_PROJECTION_MONTHS)
 		.peek(projectionAccumulator::accumulate)
 		.collect(Collectors.toList());
-
-	writeCSV(EngineerFiles.TICKET_REDUCTION_PROJECTION, TicketReduction.class, reductionList);
+	EngineerFiles.TICKET_REDUCTION_PROJECTION.write(w -> w.CSV(reductionList, TicketReduction.class));
     }
 
     private boolean onOrAfterCurrentMonth(TicketReduction ticketReduction) {

@@ -20,5 +20,4 @@ public class CreateDailyOnCallReminderEmails extends Utility implements Command 
 			.collect(Collectors.toList()),
 		EngineerFiles.DAILY_ON_CALL_REMINDER_EMAILS);
     }
-
 }

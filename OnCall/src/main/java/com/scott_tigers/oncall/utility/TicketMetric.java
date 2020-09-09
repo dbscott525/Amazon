@@ -1,5 +1,8 @@
 package com.scott_tigers.oncall.utility;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.scott_tigers.oncall.shared.Properties;
+
 public class TicketMetric implements Comparable<TicketMetric> {
     Integer createDateCount = 0;
     Integer resolvedDateCount = 0;
@@ -33,6 +36,7 @@ public class TicketMetric implements Comparable<TicketMetric> {
 	return date.compareTo(o.date);
     }
 
+    @JsonProperty(Properties.CREATED)
     public Integer getCreateDateCount() {
 	return createDateCount;
     }
@@ -41,6 +45,7 @@ public class TicketMetric implements Comparable<TicketMetric> {
 	this.createDateCount = createDateCount;
     }
 
+    @JsonProperty(Properties.RESOLVED)
     public Integer getResolvedDateCount() {
 	return resolvedDateCount;
     }
@@ -49,6 +54,7 @@ public class TicketMetric implements Comparable<TicketMetric> {
 	this.resolvedDateCount = resolvedDateCount;
     }
 
+    @JsonProperty(Properties.DATE)
     public String getDate() {
 	return date;
     }

@@ -5,22 +5,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
-import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.scott_tigers.oncall.bean.KeywordPoints;
 import com.scott_tigers.oncall.bean.TT;
-import com.scott_tigers.oncall.bean.TTReader;
 import com.scott_tigers.oncall.shared.Constants;
 import com.scott_tigers.oncall.shared.EngineerFiles;
 import com.scott_tigers.oncall.shared.Properties;
 
-public class CreateCustomerIssueReadyQueue extends Utility {
+public class CreateCustomerIssueReadyQueueOld extends Utility {
 
-    private static final int NORMALIZED_MAXIMUM_WEIGHT = 100;
-    private static final double CUSTOMER_ISSUE_AGE_EXPONENT = .6;
-    private static final int MAXIMUM_TICKETS_PER_TYPE = 7;
+    private static final int REQUIRED_NUMBER_OF_CUATOMER_ISSUE_TICKETS_IN_QUEUE = 10;
+
+    public static void main(String[] args) throws Exception {
+	new CreateCustomerIssueReadyQueueOld().run();
+    }
+
     private static final String[] READY_QUEUE_COLUMNS = {
 	    Properties.ITEM,
 	    Properties.URL,
@@ -29,14 +30,8 @@ public class CreateCustomerIssueReadyQueue extends Utility {
 	    Properties.DESCRIPTION };
 
     private List<KeywordPoints> keywordPoints;
-    private int maxCustomerIssueWeight;
+    private int maxWeight;
     private List<TT> topTickets;
-
-    private double engineExp;
-
-    public static void main(String[] args) throws Exception {
-	new CreateCustomerIssueReadyQueue().run();
-    }
 
     private void run() throws Exception {
 	readPointData();
@@ -49,47 +44,34 @@ public class CreateCustomerIssueReadyQueue extends Utility {
     private void createReadyQueue() throws Exception {
 
 	CustomerIssueLimter limter = new CustomerIssueLimter();
-	List<TT> ciTickets = getTickets(new CustomerIssueReader());
 
-	maxCustomerIssueWeight = getMaximum(ciTickets, TT::getWeight, 1000);
-
-	System.out.println("maxWeight=" + (maxCustomerIssueWeight));
-	List<TT> engineTiockets = getTickets(new CreateRootCauseToDoList());
-	int maxEnginerAge = getMaximum(engineTiockets, TT::getIntAge, 0);
-
-	engineExp = Math.log(maxCustomerIssueWeight * .6) / Math.log(maxEnginerAge);
-	System.out.println("engineExp=" + (engineExp));
-	System.out.println("maxAge=" + (maxEnginerAge));
-
-	Stream<TT> engineStream = engineTiockets.stream().peek(this::fixUpForDisplay);
-	Stream<TT> ciStream = ciTickets.stream();
-
-	topTickets = Stream.concat(engineStream, ciStream)
+	topTickets = Stream
+		.of(CustomerIssueReader.class, CreateRootCauseToDoList.class)
+		.map(c -> constuct(c))
+		.flatMap(reader -> {
+		    try {
+			return getTicketStreamFromUrl(reader.getUrl())
+				.filter(tt -> reader.getFilter().test(tt));
+		    } catch (Exception e) {
+			return Stream.<TT>empty();
+		    }
+		})
+		.filter(this::notAssigned)
+		.peek(this::fixUpForDisplay)
 		.sorted(Comparator.comparing(TT::getWeight).reversed())
 		.filter(tt -> limter.withinLimit(tt))
-//		.peek(this::normalizeWeight)
 		.collect(Collectors.toList());
+
+	maxWeight = topTickets
+		.stream()
+		.mapToInt(TT::getWeight)
+		.max()
+		.orElse(1000);
 
 	topTickets
 		.stream()
 		.forEach(this::normalizeWeight);
 
-    }
-
-    private int getMaximum(List<TT> ticketList, ToIntFunction<TT> valueGetter, int defaultMax) {
-	return ticketList
-		.stream()
-		.mapToInt(valueGetter)
-		.max()
-		.orElse(defaultMax);
-    }
-
-    private List<TT> getTickets(TTReader reader) throws Exception {
-	return getTicketStreamFromUrl(reader.getUrl())
-		.filter(tt -> reader.getFilter().test(tt))
-		.filter(this::notAssigned)
-		.peek(this::fixUpForDisplay)
-		.collect(Collectors.toList());
     }
 
     private void readPointData() {
@@ -110,11 +92,11 @@ public class CreateCustomerIssueReadyQueue extends Utility {
 	switch (tt.getItem()) {
 
 	case Constants.ITEM_ENGINE:
-	    weight = (int) Math.pow(intAge, engineExp);
+	    weight = (int) Math.pow(intAge, 2);
 	    break;
 
 	case Constants.ITEM_CUSTOMER_ISSUE:
-	    weight += (int) Math.pow(intAge, CUSTOMER_ISSUE_AGE_EXPONENT);
+	    weight += (int) Math.pow(intAge, .6);
 	    break;
 
 	}
@@ -127,7 +109,10 @@ public class CreateCustomerIssueReadyQueue extends Utility {
     }
 
     private void normalizeWeight(TT tt) {
-	tt.setWeight(tt.getWeight() * NORMALIZED_MAXIMUM_WEIGHT / maxCustomerIssueWeight);
+	tt.setWeight(tt.getWeight() * 100 / maxWeight);
+//	if (tt.getItem().equals(Constants.ITEM_ENGINE)) {
+//	    tt.setItem("Root Cause");
+//	}
     }
 
     private class CustomerIssueLimter {
@@ -142,7 +127,7 @@ public class CreateCustomerIssueReadyQueue extends Utility {
 
 	public boolean withinLimit(TT tt) {
 	    Integer count = countMap.get(tt.getItem());
-	    if (count >= MAXIMUM_TICKETS_PER_TYPE) {
+	    if (count >= 10) {
 		return false;
 	    } else {
 		count++;

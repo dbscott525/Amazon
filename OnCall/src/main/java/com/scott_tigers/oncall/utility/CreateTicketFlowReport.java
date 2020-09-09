@@ -11,8 +11,9 @@ import java.util.stream.StreamSupport;
 import com.scott_tigers.oncall.bean.TT;
 import com.scott_tigers.oncall.shared.Dates;
 import com.scott_tigers.oncall.shared.EngineerFiles;
+import com.scott_tigers.oncall.shared.Properties;
 
-public class CreateTicketFlowReport extends Utility {
+public class CreateTicketFlowReport extends Utility implements Command {
 
     private static final int ITERATIONS = 3;
     private static final int DAYS_IN_YEAR = 365;
@@ -24,7 +25,8 @@ public class CreateTicketFlowReport extends Utility {
 	new CreateTicketFlowReport().run();
     }
 
-    private void run() throws Exception {
+    @Override
+    public void run() throws Exception {
 	Stream<TT> ticketStream = getDateStream().flatMap(dateRange -> {
 	    String url = URL_TEMPLATE.replaceAll("(.*?)START(.*?)END(.*)",
 		    "$1" + dateRange.getStartDate() + "$2" + dateRange.getEndDate() + "$3");
@@ -40,8 +42,15 @@ public class CreateTicketFlowReport extends Utility {
 	TicketFlowAggregator tfa = new TicketFlowAggregator();
 	ticketStream.forEach(tfa::newTicket);
 	List<TicketMetric> result = tfa.getMetrics();
-	EngineerFiles.TICKET_FLOW_REPORT.writeCSV(result, TicketMetric.class);
-	successfulFileCreation(EngineerFiles.TICKET_FLOW_REPORT);
+	EngineerFiles.TICKET_FLOW_REPORT.write(writer -> writer
+		.CSV(result,
+			Properties.DATE,
+			Properties.CREATED,
+			Properties.RESOLVED));
+
+	waitForDataFileLaunch();
+
+	EngineerFiles.TICKET_FLOW_GRAPH.launch();
     }
 
     private class DateRange {

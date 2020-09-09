@@ -1,33 +1,41 @@
 package com.scott_tigers.oncall.utility;
 
 import java.util.Calendar;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import com.scott_tigers.oncall.bean.TT;
 import com.scott_tigers.oncall.bean.TicketStatusCount;
 import com.scott_tigers.oncall.shared.Dates;
 import com.scott_tigers.oncall.shared.EngineerFiles;
+import com.scott_tigers.oncall.shared.Properties;
 import com.scott_tigers.oncall.shared.TicketStatuses;
 
-public class CreateCITResolvedTicketsTable extends Utility {
+public class CreateCITResolvedTicketsTable extends Utility implements Command {
 
     public static void main(String[] args) throws Exception {
 	new CreateCITResolvedTicketsTable().run();
     }
 
-    private void run() throws Exception {
+    @Override
+    public void run() throws Exception {
 
-	EngineerFiles.RESOLVED_TICKET_SUMMARY.writeCSV(
-		getTicketStreamFromUrl(getUrl())
-			.filter(tt -> !tt.getStatus().equals(TicketStatuses.PENDING_PENDING_ROOT_CAUSE))
-			.collect(Collectors.groupingBy(TT::getStatus))
-			.entrySet()
-			.stream()
-			.map(TicketStatusCount::new)
-			.collect(Collectors.toList()),
-		TicketStatusCount.class);
+	List<TicketStatusCount> summaryList = getTicketStreamFromUrl(getUrl())
+		.filter(tt -> !tt.getStatus().equals(TicketStatuses.PENDING_PENDING_ROOT_CAUSE))
+		.collect(Collectors.groupingBy(TT::getStatus))
+		.entrySet()
+		.stream()
+		.map(TicketStatusCount::new)
+		.sorted()
+		.collect(Collectors.toList());
 
-	successfulFileCreation(EngineerFiles.RESOLVED_TICKET_SUMMARY);
+	summaryList.add(new TicketStatusCount("Total", summaryList
+		.stream()
+		.collect(Collectors.summarizingInt(TicketStatusCount::getCount))
+		.getSum()));
+
+	EngineerFiles.RESOLVED_TICKET_SUMMARY.write(writer -> writer
+		.CSV(summaryList, Properties.STATUS, Properties.COUNT));
     }
 
     private String getUrl() {

@@ -303,12 +303,14 @@ public class Engineer {
 	return Expertise.get(expertise).getRequiredOrder();
     }
 
+    @JsonIgnore
     public boolean isBeforeEndDate() {
 	return !Optional.ofNullable(endDate)
 		.filter(endDate -> Dates.ONLINE_SCHEDULE.getDateFromString(endDate).compareTo(new Date()) < 0)
 		.isPresent();
     }
 
+    @JsonIgnore
     public boolean isNotServerless() {
 	return Expertise.get(expertise) != Expertise.Serverless;
     }

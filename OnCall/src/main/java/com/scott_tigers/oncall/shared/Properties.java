@@ -5,6 +5,7 @@ public class Properties {
     public static final String AGE = "Age";
     public static final String CASE_ID = "Case ID";
     public static final String COMMENTS = "Comments";
+    public static final String COUNT = "Count";
     public static final String CREATE_DATE = "Create Date";
     public static final String DESCRIPTION = "Description";
     public static final String FIRST_NAME = "firstName";
@@ -20,5 +21,8 @@ public class Properties {
     public static final String UID = "uid";
     public static final String URL = "URL";
     public static final String WEIGHT = "weight";
+    public static final String CREATED = "Created";
+    public static final String RESOLVED = "Resolved";
+    public static final String DATE = "Date";
 
 }

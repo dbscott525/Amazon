@@ -7,6 +7,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -80,16 +81,19 @@ public class Utility {
     }
 
     protected void writeEmailsByDate(List<OnCallScheduleRow> emailList, EngineerFiles fileType) {
-	fileType.writeCSV(emailList
+	List<EmailsByDate> emailLines = emailList
 		.stream()
 		.collect(Collectors.groupingBy(OnCallScheduleRow::getDate))
 		.entrySet()
 		.stream()
 		.map(EmailsByDate::new)
 		.sorted(Comparator.comparing(EmailsByDate::getDate))
-		.collect(Collectors.toList()), EmailsByDate.class);
+		.collect(Collectors.toList());
 
-	successfulFileCreation(fileType);
+	fileType.write(w -> w.CSV(emailLines, EmailsByDate.class));
+//	fileType.writeCSV(emailLines, EmailsByDate.class);
+//
+//	successfulFileCreation(fileType);
     }
 
     protected List<OnCallScheduleRow> getOnCallSchedule() {
@@ -349,11 +353,6 @@ public class Utility {
 	return scheduleRow;
     }
 
-    protected void writeTickets(EngineerFiles fileType, List<TT> ticketList, List<String> columns) {
-	fileType.writeCSV(ticketList, columns);
-	successfulFileCreation(fileType);
-    }
-
     protected void makeReplacement(String searchString, String replacement) {
 	String search = Optional.ofNullable(Constants.TEMPLATE_REPLACEMENTS.get(searchString)).orElse(searchString);
 	templateDoc = templateDoc.replace(search, replacement);
@@ -381,20 +380,19 @@ public class Utility {
 	makeReplacement(prefix + index, engineers.get(index).getFullName());
     }
 
-    protected <T> void writeCSV(EngineerFiles fileType, Class<T> listClass, List<T> list) {
-	fileType.writeCSV(list, listClass);
-	successfulFileCreation(fileType);
-    }
+    protected List<EngineerMetric> getTicketClosedMetrics() {
+	try {
+	    getMetricMap();
+	    List<EngineerMetric> metrics = metricMap
+		    .values()
+		    .stream()
+		    .sorted(Comparator.comparing(EngineerMetric::getTicketsPerWeek).reversed())
+		    .collect(Collectors.toList());
+	    return metrics;
+	} catch (Exception e) {
+	    return new ArrayList<EngineerMetric>();
+	}
 
-    protected List<EngineerMetric> getTicketClosedMetrics() throws Exception {
-	getMetricMap();
-
-	List<EngineerMetric> metrics = metricMap
-		.values()
-		.stream()
-		.sorted(Comparator.comparing(EngineerMetric::getTicketsPerWeek).reversed())
-		.collect(Collectors.toList());
-	return metrics;
     }
 
     protected void getMetricMap() throws Exception {
@@ -450,12 +448,7 @@ public class Utility {
     }
 
     protected void createCSVCITSchedule() {
-	writeLines(EngineerFiles.SCHEDULE_CSV, getCSVSchedule());
-    }
-
-    protected void writeLines(EngineerFiles fileType, List<String> lines) {
-	fileType.writeLines(lines);
-	successfulFileCreation(fileType);
+	EngineerFiles.SCHEDULE_CSV.write(w -> w.lines(getCSVSchedule()));
     }
 
     protected void createFileFromTemplate(EngineerFiles inputFile, EngineerFiles outputFile, Executor replacer)
@@ -475,4 +468,25 @@ public class Utility {
 	    return null;
 	}
     }
+
+    protected void runCommands(@SuppressWarnings("unchecked") Class<? extends Command>... commands) {
+	Arrays.asList(commands)
+		.stream().map(c -> constuct(c))
+		.forEach(command -> {
+		    try {
+			command.run();
+		    } catch (Exception e) {
+			e.printStackTrace();
+			System.exit(1);
+		    }
+		});
+    }
+
+    protected void waitForDataFileLaunch() {
+	try {
+	    TimeUnit.SECONDS.sleep(10);
+	} catch (InterruptedException e) {
+	}
+    }
+
 }

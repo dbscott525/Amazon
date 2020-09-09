@@ -26,13 +26,11 @@ public class CreateOncallSchedule extends Utility implements Command {
 
 	Stream<OnCallScheduleRow> scheduleStream = Stream.of(getOnCallStream(), getTraineeStream()).flatMap(x -> x);
 
-	EngineerFiles.ON_CALL_SCHEDULE.writeCSV(
-		scheduleStream
-			.distinct()
-			.collect(Collectors.toList()),
-		OnCallScheduleRow.class);
+	List<OnCallScheduleRow> onCallList = scheduleStream
+		.distinct()
+		.collect(Collectors.toList());
 
-	successfulFileCreation(EngineerFiles.ON_CALL_SCHEDULE);
+	EngineerFiles.ON_CALL_SCHEDULE.write(w -> w.CSV(onCallList, OnCallScheduleRow.class));
     }
 
     private Stream<OnCallScheduleRow> getTraineeStream() {
@@ -91,5 +89,4 @@ public class CreateOncallSchedule extends Utility implements Command {
 	currentEvent = new OnCallScheduleRow();
 	onCallSchedules.add(currentEvent);
     }
-
 }
