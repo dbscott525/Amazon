@@ -110,7 +110,7 @@ public enum Dates {
 	long mondayTime = getDateFromString(monday).getTime();
 	long nowTime = getDateFromString(getFormattedString()).getTime();
 	long daysDelta = (mondayTime - nowTime) / 60 / 60 / 24 / 1000;
-	return daysDelta >= 3 ? getFormattedDelta(monday, -7) : monday;
+	return daysDelta > 3 ? getFormattedDelta(monday, -7) : monday;
     }
 
     public static Date addMonth(Date date) {
@@ -118,6 +118,32 @@ public enum Dates {
 	calendar.setTime(date);
 	calendar.add(Calendar.MONTH, 1);
 	return calendar.getTime();
+    }
+
+    public String getClosestMonday() {
+	String nextMonday = getNextMondayFormattedDate();
+	long nextMondayTime = getTime(nextMonday);
+
+	String lastMonday = getFormattedDelta(nextMonday, -7);
+	long lastMondayTime = getTime(lastMonday);
+
+	long nowTime = new Date().getTime();
+
+	long nextMondayDelta = nextMondayTime - nowTime;
+	long lastMondayDelta = nowTime - lastMondayTime;
+
+	return nextMondayDelta < lastMondayDelta ? nextMonday : lastMonday;
+    }
+
+    long getTime(String date) {
+	return getDateFromString(date).getTime();
+    }
+
+    public String addMonths(String stringDate, int months) {
+	Calendar calendar = Calendar.getInstance();
+	calendar.setTime(getDateFromString(stringDate));
+	calendar.add(Calendar.MONTH, months);
+	return getFormattedString(calendar.getTime());
     }
 
 }

@@ -3,10 +3,13 @@ package com.scott_tigers.oncall.bean;
 import java.util.ArrayList;
 import java.util.stream.IntStream;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.scott_tigers.oncall.shared.Dates;
+import com.scott_tigers.oncall.shared.Properties;
 
 public class Unavailability {
 
+    private static final String END_DATE_3 = "End Date 3";
     private String uid;
     private String start1;
     private String end1;
@@ -17,38 +20,47 @@ public class Unavailability {
     private String start4;
     private String end4;
 
+    @JsonProperty(Properties.ALL_CAPS_UID)
     public String getUid() {
 	return uid;
     }
 
+    @JsonProperty(Properties.START_DATE_1)
     public String getStart1() {
 	return start1;
     }
 
+    @JsonProperty(Properties.END_DATE_1)
     public String getEnd1() {
 	return end1;
     }
 
+    @JsonProperty(Properties.START_DATE_2)
     public String getStart2() {
 	return start2;
     }
 
+    @JsonProperty(Properties.END_DATE_2)
     public String getEnd2() {
 	return end2;
     }
 
+    @JsonProperty(Properties.START_DATE_3)
     public String getStart3() {
 	return start3;
     }
 
+    @JsonProperty(END_DATE_3)
     public String getEnd3() {
 	return end3;
     }
 
+    @JsonProperty("Start Date 4")
     public String getStart4() {
 	return start4;
     }
 
+    @JsonProperty("End Date 4")
     public String getEnd4() {
 	return end4;
     }

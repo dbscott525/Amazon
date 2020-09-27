@@ -47,9 +47,7 @@ public class CreateLTTRProjections extends Utility {
 
 	ProjectionAccumulator projectionAccumulator = new ProjectionAccumulator(fourWeekTrailingAverage);
 
-	List<TicketReduction> reductionList = EngineerFiles
-		.readCSVToPojoByFileName(launchUrlAndWaitForDownload(URL.LTTR_PLAN), LTTRPlan.class)
-		.stream()
+	List<TicketReduction> reductionList = readFromUrl(URL.LTTR_PLAN, LTTRPlan.class)
 		.map(LttrProjection::new)
 		.flatMap(LttrProjection::getTicketReductions)
 		.collect(Collectors.groupingBy(TicketReduction::getMonth,

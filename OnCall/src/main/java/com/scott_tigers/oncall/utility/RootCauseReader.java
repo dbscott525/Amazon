@@ -31,7 +31,6 @@ public class RootCauseReader implements TTReader {
 
     @Override
     public Predicate<TT> getFilter() {
-	// TODO Auto-generated method stub
 	return null;
     }
 

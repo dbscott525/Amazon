@@ -18,7 +18,9 @@ public class Constants {
     public static final String AMAZON_EMAIL_POSTFIX = "@amazon.com";
     public static final String AUTOMATICIC_UID = "AR_ESCALATOR";
     public static final String CSV_EXTENSION = ".csv";
+    public static final double CUSTOMER_ISSUE_AGE_EXPONENT = .6;
     public static final String DOCX_EXTENSION = ".docx";
+    public static final int ENGINE_TICKET_TRAILING_DAYS = 7;
     public static final String ENGINEER_TYPE_TRAINEE = "Trainee";
     public static final String ITEM_CUSTOMER_ISSUE = "CustomerIssue";
     public static final String ITEM_ENGINE = "Engine";
@@ -27,6 +29,7 @@ public class Constants {
     public static final int NUMBER_OF_WEEKDAYS = 5;
     public static final int ON_CALL_DAYS_PER_INTERVAL = 1;
     public static final int ON_CALLS_PER_DAY = 4;
+    public static final int PENDING_CUSTOMER_RESPONSE_WAIT_TIME = 7;
     public static final String PPTX_EXTENSION = ".pptx";
     public static final int PRIORITY_ENGINEERS_PER_WEEK = 3;
     public static final String SORTABLE_DATE_FORMAT = "yyyy-MM-dd";
@@ -59,5 +62,6 @@ public class Constants {
     };
     public static final String XLSX_EXTENSION = ".xlsx";
     public static final String XML_EXTENSION = ".xml";
+    public static final String REPLACE_ME_EMAIL = "replace@me.com";
 
 }

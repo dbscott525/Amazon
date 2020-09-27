@@ -10,10 +10,10 @@ public class PrepareForNextCITMidweek extends Utility {
     private void run() {
 	runCommands(
 		UpdateMasterListWithTicketsClosed.class,
-		CreateCITEmails.class,
 		CreateOncallSchedule.class,
-		CreateDailyOnCallReminderEmails.class,
-		LauchCITMidweekDocuments.class);
+		CreateDailyOnCallReminderEmails.class);
+
+	launchCITUpdater();
     }
 
 }

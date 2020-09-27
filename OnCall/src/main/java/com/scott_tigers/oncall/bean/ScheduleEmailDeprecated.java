@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
+import com.scott_tigers.oncall.shared.Constants;
 import com.scott_tigers.oncall.shared.Util;
 
 public class ScheduleEmailDeprecated {
@@ -22,7 +23,7 @@ public class ScheduleEmailDeprecated {
 
     public ScheduleEmailDeprecated(ScheduleRow scheduleRow, Function<List<Engineer>, List<Engineer>> transformer) {
 
-	email = "replace@me.com";
+	email = Constants.REPLACE_ME_EMAIL;
 
 	List<Engineer> engineers = transformer.apply(scheduleRow.getEngineers());
 

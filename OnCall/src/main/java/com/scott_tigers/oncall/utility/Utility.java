@@ -23,18 +23,22 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import com.scott_tigers.oncall.bean.Email;
 import com.scott_tigers.oncall.bean.EmailsByDate;
 import com.scott_tigers.oncall.bean.Engineer;
 import com.scott_tigers.oncall.bean.EngineerMetric;
 import com.scott_tigers.oncall.bean.OnCallScheduleRow;
 import com.scott_tigers.oncall.bean.ScheduleRow;
 import com.scott_tigers.oncall.bean.TT;
+import com.scott_tigers.oncall.bean.WIP;
 import com.scott_tigers.oncall.newschedule.Schedule;
 import com.scott_tigers.oncall.newschedule.Shift;
 import com.scott_tigers.oncall.shared.Constants;
 import com.scott_tigers.oncall.shared.Dates;
 import com.scott_tigers.oncall.shared.EngineerFiles;
+import com.scott_tigers.oncall.shared.EngineerType;
 import com.scott_tigers.oncall.shared.Executor;
+import com.scott_tigers.oncall.shared.Oncall;
 import com.scott_tigers.oncall.shared.URL;
 import com.scott_tigers.oncall.test.Company;
 
@@ -155,13 +159,14 @@ public class Utility {
     }
 
     protected boolean forToday(Shift shift) {
-	Date scheduleStartDate = Dates.SORTABLE.getDateFromString(shift.getDate());
-
-	Date startDate = Dates.getDateDelta(scheduleStartDate, -2);
-	Date endDate = Dates.getDateDelta(scheduleStartDate, 5);
-
-	Date currentDate = new Date();
-	return startDate.compareTo(currentDate) <= 0 && currentDate.compareTo(endDate) <= 0;
+	return shift.getDate().compareTo(Dates.SORTABLE.getClosestMonday()) == 0;
+//	Date scheduleStartDate = Dates.SORTABLE.getDateFromString(shift.getDate());
+//
+//	Date startDate = Dates.getDateDelta(scheduleStartDate, -3);
+//	Date endDate = Dates.getDateDelta(scheduleStartDate, 5);
+//
+//	Date currentDate = new Date();
+//	return startDate.compareTo(currentDate) <= 0 && currentDate.compareTo(endDate) <= 0;
     }
 
     protected Map<String, List<Engineer>> getTraineesByDate() {
@@ -238,25 +243,15 @@ public class Utility {
 
     private List<Integer> getAssingedTicketIds() {
 	try {
-	    String fileName = launchUrlAndWaitForDownload(
-		    URL.CIT_TICKET_TRACKER);
-	    System.out.println("fileName=" + (fileName));
-	    Stream<Integer> assignedStream = Files.readAllLines(Paths.get(fileName))
-		    .stream()
-		    .map(this::getCaseId)
+	    return readFromUrl(URL.CIT_TICKET_TRACKER, WIP.class)
+		    .map(WIP::getTicketURL)
+		    .map(url -> url.replaceAll(".*?(\\d).*?", "$1"))
 		    .filter(this::isDigits)
-		    .map(Integer::valueOf);
-
-	    Stream<Integer> excludedStream = EngineerFiles.EXCLUDED_TICKETS
-		    .readCSVToPojo(TT.class)
-		    .stream()
-		    .map(TT::getUrl)
-		    .map(x -> x.replaceAll("https://tt.amazon.com/(\\d+)", "$1"))
-		    .map(Integer::parseInt);
-
-	    return Stream.concat(assignedStream, excludedStream)
+		    .map(Integer::parseInt)
 		    .collect(Collectors.toList());
 	} catch (Exception e) {
+	    System.out.println("e=" + (e));
+	    System.exit(1);
 	    return new ArrayList<Integer>();
 	}
     }
@@ -265,9 +260,9 @@ public class Utility {
 	return line.matches("[0-9]+");
     }
 
-    private String getCaseId(String line) {
-	return line.replaceAll(".*?https://tt\\.amazon\\.com/([0-9]+).*", "$1");
-    }
+//    private String getCaseId(String line) {
+//	return line.replaceAll(".*?https://tt\\.amazon\\.com/([0-9]+).*", "$1");
+//    }
 
     protected List<String> getCompanyList(EngineerFiles companyFile) {
 	List<String> list = companyListMap.get(companyFile);
@@ -286,14 +281,6 @@ public class Utility {
 
 	return list;
 
-    }
-
-    protected boolean foundIn(String target, String searchString) {
-	return target
-		.toLowerCase()
-		.contains(searchString
-			.toLowerCase()
-			.trim());
     }
 
     protected List<Engineer> getEngineeringDetails(List<Engineer> engineers) {
@@ -396,11 +383,7 @@ public class Utility {
     }
 
     protected void getMetricMap() throws Exception {
-//	String lastDate = Dates.SORTABLE
-//		.getFormattedDelta(Dates.SORTABLE
-//			.getFormattedString(), -4);
 	String lastDate = Dates.SORTABLE.getCompletedShiftMonday();
-	System.out.println("lastDate=" + (lastDate));
 	getShiftStream()
 		.filter(row -> row.isBefore(lastDate))
 		.map(Shift::getEngineers)
@@ -487,6 +470,66 @@ public class Utility {
 	    TimeUnit.SECONDS.sleep(10);
 	} catch (InterruptedException e) {
 	}
+    }
+
+    protected <T> Stream<T> readFromUrl(String url, Class<T> pojoClass) {
+	return EngineerFiles
+		.readCSVToPojoByFileName(launchUrlAndWaitForDownload(url), pojoClass)
+		.stream();
+    }
+
+    protected void reconcileMasterListToOncallList(Oncall oncallType, EngineerType engineerType) {
+
+	List<String> offshoreUids = EngineerFiles.OFFSHORE_UIDS.readCSV().stream().map(Engineer::getUid)
+		.collect(Collectors.toList());
+
+	List<String> emails = EngineerFiles.EMAILS
+		.readCSVToPojo(Email.class)
+		.stream()
+		.map(Email::getEmail)
+		.map(email -> email.replaceAll("(.*)?@amazon.com", "$1"))
+		.filter(Predicate.not("bruscob"::equals))
+
+		.collect(Collectors.toList());
+
+	List<String> onCallUids = oncallType
+		.getOnCallScheduleStream()
+		.map(OnCallScheduleRow::getUid)
+		.filter(Predicate.not(offshoreUids::contains))
+		.distinct()
+		.collect(Collectors.toList());
+
+	List<String> masterListUids = EngineerFiles.MASTER_LIST
+		.readCSV()
+		.stream()
+		.filter(eng -> eng.isType(engineerType))
+		.map(Engineer::getUid)
+		.filter(Predicate.not(offshoreUids::contains))
+		.collect(Collectors.toList());
+
+	compareLists(onCallUids, "On Call", masterListUids, "Master List");
+	compareLists(masterListUids, "Master List", emails, "Emails");
+    }
+
+    private void compareLists(List<String> list1, String list1Title, List<String> list2, String list2Title) {
+	printMissing(list1Title + " not in " + list2Title + ":", list1, list2);
+	printMissing(list2Title + " UIDs not in " + list1Title + ":", list2, list1);
+    }
+
+    private void printMissing(String title, List<String> list1, List<String> list2) {
+	System.out.println(title);
+	list1.stream()
+		.filter(Predicate.not(list2::contains))
+		.forEach(System.out::println);
+    }
+
+    @SuppressWarnings("unchecked")
+    protected void launchCITUpdater() {
+        runCommands(
+        	CreateCSVSchedule.class,
+        	CreateCITOnlineSchedule.class,
+        	CreateCITEmails.class,
+        	LauchCITMidweekDocuments.class);
     }
 
 }

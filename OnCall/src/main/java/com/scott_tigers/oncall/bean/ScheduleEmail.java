@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.scott_tigers.oncall.newschedule.Shift;
+import com.scott_tigers.oncall.shared.Constants;
 import com.scott_tigers.oncall.shared.Util;
 
 public class ScheduleEmail {
@@ -23,20 +24,21 @@ public class ScheduleEmail {
 
     public ScheduleEmail(Shift shift) {
 
-	email = "replace@me.com";
+	email = Constants.REPLACE_ME_EMAIL;
 
-//	List<Engineer> engineers = transformer.apply(shift.getEngineers());
 	List<Engineer> engineers = shift.getEngineers();
 
-	teamEmails = Util.getEngineerEmails(engineers);
-	toList = Util.getEngineerToList(engineers);
+	List<Engineer> citEngineers = engineers
+		.stream()
+		.filter(Engineer::isNotServerless)
+		.collect(Collectors.toList());
+
+	teamEmails = Util.getEngineerEmails(citEngineers);
+	toList = Util.getEngineerToList(citEngineers);
 
 	date = shift.getDate();
 
 	teamLead = engineers.get(0).getFirstName();
-
-	List<Engineer> citEngineers = engineers.stream().filter(eng -> eng.isNotServerless())
-		.collect(Collectors.toList());
 
 	IntStream.range(0, citEngineers.size()).forEach(index -> {
 	    try {

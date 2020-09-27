@@ -13,7 +13,7 @@ public class EmailsByDate {
     private String date;
     private String emails;
     private String to;
-    private String email = "replace@me.com";
+    private String email = Constants.REPLACE_ME_EMAIL;
 
     public static EmailsByDate fromTrainee(Entry<String, List<Engineer>> entry) {
 	return new EmailsByDate().trainee(entry);

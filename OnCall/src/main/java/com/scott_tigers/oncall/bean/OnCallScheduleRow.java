@@ -19,6 +19,10 @@ public class OnCallScheduleRow {
     public OnCallScheduleRow() {
     }
 
+    public OnCallScheduleRow(String type) {
+	this.type = type;
+    }
+
     public String getDate() {
 	return date;
     }

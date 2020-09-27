@@ -10,15 +10,16 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import com.scott_tigers.oncall.bean.Engineer;
-import com.scott_tigers.oncall.bean.ScheduleRow;
 import com.scott_tigers.oncall.bean.TT;
 import com.scott_tigers.oncall.bean.TTReader;
+import com.scott_tigers.oncall.newschedule.Shift;
+import com.scott_tigers.oncall.shared.Constants;
+import com.scott_tigers.oncall.shared.Dates;
 import com.scott_tigers.oncall.shared.EngineerFiles;
 import com.scott_tigers.oncall.shared.Properties;
+import com.scott_tigers.oncall.shared.Status;
 
 public class CreateRootCauseToDoList extends Utility implements TTReader {
-
-    private static final String SEARCH_START_DATE = "8/20/2020";
 
     static String[] validRootCauseMarkers = {
 	    "i.amazon.com/aurora",
@@ -47,16 +48,16 @@ public class CreateRootCauseToDoList extends Utility implements TTReader {
     private void run() throws Exception {
 	rootCauseNeededTTs = getTicketStreamFromUrl(getUrl())
 		.filter(this::notAssigned)
-		.filter(this::noRootCause)
+		.filter(this::needsWork)
 		.sorted(Comparator.comparing(TT::getCreateDate))
 		.collect(Collectors.toList());
 
-	getScheduleForThisWeekDeprecated().ifPresentOrElse(this::createRootCauseList,
+	getScheduleForThisWeek().ifPresentOrElse(this::createRootCauseList,
 		() -> System.out.println("No schedule is within range of today"));
     }
 
-    private void createRootCauseList(ScheduleRow schedule) {
-	engineerNames = schedule
+    private void createRootCauseList(Shift shift) {
+	engineerNames = shift
 		.getEngineers()
 		.stream().map(Engineer::getFirstName)
 		.collect(Collectors.toList());
@@ -75,43 +76,33 @@ public class CreateRootCauseToDoList extends Utility implements TTReader {
 
     @Override
     public String getUrl() {
-//	String date = Dates.SORTABLE
-//		.convertFormat(Dates.SORTABLE
-//			.getFormattedDelta(EngineerFiles.ROOT_CAUSE_TO_DO
-//				.readCSVToPojo(TT.class)
-//				.stream()
-//				.map(TT::getCreateDate)
-//				.min(Comparator.comparing(String::toString))
-//				.orElse(getYesterdayDate())
-//				.substring(0, 10),
-//				-1),
-//			Dates.TT_SEARCH);
-//
-//	System.out.println("date=" + (date));
-
 	return "https://tt.amazon.com/search?category=AWS&type=RDS-AuroraMySQL&item=Engine&assigned_group=aurora-head%3Boscar-eng-secondary&status=Assigned%3BResearching%3BWork+In+Progress%3BPending%3BResolved%3BClosed&impact=&assigned_individual=&requester_login=&login_name=&cc_email=&phrase_search_text=&keyword_bq=&exact_bq=&or_bq1=&or_bq2=&or_bq3=&exclude_bq=&create_date="
-		+ SEARCH_START_DATE
-		+ "&modified_date=&tags=&case_type=&building_id=&min_impact=3&search=Search%21#";
+		+ Dates.TT_SEARCH.getFormattedDelta(Dates.TT_SEARCH.getFormattedString(),
+			-Constants.ENGINE_TICKET_TRAILING_DAYS)
+		+ "&modified_date=&tags=&case_type=&building_id=&min_impact=2&search=Search%21#";
     }
 
-//    private String getYesterdayDate() {
-//	return Dates.SORTABLE.getFormattedDelta(Dates.SORTABLE.getFormattedString(), -2);
-//    }
-//
     private void assignOwner(int index) {
 	rootCauseNeededTTs.get(index).setOwner(engineerNames.get(index % engineerNames.size()));
     }
 
-    private boolean noRootCause(TT tt) {
-	String rootCauseDetails = tt.getRootCauseDetails().toLowerCase();
-	return Stream
-		.of(validRootCauseMarkers)
-		.noneMatch(rootCauseDetails::contains);
+    private boolean needsWork(TT tt) {
+
+	Predicate<TT> needsWork = t -> Status.get(t.getStatus()).needsWork();
+	Predicate<TT> noRootCause = t -> {
+	    String rootCauseDetails = t.getRootCauseDetails().toLowerCase();
+	    return Stream
+		    .of(validRootCauseMarkers)
+		    .noneMatch(rootCauseDetails::contains);
+	};
+
+	return Stream.of(needsWork, noRootCause).anyMatch(p -> p.test(tt));
     }
 
     @Override
     public Predicate<TT> getFilter() {
-	return tt -> noRootCause(tt) && !tt.getDescription().contains("Cross Issue Event - CIE");
+	return tt -> needsWork(tt);
+//	return tt -> unresolved(tt) && !tt.getDescription().contains("Cross Issue Event - CIE");
     }
 
 }

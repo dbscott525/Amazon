@@ -24,6 +24,7 @@ public class TT {
     private String item;
     private String resolvedBy;
     private String lastModifiedBy;
+    private int impact;
 
     @JsonProperty(Properties.CASE_ID)
     public String getCaseId() {
@@ -179,6 +180,15 @@ public class TT {
     @JsonProperty(Properties.ITEM)
     public void setItem(String item) {
 	this.item = item;
+    }
+
+    @JsonProperty("Impact")
+    public int getImpact() {
+	return impact;
+    }
+
+    public void setImpact(int impact) {
+	this.impact = impact;
     }
 
     public Integer getIntCaseId() {

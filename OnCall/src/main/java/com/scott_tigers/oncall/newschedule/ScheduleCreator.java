@@ -143,7 +143,8 @@ public class ScheduleCreator {
 
     private List<Engineer> availableEngs(String startDate) {
 	return engineers.stream()
-		.filter(eng -> DateStream.getStream(startDate, Dates.SORTABLE.getFormattedDelta(startDate, daysInShift), 1)
+		.filter(eng -> DateStream
+			.getStream(startDate, Dates.SORTABLE.getFormattedDelta(startDate, daysInShift), 1)
 			.noneMatch(eng::hasDateConflict))
 		.collect(Collectors.toList());
     }
@@ -244,6 +245,12 @@ public class ScheduleCreator {
 	    }
 	    return true;
 	};
+	return this;
+    }
+
+    public ScheduleCreator endAfterMonths(int months) {
+	endDate = Dates.SORTABLE.addMonths(Dates.SORTABLE.getFormattedString(), months);
+	System.out.println("endDate=" + (endDate));
 	return this;
     }
 }

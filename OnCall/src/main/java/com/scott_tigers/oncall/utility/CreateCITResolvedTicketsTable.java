@@ -9,7 +9,7 @@ import com.scott_tigers.oncall.bean.TicketStatusCount;
 import com.scott_tigers.oncall.shared.Dates;
 import com.scott_tigers.oncall.shared.EngineerFiles;
 import com.scott_tigers.oncall.shared.Properties;
-import com.scott_tigers.oncall.shared.TicketStatuses;
+import com.scott_tigers.oncall.shared.Status;
 
 public class CreateCITResolvedTicketsTable extends Utility implements Command {
 
@@ -21,7 +21,8 @@ public class CreateCITResolvedTicketsTable extends Utility implements Command {
     public void run() throws Exception {
 
 	List<TicketStatusCount> summaryList = getTicketStreamFromUrl(getUrl())
-		.filter(tt -> !tt.getStatus().equals(TicketStatuses.PENDING_PENDING_ROOT_CAUSE))
+//		.filter(tt -> !tt.getStatus().equals(TicketStatuses.PENDING_PENDING_ROOT_CAUSE))
+		.filter(tt -> Status.get(tt.getStatus()).includeInSummary())
 		.collect(Collectors.groupingBy(TT::getStatus))
 		.entrySet()
 		.stream()

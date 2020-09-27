@@ -6,6 +6,7 @@ import java.util.List;
 import com.scott_tigers.oncall.bean.Engineer;
 import com.scott_tigers.oncall.newschedule.Shift;
 import com.scott_tigers.oncall.shared.Dates;
+import com.scott_tigers.oncall.shared.Util;
 
 public class CreateEmailListFromSchedule extends Utility {
 
@@ -22,7 +23,7 @@ public class CreateEmailListFromSchedule extends Utility {
 		.map(Engineer::getUid)
 		.distinct()
 		.sorted()
-		.map(uid -> uid + "@amazon.com")
+		.map(Util.toAmazonEmail())
 		.forEach(System.out::println);
     }
 }

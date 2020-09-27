@@ -6,6 +6,7 @@ import com.scott_tigers.oncall.shared.Properties;
 public class TicketMetric implements Comparable<TicketMetric> {
     Integer createDateCount = 0;
     Integer resolvedDateCount = 0;
+    Integer open = 0;
     String date;
 
     public TicketMetric(String date) {
@@ -61,6 +62,19 @@ public class TicketMetric implements Comparable<TicketMetric> {
 
     public void setDate(String date) {
 	this.date = date;
+    }
+
+    @JsonProperty(Properties.OPEN)
+    public Integer getOpen() {
+	return open;
+    }
+
+    public void setOpen(Integer opened) {
+	this.open = opened;
+    }
+
+    public void setResolved(Integer resolved) {
+	this.resolvedDateCount = resolved;
     }
 
 }

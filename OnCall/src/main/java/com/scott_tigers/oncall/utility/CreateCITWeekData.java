@@ -14,15 +14,19 @@ import com.scott_tigers.oncall.newschedule.Shift;
 import com.scott_tigers.oncall.shared.Constants;
 import com.scott_tigers.oncall.shared.DateStream;
 import com.scott_tigers.oncall.shared.EngineerFiles;
+import com.scott_tigers.oncall.shared.Ran;
 
 public class CreateCITWeekData extends Utility implements Command {
+
+    private static final boolean OLD_STUFF = false;
 
     public static void main(String[] args) throws Exception {
 	new CreateCITWeekData().run();
     }
 
-    private List<String> engineers;
+    private List<String> engineersOld;
     private Shift shift;
+    private List<Engineer> engineers;
 
     @Override
     public void run() throws Exception {
@@ -32,42 +36,73 @@ public class CreateCITWeekData extends Utility implements Command {
 
     void createFileForShift(Shift shift) {
 	this.shift = shift;
-	engineers = shift
+	engineersOld = shift
 		.getEngineers()
 		.stream()
 		.filter(Engineer::isNotServerless)
 		.map(Engineer::getFullName)
+		.collect(Collectors.toList());
+	engineers = shift
+		.getEngineers()
+		.stream()
+		.filter(Engineer::isNotServerless)
 		.collect(Collectors.toList());
 
 	createCsvFile();
     }
 
     private void createCsvFile() {
-	Stream<String> dataStream = DateStream.getStream(shift.getDate(), Constants.NUMBER_OF_WEEKDAYS).map(date -> {
-	    List<String> randomEngineers = new ArrayList<String>(engineers);
-	    Collections.shuffle(randomEngineers);
-	    List<String> dates = DateStream.getStream(shift.getDate(), Constants.NUMBER_OF_WEEKDAYS)
-		    .collect(Collectors.toList());
 
-	    Stream<String> foo = Stream
-		    .of(Arrays.asList(date), engineers, randomEngineers, dates)
-		    .flatMap(List<String>::stream);
-	    return getCommaSeparatedList(foo);
-	});
+	if (OLD_STUFF) {
+	    Stream<String> dataStream = DateStream.getStream(shift.getDate(), Constants.NUMBER_OF_WEEKDAYS)
+		    .map(date -> {
+			List<String> randomEngineers = new ArrayList<String>(engineersOld);
+			Collections.shuffle(randomEngineers);
+			List<String> dates = DateStream.getStream(shift.getDate(), Constants.NUMBER_OF_WEEKDAYS)
+				.collect(Collectors.toList());
 
-	Stream<String> headerStream = Stream
-		.of(
-			Stream.of("Date"),
-			getHeaderStream("Engineer", engineers.size()),
-			getHeaderStream("RandomEngineer", engineers.size()),
-			getHeaderStream("Day", Constants.NUMBER_OF_WEEKDAYS))
-		.flatMap(Function.identity());
+			Stream<String> foo = Stream
+				.of(Arrays.asList(date), engineersOld, randomEngineers, dates)
+				.flatMap(List<String>::stream);
+			return getCommaSeparatedList(foo);
+		    });
 
-	Stream<String> hstream = Stream.of(getCommaSeparatedList(headerStream));
+	    Stream<String> headerStream = Stream
+		    .of(
+			    Stream.of("Date"),
+			    getHeaderStream("Engineer", engineersOld.size()),
+			    getHeaderStream("RandomEngineer", engineersOld.size()),
+			    getHeaderStream("Day", Constants.NUMBER_OF_WEEKDAYS))
+		    .flatMap(Function.identity());
 
-	List<String> lines = Stream.concat(hstream, dataStream).collect(Collectors.toList());
+	    Stream<String> hstream = Stream.of(getCommaSeparatedList(headerStream));
+	}
 
-	EngineerFiles.CIT_WEEK_DATA.write(writer -> writer.lines(lines).noOpen());
+//	Stream<Stream<String>> dataStream = Stream.empty();
+//	Stream<Stream<String>> hstream = Stream.empty();
+
+	Context context = new Context();
+
+	Stream<Stream<String>> headerStream = Stream.of(getSegmentStream()
+		.flatMap(x -> x.getHeaderStream(context)));
+
+	Stream<Stream<String>> dataStream = DateStream.getStream(shift.getDate(), Constants.NUMBER_OF_WEEKDAYS)
+		.map(date -> {
+		    context.setDate(date);
+		    return getSegmentStream().flatMap(x -> x.getDataStream(context));
+		});
+
+	List<String> lines = Stream.concat(headerStream, dataStream)
+		.map(x -> x.collect(Collectors.joining(",")))
+		.collect(Collectors.toList());
+
+//	List<String> lines = Stream.concat(hstream, dataStream).collect(Collectors.toList());
+
+	EngineerFiles.CIT_WEEK_DATA.write(writer -> writer.lines(lines));
+    }
+
+    private static Stream<Segment> getSegmentStream() {
+	return Stream.of(Segment.values());
     }
 
     private String getCommaSeparatedList(Stream<String> contentStream) {
@@ -79,6 +114,138 @@ public class CreateCITWeekData extends Utility implements Command {
 		.mapToObj(n -> {
 		    return prefix + n;
 		});
+    }
+
+    private class Context {
+
+	private String date;
+
+	public String getDate() {
+	    return date;
+	}
+
+	public String getStartDate() {
+	    return shift.getDate();
+	}
+
+	public void setDate(String date) {
+	    this.date = date;
+	}
+
+	public int getNumberOfEngineers() {
+	    return engineers.size();
+	}
+
+	public List<Engineer> getEngineers() {
+	    return engineers;
+	}
+
+    }
+
+    enum Segment {
+	DATE {
+	    @Override
+	    Stream<String> getHeaderStream(Context context) {
+		return Stream.of("Date");
+	    }
+
+	    @Override
+	    Stream<String> getDataStream(Context context) {
+		return Stream.of(context.getDate());
+	    }
+	},
+	ENGINEERS {
+	    @Override
+	    Stream<String> getHeaderStream(Context context) {
+		return getHeaderStream("Engineer", context.getNumberOfEngineers());
+	    }
+
+	    @Override
+	    Stream<String> getDataStream(Context context) {
+		return getAttributeStream(context, Engineer::getFullName);
+	    }
+
+	},
+	RANDOM_ENGINEERS {
+
+	    @Override
+	    Stream<String> getHeaderStream(Context context) {
+		return getHeaderStream("RandomEngineer", context.getNumberOfEngineers());
+	    }
+
+	    @Override
+	    Stream<String> getDataStream(Context context) {
+		return context.getEngineers().stream().map(Engineer::getFullName).collect(Ran.toStream());
+	    }
+	},
+	DAY_OF_WEEK {
+	    @Override
+	    Stream<String> getHeaderStream(Context context) {
+		return getHeaderStream("Day", Constants.NUMBER_OF_WEEKDAYS);
+	    }
+
+	    @Override
+	    Stream<String> getDataStream(Context context) {
+		return DateStream.getStream(context.getStartDate(), Constants.NUMBER_OF_WEEKDAYS);
+	    }
+	},
+	EMAIL_FILTER {
+	    @Override
+	    Stream<String> getHeaderStream(Context context) {
+		return getHeaderStream("Filter", context.getNumberOfEngineers());
+	    }
+
+	    @Override
+	    Stream<String> getDataStream(Context context) {
+		return getAttributeStream(context, eng -> "Entered by " + eng.getUid());
+//		return context
+//			.getEngineers()
+//			.stream()
+//			.map(Engineer::getUid)
+//			.map(uid -> "Entered by " + uid);
+	    }
+	},
+	UID {
+	    @Override
+	    Stream<String> getHeaderStream(Context context) {
+		return getHeaderStream("UID", context.getNumberOfEngineers());
+	    }
+
+	    @Override
+	    Stream<String> getDataStream(Context context) {
+		return getAttributeStream(context, Engineer::getUid);
+//		return context
+//			.getEngineers()
+//			.stream()
+//			.map(Engineer::getUid);
+	    }
+	},
+	EMAIL {
+	    @Override
+	    Stream<String> getHeaderStream(Context context) {
+		return getHeaderStream("Email", context.getNumberOfEngineers());
+	    }
+
+	    @Override
+	    Stream<String> getDataStream(Context context) {
+		return getAttributeStream(context, Engineer::getEmail);
+	    }
+	};
+
+	private static Stream<String> getHeaderStream(String prefix, int size) {
+	    return IntStream.rangeClosed(1, size)
+		    .mapToObj(n -> {
+			return prefix + n;
+		    });
+	}
+
+	abstract Stream<String> getHeaderStream(Context context);
+
+	abstract Stream<String> getDataStream(Context context);
+
+	private static Stream<String> getAttributeStream(Context context, Function<Engineer, String> mapper) {
+	    return context.getEngineers().stream().map(mapper);
+	}
     }
 
 }

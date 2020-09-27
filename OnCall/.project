@@ -42,11 +42,6 @@
 			<location>J:/SupportEngineering/OnCallData/Customer Issue Emails.csv</location>
 		</link>
 		<link>
-			<name>EngineeringSupportData/Customer Issue Team Schedule.json</name>
-			<type>1</type>
-			<location>J:/SupportEngineering/OnCallData/Customer Issue Team Schedule.json</location>
-		</link>
-		<link>
 			<name>EngineeringSupportData/Engine Ticket Daily Review.csv</name>
 			<type>1</type>
 			<location>J:/SupportEngineering/OnCallData/Engine Ticket Daily Review.csv</location>

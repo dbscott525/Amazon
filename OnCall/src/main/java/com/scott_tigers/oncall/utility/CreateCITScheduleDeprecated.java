@@ -18,7 +18,7 @@ import com.scott_tigers.oncall.shared.Dates;
  * @author bruscob
  */
 
-public class CreateCITSchedule {
+public class CreateCITScheduleDeprecated {
 
     private static final int ROTATION_DELTA = 2;
     private static final int SHIFT_SIZE = 5;
@@ -32,7 +32,7 @@ public class CreateCITSchedule {
     private static final int RUNS = 5;
 
     public static void main(String[] args) throws IOException {
-	new CreateCITSchedule().run();
+	new CreateCITScheduleDeprecated().run();
     }
 
     private void run() {

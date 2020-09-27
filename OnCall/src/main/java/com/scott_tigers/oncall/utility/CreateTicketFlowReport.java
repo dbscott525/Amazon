@@ -1,5 +1,6 @@
 package com.scott_tigers.oncall.utility;
 
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -12,6 +13,7 @@ import com.scott_tigers.oncall.bean.TT;
 import com.scott_tigers.oncall.shared.Dates;
 import com.scott_tigers.oncall.shared.EngineerFiles;
 import com.scott_tigers.oncall.shared.Properties;
+import com.scott_tigers.oncall.shared.URL;
 
 public class CreateTicketFlowReport extends Utility implements Command {
 
@@ -27,30 +29,60 @@ public class CreateTicketFlowReport extends Utility implements Command {
 
     @Override
     public void run() throws Exception {
-	Stream<TT> ticketStream = getDateStream().flatMap(dateRange -> {
-	    String url = URL_TEMPLATE.replaceAll("(.*?)START(.*?)END(.*)",
-		    "$1" + dateRange.getStartDate() + "$2" + dateRange.getEndDate() + "$3");
-	    try {
-		return getTicketStreamFromUrl(url);
-	    } catch (Exception e) {
-		Stream<TT> stream = Stream.empty();
-		return stream;
-	    }
-
-	});
-
 	TicketFlowAggregator tfa = new TicketFlowAggregator();
-	ticketStream.forEach(tfa::newTicket);
+
+	getDateStream()
+		.flatMap(this::getDateRangeTicketStream)
+		.forEach(tfa::newTicket);
+
 	List<TicketMetric> result = tfa.getMetrics();
+	result.remove(result.size() - 1);
+
+	OpenTicketComputer openTicketComputer = new OpenTicketComputer(
+		getTicketStreamFromUrl(URL.OPEN_CUSTOMER_ISSUE_TICKETS).count());
+
+	result
+		.stream()
+		.sorted(Comparator.reverseOrder())
+		.forEach(openTicketComputer::updateOpenTickets);
+
 	EngineerFiles.TICKET_FLOW_REPORT.write(writer -> writer
 		.CSV(result,
 			Properties.DATE,
 			Properties.CREATED,
-			Properties.RESOLVED));
+			Properties.RESOLVED,
+			Properties.OPEN));
 
 	waitForDataFileLaunch();
-
 	EngineerFiles.TICKET_FLOW_GRAPH.launch();
+	waitForDataFileLaunch();
+	EngineerFiles.TICKET_FLOW_GRAPH_WITH_OPENED.launch();
+    }
+
+    private Stream<? extends TT> getDateRangeTicketStream(DateRange dateRange) {
+	String url = URL_TEMPLATE.replaceAll("(.*?)START(.*?)END(.*)",
+		"$1" + dateRange.getStartDate() + "$2" + dateRange.getEndDate() + "$3");
+	try {
+	    return getTicketStreamFromUrl(url);
+	} catch (Exception e) {
+	    Stream<TT> stream = Stream.empty();
+	    return stream;
+	}
+    }
+
+    private class OpenTicketComputer {
+
+	private int openTickets;
+
+	public OpenTicketComputer(long openTickets) {
+	    this.openTickets = (int) openTickets;
+	}
+
+	public void updateOpenTickets(TicketMetric ticketMetric) {
+	    ticketMetric.setOpen(openTickets);
+	    openTickets += (ticketMetric.getResolvedDateCount() - ticketMetric.getCreateDateCount());
+//	    openTickets += (ticketMetric.getCreateDateCount() - ticketMetric.getResolvedDateCount());
+	}
     }
 
     private class DateRange {

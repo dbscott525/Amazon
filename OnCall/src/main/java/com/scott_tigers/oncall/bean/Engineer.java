@@ -16,6 +16,7 @@ import com.google.gson.GsonBuilder;
 import com.scott_tigers.oncall.schedule.DateStringContainer;
 import com.scott_tigers.oncall.schedule.Scheduler;
 import com.scott_tigers.oncall.shared.Dates;
+import com.scott_tigers.oncall.shared.EngineerType;
 import com.scott_tigers.oncall.shared.Expertise;
 import com.scott_tigers.oncall.shared.ResultCache;
 
@@ -313,5 +314,9 @@ public class Engineer {
     @JsonIgnore
     public boolean isNotServerless() {
 	return Expertise.get(expertise) != Expertise.Serverless;
+    }
+
+    public boolean isType(EngineerType engineerType) {
+	return type.compareTo(engineerType.toString()) == 0;
     }
 }

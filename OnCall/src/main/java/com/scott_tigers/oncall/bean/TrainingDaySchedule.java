@@ -18,6 +18,9 @@ public class TrainingDaySchedule {
 
 	boolean found = false;
 	int tries = 0;
+	System.out.println("date=" + (date));
+	System.out.println("engineers.size()=" + (engineers.size()));
+	System.out.println("ShadowSlot.values().length=" + (ShadowSlot.values().length));
 
 	while (!found) {
 	    if (tries > 1000) {

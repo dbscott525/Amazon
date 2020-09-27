@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 import com.scott_tigers.oncall.shared.Dates;
 import com.scott_tigers.oncall.shared.EngineerFiles;
 import com.scott_tigers.oncall.shared.Properties;
-import com.scott_tigers.oncall.shared.TicketStatuses;
+import com.scott_tigers.oncall.shared.Status;
 
 public class CreateEngineTicketReviewCSV extends Utility {
 
@@ -28,7 +28,8 @@ public class CreateEngineTicketReviewCSV extends Utility {
     private void run() throws Exception {
 	EngineerFiles.ENGINE_TICKET_DAILY_REVIEW
 		.writeCSV(getTicketStreamFromUrl(getURL())
-			.filter(tt -> !tt.getStatus().equals(TicketStatuses.PENDING_PENDING_ROOT_CAUSE))
+//			.filter(tt -> !tt.getStatus().equals(TicketStatuses.PENDING_PENDING_ROOT_CAUSE))
+			.filter(tt -> Status.get(tt.getStatus()).includeInSummary())
 			.collect(Collectors.toList()),
 			ENGINE_REVIEW_COLUMNS);
 

@@ -24,5 +24,6 @@ public class CreateCITOnlineSchedule extends Utility implements Command {
 
 	EngineerFiles.ONLINE_SCHEDULE.write(w -> w
 		.json(onlineSchedule));
+	launchUrl("https://oncall.corp.amazon.com/#/view/aurora-head-ams-customer-issues-team/schedule");
     }
 }

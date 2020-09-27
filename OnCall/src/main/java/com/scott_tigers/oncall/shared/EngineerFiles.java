@@ -45,6 +45,7 @@ public enum EngineerFiles {
     CIT_EVALUATION_TEMPLATE            ("CIT Evaluation Template", Constants.DOCX_EXTENSION),
     CIT_EVALUATIONS                    ("CIT Evaluations",Constants.XML_EXTENSION),
     CIT_SCHEDULE                       ("CIT Schedule",Constants.JSON_EXTENSION),
+    CIT_TICKET_TRANSITION              ("CIT Ticket Transition",Constants.DOCX_EXTENSION),
     CIT_WEEK_DATA                      ("CIT Week Data"), 
     CIT_WEEK_WELCOME                   ("CIT Week Welcome",Constants.DOCX_EXTENSION),
     CUSTOMER_ISSUE_BACKLOG             ("Customer Issue Backlog"),
@@ -56,6 +57,7 @@ public enum EngineerFiles {
     DSU                                ("DSU",  Constants.XML_EXTENSION),    
     DSU_DATA                           ("DSU Data"),
     DSU_TEMPLATE                       ("DSU Template", Constants.XML_EXTENSION),
+    EMAILS                             ("Emails"),
     ENGINE_TICKET_COUNTS               ("Engine Ticket Counts"),
     ENGINE_TICKET_DAILY_REVIEW         ("Engine Ticket Daily Review"),
     ENGINEER_ADDS                      ("Engineers to be Added"),
@@ -67,10 +69,13 @@ public enum EngineerFiles {
     KEYWORD_POINTS                     ("Keyword Points"),
     LEVELS_FROM_QUIP                   ("Levels From Quip"),
     LTTR_PLAN_TEST                     ("LTTR Plan Test"),
+    LTTR_PLAN_TICKETS                  ("LTTR Plan Tickets"),
+    LTTR_PRIORITIZED_TICKETS           ("LTTR Prioritized Tickets"),
     MASTER_LIST                        ("Engineer Master List"),
     MODULE_LABEL_TAXONOMY	       ("Module Label Taxonomy"),
     MODULE_LABEL_TAXONOMY_RAW_DATA     ("Module Label Taxonomy Raw Data"),
     NEW_LEVEL_ENGINEERS                ("New Level Engineers"),
+    OFFSHORE_UIDS                      ("Offshore UIDs"),
     ON_CALL_DAILY_REMINDER_EMAIL       ("On Call Daily Reminder Email",Constants.DOCX_EXTENSION),
     ON_CALL_SCHEDULE                   ("On Call Schedule"),
     ONLINE_SCHEDULE                    ("Online Schedule", Constants.JSON_EXTENSION),
@@ -83,6 +88,7 @@ public enum EngineerFiles {
     TICKET_CLOSURE_BAR_GRAPH           ("Ticket Closure Bar Graph", Constants.XLSX_EXTENSION),
     TICKET_CLOSURES                    ("Ticket Closures"),
     TICKET_FLOW_GRAPH                  ("Ticket Flow Graph", Constants.XLSX_EXTENSION),
+    TICKET_FLOW_GRAPH_WITH_OPENED      ("Ticket Flow Graph With Opened", Constants.XLSX_EXTENSION),
     TICKET_FLOW_REPORT                 ("Ticket Flow Report"),
     TICKET_REDUCTION_PROJECTION        ("Ticket Reduction Projection"),
     TRAINEE_EMAILS                     ("Trainee Emails"),
@@ -158,6 +164,7 @@ public enum EngineerFiles {
 	System.out.println("getArchivePath()=" + (getArchivePath()));
 	System.out.println("fileName=" + (fileName));
 	FileUtils.copyFile(new File(getFileName()), new File(getArchivePath()));
+	launch();
     }
 
     protected String extension() {
@@ -188,6 +195,7 @@ public enum EngineerFiles {
     }
 
     public void launch() {
+	System.out.println("Launching " + getFileName());
 	launch(getFileName());
     }
 
