@@ -20,7 +20,7 @@ public class Constants {
     public static final String CSV_EXTENSION = ".csv";
     public static final double CUSTOMER_ISSUE_AGE_EXPONENT = .6;
     public static final String DOCX_EXTENSION = ".docx";
-    public static final int ENGINE_TICKET_TRAILING_DAYS = 7;
+    public static final int ENGINE_TICKET_TRAILING_DAYS = 4;
     public static final String ENGINEER_TYPE_TRAINEE = "Trainee";
     public static final String ITEM_CUSTOMER_ISSUE = "CustomerIssue";
     public static final String ITEM_ENGINE = "Engine";
@@ -63,5 +63,7 @@ public class Constants {
     public static final String XLSX_EXTENSION = ".xlsx";
     public static final String XML_EXTENSION = ".xml";
     public static final String REPLACE_ME_EMAIL = "replace@me.com";
+    public static final String CHROME_USER_DATA_LOCATION = "C:\\Users\\bruscob\\AppData\\Local\\Google\\Chrome\\User Data";
+    public static final String CHROMEDRIVER_EXE_LOCATION = "P:\\bin\\chromedriver.exe";
 
 }

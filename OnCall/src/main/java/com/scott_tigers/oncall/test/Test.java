@@ -1,8 +1,11 @@
 package com.scott_tigers.oncall.test;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.scott_tigers.oncall.bean.Engineer;
+import com.scott_tigers.oncall.bean.LTTRTicket;
 import com.scott_tigers.oncall.shared.EngineerFiles;
+import com.scott_tigers.oncall.shared.Json;
 import com.scott_tigers.oncall.utility.Utility;
 
 @JsonIgnoreProperties
@@ -13,8 +16,14 @@ public class Test extends Utility {
     }
 
     private void run() throws Exception {
-	EngineerFiles.OFFSHORE_UIDS.readCSV().stream().map(Engineer::getUid).forEach(System.out::println);
-
+	List<LTTRTicket> tickets = EngineerFiles.LTTR_PLAN_TICKETS.readCSVToPojo(LTTRTicket.class);
+	tickets.stream()
+		.forEach(tkt -> {
+		    String newDes = tkt.getDescription().split("\n")[0];
+		    tkt.setDescription(newDes);
+		});
+	Json.print(tickets);
+	EngineerFiles.LTTR_PLAN_TICKETS.write(x -> x.CSV(tickets, LTTRTicket.class));
     }
 
 }

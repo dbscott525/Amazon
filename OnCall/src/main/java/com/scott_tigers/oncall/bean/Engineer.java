@@ -49,6 +49,14 @@ public class Engineer {
     private transient ResultCache<String, Boolean> dateConflictCache = new ResultCache<String, Boolean>();
     private transient ResultCache<Integer, Boolean> percentileCache = new ResultCache<Integer, Boolean>();
 
+    public Engineer(OnCallScheduleRow onCallScheduleRow) {
+	uid = onCallScheduleRow.getUid();
+	type = onCallScheduleRow.getType();
+    }
+
+    public Engineer() {
+    }
+
     public String getFirstName() {
 	return firstName;
     }
@@ -292,10 +300,11 @@ public class Engineer {
 	return Optional
 		.ofNullable(trainingDate)
 		.filter(Predicate.not(String::isEmpty))
-		.filter(this::isAfterToday)
+//		.filter(this::isAfterToday) THIS SEEMS NOT TO BE NECESSARY
 		.isPresent();
     }
 
+    @SuppressWarnings("unused")
     private boolean isAfterToday(String date) {
 	return new Date().compareTo(Dates.ONLINE_SCHEDULE.getDateFromString(date)) < 0;
     }

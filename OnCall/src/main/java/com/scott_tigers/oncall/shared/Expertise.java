@@ -1,6 +1,7 @@
 package com.scott_tigers.oncall.shared;
 
 public enum Expertise {
+    QP,
     Binlog,
     MySQL8 {
 	@Override

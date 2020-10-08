@@ -13,7 +13,7 @@ public class LauchCITMidweekDocuments extends Utility implements Command {
     public void run() throws Exception {
 	EngineerFiles.CIT_WEEK_WELCOME.launch();
 	EngineerFiles.ON_CALL_DAILY_REMINDER_EMAIL.launch();
-	EngineerFiles.CIT_TICKET_TRANSITION.launch();
+	EngineerFiles.CIT_LAST_DAY_EMAIL.launch();
 	launchUrl(URL.CIT_ON_CALL_SCHEDULE);
 	launchUrl(URL.CIT_SCHEDULE);
     }

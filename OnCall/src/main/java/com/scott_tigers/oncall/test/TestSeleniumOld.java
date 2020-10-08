@@ -11,14 +11,14 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-public class TestSelenium {
+public class TestSeleniumOld {
 
     public static void main(String[] args) {
 	// declaration and instantiation of objects/variables
 //	System.setProperty("webdriver.gecko.driver", "C:\\geckodriver.exe");
 //	WebDriver driver = new FirefoxDriver();
 
-	System.setProperty("webdriver.chrome.driver", "c:\\chromedriver.exe");
+	System.setProperty("webdriver.chrome.driver", "P:\\Bin\\chromedriver.exe");
 
 	ChromeOptions chromeProfile = new ChromeOptions();
 //	chromeProfile.addArguments("chrome.switches", "--disable-extensions");

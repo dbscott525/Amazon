@@ -221,6 +221,7 @@ public class Utility {
     }
 
     private Stream<TT> getTicketStream(String ttFileName) throws IOException {
+	System.out.println("ttFileName=" + (ttFileName));
 	Class<TT> pojoClass = TT.class;
 
 	List<String> lines = Files.readAllLines(Paths.get(ttFileName), Charset.forName("ISO-8859-1"));
@@ -525,11 +526,11 @@ public class Utility {
 
     @SuppressWarnings("unchecked")
     protected void launchCITUpdater() {
-        runCommands(
-        	CreateCSVSchedule.class,
-        	CreateCITOnlineSchedule.class,
-        	CreateCITEmails.class,
-        	LauchCITMidweekDocuments.class);
+	runCommands(
+		CreateCSVSchedule.class,
+		CreateCITOnlineSchedule.class,
+		CreateCITEmails.class,
+		LauchCITMidweekDocuments.class);
     }
 
 }
