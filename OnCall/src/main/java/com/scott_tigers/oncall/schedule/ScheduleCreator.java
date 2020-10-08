@@ -1,4 +1,4 @@
-package com.scott_tigers.oncall.newschedule;
+package com.scott_tigers.oncall.schedule;
 
 import java.util.Collections;
 import java.util.Date;

@@ -7,8 +7,6 @@ import com.google.gson.Gson;
 
 public class DateStringContainer {
 
-    // json={"dates":["Geeks","for","Geeks"]}
-
     List<String> dates;
 
     public List<String> getDates() {

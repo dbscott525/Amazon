@@ -14,7 +14,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.scott_tigers.oncall.schedule.DateStringContainer;
-import com.scott_tigers.oncall.schedule.Scheduler;
+import com.scott_tigers.oncall.shared.Constants;
 import com.scott_tigers.oncall.shared.Dates;
 import com.scott_tigers.oncall.shared.EngineerType;
 import com.scott_tigers.oncall.shared.Expertise;
@@ -44,10 +44,8 @@ public class Engineer {
     private String uid;
 
     private int shiftsCompleted;
-    private transient Scheduler scheduler;
     private transient DateStringContainer oooDates;
     private transient ResultCache<String, Boolean> dateConflictCache = new ResultCache<String, Boolean>();
-    private transient ResultCache<Integer, Boolean> percentileCache = new ResultCache<Integer, Boolean>();
 
     public Engineer(OnCallScheduleRow onCallScheduleRow) {
 	uid = onCallScheduleRow.getUid();
@@ -122,7 +120,6 @@ public class Engineer {
     }
 
     private boolean beforeStartDate(String date) {
-//	return false;
 	if (!optionalString(startDate).isPresent()) {
 	    return false;
 	}
@@ -131,16 +128,11 @@ public class Engineer {
     }
 
     public boolean afterEndDate(String date) {
-//	return false;
 	if (!optionalString(endDate).isPresent()) {
 	    return false;
 	}
 	return Dates.ONLINE_SCHEDULE.convertFormat(endDate, Dates.SORTABLE).compareTo(date) < 0;
     }
-
-//    private boolean afterEndDate(String date) {
-//	return dateComparator(endDate, x -> x >= 0);
-//    }
 
     private boolean outOfOffice(String date) {
 	return optionalString(ooo)
@@ -171,16 +163,6 @@ public class Engineer {
 
     }
 
-    public void setScheduler(Scheduler scheduler) {
-	this.scheduler = scheduler;
-    }
-
-    public boolean isGreaterThanPercentile(int percentile) {
-	return percentileCache
-		.evaluate(percentile,
-			() -> scheduler.isGreaterThanPercnetile(percentile, level));
-    }
-
     @JsonIgnore
     public String getFullName() {
 	return firstName + " " + lastName;
@@ -188,16 +170,12 @@ public class Engineer {
 
     @JsonIgnore
     public String getFullNameWithExertise() {
-//	Expertise.get(expertise);
-//	String expertiseNotation = expertise.length() == 0
-//		? ""
-//		: " (" + expertise + ")";
 	return getFullName() + Expertise.get(expertise).getNotation();
     }
 
     @JsonIgnore
     public String getEmail() {
-	return uid + "@amazon.com";
+	return uid + Constants.AMAZON_EMAIL_POSTFIX;
     }
 
     @JsonIgnore

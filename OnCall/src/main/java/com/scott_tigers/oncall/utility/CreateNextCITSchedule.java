@@ -2,7 +2,7 @@ package com.scott_tigers.oncall.utility;
 
 import java.io.IOException;
 
-import com.scott_tigers.oncall.newschedule.ScheduleCreator;
+import com.scott_tigers.oncall.schedule.ScheduleCreator;
 import com.scott_tigers.oncall.shared.URL;
 
 @SuppressWarnings("unchecked")

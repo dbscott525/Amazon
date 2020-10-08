@@ -1,190 +1,203 @@
 package com.scott_tigers.oncall.schedule;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.BinaryOperator;
-import java.util.function.Supplier;
-import java.util.stream.Collector;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Random;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 
 import com.scott_tigers.oncall.bean.Engineer;
-import com.scott_tigers.oncall.bean.ScheduleRow;
-import com.scott_tigers.oncall.shared.Constants;
-import com.scott_tigers.oncall.shared.Util;
+import com.scott_tigers.oncall.bean.ScheduleContainer;
+import com.scott_tigers.oncall.shared.Dates;
 
 public class Schedule {
 
-    private List<Engineer> engineers;
-    private List<List<Engineer>> daySchedules;
-    private Scheduler scheduler;
+    private List<Shift> shifts;
+    private Double levelStandardDeviation;
+    private transient ScheduleCreator scheduleCreator;
+    private long tryCount;
+//    private transient Random random = new Random();
 
-    public Schedule(Scheduler scheduler, List<Engineer> candidateSchedule) {
-	this.scheduler = scheduler;
-//	this.engineers = candidateSchedule;
-	this.engineers = candidateSchedule.subList(0, scheduler.getTeamSize() * scheduler.getShifts());
-	daySchedules = IntStream
-		.range(0, engineers.size())
-		.mapToObj(Integer::valueOf)
-		.collect(scheduleCollector());
-    }
-
-    public Schedule getBestSchedule(Schedule bestSchedule) {
-
-	if (hasDateConflict() || hasSmeProblem()) {
-	    return bestSchedule;
-	}
-
-	if (bestSchedule == null) {
-	    return this;
-	}
-
-	double standardDeviation = getStandardDeviation();
-	boolean betterStandardDeviation = standardDeviation < bestSchedule.getStandardDeviation();
-
-	if (betterStandardDeviation) {
-	    System.out.println("try "
-		    + scheduler.getSchedulesTried()
-		    + ", " + new Date() + ": standardDeviation=" + (standardDeviation));
-	}
-
-	return betterStandardDeviation ? this : bestSchedule;
-
-    }
-
-    private boolean hasSmeProblem() {
-
-	return daySchedules
+    public Schedule(ScheduleContainer oldSchedule) {
+	shifts = oldSchedule
+		.getScheduleRows()
 		.stream()
-		.anyMatch(daySchedule -> daySchedule
-			.stream()
-			.filter(e -> !e.getExpertise().isEmpty())
-			.collect(Collectors.groupingBy(Engineer::getExpertise, Collectors.counting()))
-			.entrySet()
-			.stream()
-			.anyMatch(scheduler::smeOutOfRang));
+		.map(Shift::new)
+		.collect(Collectors.toList());
     }
 
-    private boolean hasDateConflict() {
-	return scheduleRange()
-		.anyMatch(scheduleNumber -> {
-		    int scheduleDayOne = scheduleNumber * scheduler.getShiftFrequency();
-		    return IntStream
-			    .range(0, scheduler.getShiftSize())
-			    .anyMatch(shiftDay -> {
-				String date = getDateString(scheduleDayOne + shiftDay);
-				return daySchedules.get(scheduleNumber)
-					.stream().anyMatch(eng -> eng.hasDateConflict(date));
-			    });
+    public Schedule(ScheduleCreator scheduleCreator) {
+	this.scheduleCreator = scheduleCreator;
+	shifts = new ArrayList<>(scheduleCreator.getExistingSchedule().shifts);
+	tryCount = scheduleCreator.getIterations();
+    }
+
+    public double getLevelStandardDeviation() {
+	return Optional
+		.ofNullable(levelStandardDeviation)
+		.orElseGet(() -> {
+		    levelStandardDeviation = new StandardDeviation(false)
+			    .evaluate(shifts
+			        .stream()
+			        .filter(s -> !s.isBefore(scheduleCreator.getStartDate()))
+			        .mapToDouble(Shift::getSumOfLevels)
+			        .toArray());
+		    return levelStandardDeviation;
 		});
-//	return scheduleRange().anyMatch(day -> {
-//	    String date = getDateString(day);
-//	    return daySchedules.get(day).stream().anyMatch(eng -> {
-//		return eng.hasDateConflict(date);
-//	    });
-//	});
     }
 
-    public double getStandardDeviation() {
-
-	double[] levelSums = daySchedules.stream()
-		.map(engineers -> engineers
-			.stream()
-			.map(Engineer::getLevel)
-			.mapToDouble(Double::doubleValue)
-			.sum())
-		.mapToDouble(x -> x)
-		.toArray();
-
-	return new StandardDeviation(false).evaluate(levelSums);
-    }
-
-    private Collector<Integer, List<List<Engineer>>, List<List<Engineer>>> scheduleCollector() {
-	Supplier<List<List<Engineer>>> supplier = () -> new ArrayList<List<Engineer>>();
-
-	BiConsumer<List<List<Engineer>>, Integer> accumlator = (result, index) -> {
-	    int i = (int) index / scheduler.getTeamSize();
-	    while (result.size() < i + 1) {
-		result.add(new ArrayList<Engineer>());
-	    }
-	    result.get(i).add(engineers.get((int) index));
-	};
-
-	BinaryOperator<List<List<Engineer>>> combiner = (result1, result2) -> Stream
-		.concat(result1.stream(), result1.stream())
+    public void truncate() {
+	shifts = shifts
+		.stream()
+		.filter(s -> s.isBefore(scheduleCreator.getStartDate()))
 		.collect(Collectors.toList());
 
-	return Collector.of(supplier, accumlator, combiner);
-
     }
 
-    @Override
-    public String toString() {
+    public void addShift(Shift shift) {
+	shifts.add(shift);
+    }
 
-	try {
-	    ByteArrayOutputStream os = new ByteArrayOutputStream();
-	    PrintStream ps = new PrintStream(os);
-	    getScheduleString(ps);
-	    return os.toString("UTF8");
-	} catch (UnsupportedEncodingException e) {
-	    e.printStackTrace();
-	    return "";
+    public void setScheduleCreator(ScheduleCreator scheduleCreator) {
+	this.scheduleCreator = scheduleCreator;
+	shifts.stream().forEach(shift -> shift.setScheduleCreator(scheduleCreator));
+    }
+
+    public List<Engineer> getCandidates(String date, List<Engineer> candidateEngineers)
+	    throws ImpossibleScheduleCombinationException {
+	Integer index = Optional
+		.ofNullable(shifts.size() - scheduleCreator.getMaximumShiftFrequency())
+		.filter(i -> i > 0)
+		.orElse(0);
+
+	Map<Engineer, Engineer> excludedEngineers = shifts
+		.subList(index, shifts.size())
+		.stream()
+		.map(Shift::getEngineers)
+		.flatMap(List<Engineer>::stream)
+		.distinct()
+		.collect(Collectors.toMap(Function.identity(), Function.identity()));
+
+	Random random = new Random();
+
+	Map<Engineer, Long> shiftCounts = getShiftCounts();
+
+	DuplicateSmeEliminator duplicateSmeEliminator = new DuplicateSmeEliminator();
+
+	List<Engineer> finalList = candidateEngineers
+		.stream()
+		.filter(Predicate.not(excludedEngineers::containsKey))
+		.map(engineer -> new RandomUid(engineer, shiftCounts.get(engineer), random.nextDouble()))
+		.sorted()
+		.map(RandomUid::getEngineer)
+		.filter(engineer -> duplicateSmeEliminator.notDuplicate(engineer))
+		.collect(Collectors.toList());
+
+	if (finalList.size() < scheduleCreator.getShiftSize()) {
+	    throw new ImpossibleScheduleCombinationException();
+	}
+
+	return finalList
+		.subList(0, scheduleCreator.getShiftSize());
+    }
+
+    private Map<Engineer, Long> getShiftCounts() {
+	String startDate = Dates.SORTABLE.getFormattedDelta(scheduleCreator.getStartDate(),
+		scheduleCreator.getDaysInShifts());
+	Map<Engineer, Long> scheduleCount = shifts
+		.stream()
+		.map(Shift::getEngineers)
+		.flatMap(List<Engineer>::stream)
+		.filter(eng -> !eng.afterEndDate(startDate))
+		.collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+	return scheduleCount;
+    }
+
+    public Schedule getBestSchedule(Schedule currentBestSchedule) {
+	if (currentBestSchedule == null || isBetter(currentBestSchedule)) {
+	    new DecimalFormat("#.000").format(getLevelStandardDeviation());
+	    System.out.println(new Date() + " Try="
+		    + String.format("%,12.0f", (double) tryCount)
+		    + " STD=" + new DecimalFormat("0.000000000").format(getLevelStandardDeviation()));
+	    return this;
+	} else {
+	    return currentBestSchedule;
 	}
     }
 
-    private void getScheduleString(PrintStream ps) {
-	ps.println();
-	ps.println("getStandardDeviation()=" + (getStandardDeviation()));
-	scheduleRange()
-		.forEach(day -> {
-		    String engineers = daySchedules
-			    .get(day)
-			    .stream()
-			    .map(Engineer::getFirstName)
-			    .collect(Collectors.joining(","));
-		    ps.println(getAdjustedDate(day) + ": " + engineers);
-		});
+    private boolean isBetter(Schedule schedule) {
+	return schedule.getCompositeStandarDeviation() > getCompositeStandarDeviation();
     }
 
-    private String getAdjustedDate(int day) {
-	return getDateString(day * scheduler.getShiftFrequency());
+    private double getCompositeStandarDeviation() {
+	return getLevelStandardDeviation();
     }
 
-    private IntStream scheduleRange() {
-	return IntStream
-		.range(0, daySchedules.size());
+    public List<Shift> getShifts() {
+	return shifts;
     }
 
-    private String getDateString(int daySchedule) {
-	return Util.getDateIncrementString(scheduler.getStartDate(), daySchedule, Constants.SORTABLE_DATE_FORMAT);
+    private class RandomUid implements Comparable<RandomUid> {
+
+	private Engineer engineer;
+	private int shifts;
+	private double random;
+
+	public RandomUid(Engineer engineer, Long shifts, double random) {
+	    this.engineer = engineer;
+	    this.shifts = Optional
+		    .ofNullable(shifts)
+		    .map(Long::intValue)
+		    .orElse(0);
+	    this.random = random;
+	}
+
+	@Override
+	public int compareTo(RandomUid o) {
+
+	    if (engineer.getRequiredOrder() != o.engineer.getRequiredOrder()) {
+		return engineer.getRequiredOrder() - o.engineer.getRequiredOrder();
+	    }
+
+	    if (shifts != o.shifts) {
+		return shifts - o.shifts;
+	    }
+
+//	    return 0;
+
+	    return (int) ((random - o.random) * 10000);
+	}
+
+	public Engineer getEngineer() {
+	    return engineer;
+	}
+
     }
 
-    public List<ScheduleRow> getScheduleRows() {
-	return scheduleRange().mapToObj(day -> {
-	    return new ScheduleRow(getAdjustedDate(day), daySchedules.get(day)
-		    .stream()
-		    .sorted(Comparator.comparingDouble(Engineer::getLevel)
-			    .reversed())
-		    .collect(Collectors.toList()));
-	})
-		.collect(Collectors.toList());
-    }
+    private class DuplicateSmeEliminator {
+	private List<String> foundSMEs = new ArrayList<>();
 
-    public Date getNextDate() {
-	Calendar c = Calendar.getInstance();
-	c.setTime(scheduler.getStartDate());
-	c.add(Calendar.DATE, daySchedules.size());
-	return c.getTime();
-    }
+	public boolean notDuplicate(Engineer engineer) {
+	    String expertise = engineer.getExpertise();
+	    if (expertise.length() == 0) {
+		return true;
+	    }
 
+	    if (foundSMEs.contains(expertise)) {
+		return false;
+	    }
+
+	    foundSMEs.add(expertise);
+
+	    return true;
+	}
+
+    }
 }

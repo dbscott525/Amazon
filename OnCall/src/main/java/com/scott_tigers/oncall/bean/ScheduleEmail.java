@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import com.scott_tigers.oncall.newschedule.Shift;
+import com.scott_tigers.oncall.schedule.Shift;
 import com.scott_tigers.oncall.shared.Constants;
 import com.scott_tigers.oncall.shared.Util;
 

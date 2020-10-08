@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import com.scott_tigers.oncall.bean.Engineer;
-import com.scott_tigers.oncall.newschedule.Shift;
+import com.scott_tigers.oncall.schedule.Shift;
 import com.scott_tigers.oncall.shared.Dates;
 import com.scott_tigers.oncall.shared.Util;
 

@@ -5,7 +5,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import com.google.gson.GsonBuilder;
-import com.scott_tigers.oncall.newschedule.Shift;
+import com.scott_tigers.oncall.schedule.Shift;
 import com.scott_tigers.oncall.shared.Dates;
 
 public class CitScheduleRow {

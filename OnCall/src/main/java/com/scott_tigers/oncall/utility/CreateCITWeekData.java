@@ -10,7 +10,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import com.scott_tigers.oncall.bean.Engineer;
-import com.scott_tigers.oncall.newschedule.Shift;
+import com.scott_tigers.oncall.schedule.Shift;
 import com.scott_tigers.oncall.shared.Constants;
 import com.scott_tigers.oncall.shared.DateStream;
 import com.scott_tigers.oncall.shared.EngineerFiles;

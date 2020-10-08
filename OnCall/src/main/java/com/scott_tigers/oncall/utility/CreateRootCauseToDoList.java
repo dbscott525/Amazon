@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 import com.scott_tigers.oncall.bean.Engineer;
 import com.scott_tigers.oncall.bean.TT;
 import com.scott_tigers.oncall.bean.TTReader;
-import com.scott_tigers.oncall.newschedule.Shift;
+import com.scott_tigers.oncall.schedule.Shift;
 import com.scott_tigers.oncall.shared.Constants;
 import com.scott_tigers.oncall.shared.Dates;
 import com.scott_tigers.oncall.shared.EngineerFiles;
