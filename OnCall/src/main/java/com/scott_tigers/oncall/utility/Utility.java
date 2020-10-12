@@ -371,6 +371,11 @@ public class Utility {
     protected List<EngineerMetric> getTicketClosedMetrics() {
 	try {
 	    getMetricMap();
+	    double average = metricMap.values().stream().map(x -> x.getTicketsPerWeek()).mapToDouble(x -> x)
+		    .average()
+		    .orElse(Double.NaN);
+	    System.out.println("average=" + (average));
+	    metricMap.put("AVERAGE", new EngineerMetric("AVERAGE", average));
 	    List<EngineerMetric> metrics = metricMap
 		    .values()
 		    .stream()

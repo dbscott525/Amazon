@@ -9,10 +9,15 @@ public class EngineerMetric {
     private transient int weeks = 0;
     private transient int tickets = 0;
     private String name;
-    private double ticketsPerWeek;
+    private Double ticketsPerWeek;
 
     public EngineerMetric(Engineer eng) {
 	name = eng.getFullName();
+    }
+
+    public EngineerMetric(String name, double ticketsPerWeek) {
+	this.name = name;
+	this.ticketsPerWeek = ticketsPerWeek;
     }
 
     public void addWeek() {

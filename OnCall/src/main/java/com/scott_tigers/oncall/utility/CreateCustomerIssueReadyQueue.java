@@ -110,23 +110,13 @@ public class CreateCustomerIssueReadyQueue extends Utility {
 		.filter(SpecialLabel.match(tt.getDescription()))
 		.findFirst()
 		.ifPresent(specialLabel -> tt.setItem(specialLabel.toString()));
-
-//	if (description.contains("ESCALATION]")) {
-//	    tt.setItem("Escalation");
-//	}
     }
-
-//    private Predicate<String> match(String description) {
-//	// TODO Auto-generated method stub
-//	return null;
-//    }
 
     private class CustomerIssueLimter {
 	private Map<TicketType, Integer> countMap = new HashMap<>();
 
 	public boolean withinLimit(TT tt) {
 	    TicketType type = TicketType.getType(tt.getItem());
-//	    Integer count = countMap.get(type);
 	    Integer count = Optional.ofNullable(countMap.get(type)).orElse(0);
 	    if (count >= type.getMaximumTickets()) {
 		return false;

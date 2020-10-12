@@ -13,6 +13,9 @@ public class TicketMetric implements Comparable<TicketMetric> {
 	this.date = date;
     }
 
+    public TicketMetric() {
+    }
+
     public void addDataPoint(String dateType) {
 	try {
 	    int count = (int) TicketMetric.class

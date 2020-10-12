@@ -20,6 +20,7 @@ public enum Dates {
     DAY_OF_WEEK("EEEE, MMMM d, yyyy"),
     YEAR_MONTH("yyyy-MM");
 
+    private static final int DAYS_PER_WEEK = 7;
     private String format;
 
     Dates(String format) {
@@ -124,7 +125,7 @@ public enum Dates {
 	String nextMonday = getNextMondayFormattedDate();
 	long nextMondayTime = getTime(nextMonday);
 
-	String lastMonday = getFormattedDelta(nextMonday, -7);
+	String lastMonday = getFormattedDelta(nextMonday, -DAYS_PER_WEEK);
 	long lastMondayTime = getTime(lastMonday);
 
 	long nowTime = new Date().getTime();
@@ -144,6 +145,24 @@ public enum Dates {
 	calendar.setTime(getDateFromString(stringDate));
 	calendar.add(Calendar.MONTH, months);
 	return getFormattedString(calendar.getTime());
+    }
+
+    public String getLastMondayFormattedDate() {
+	return getFormattedDelta(getNextMondayFormattedDate(), -DAYS_PER_WEEK);
+    }
+
+    public String getFirstDayOfWeek(String date) {
+	LocalDate monday = getDateFromString(date)
+		.toInstant()
+		.atZone(ZoneId.systemDefault())
+		.toLocalDate()
+		.with(DayOfWeek.MONDAY);
+
+	Date mondayDate = java.util.Date.from(monday.atStartOfDay()
+		.atZone(ZoneId.systemDefault())
+		.toInstant());
+
+	return getFormattedString(mondayDate);
     }
 
 }

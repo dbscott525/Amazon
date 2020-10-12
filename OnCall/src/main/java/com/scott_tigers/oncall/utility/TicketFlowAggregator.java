@@ -49,7 +49,12 @@ public class TicketFlowAggregator {
     }
 
     private String firstDayOfWeek(String date) {
-	return Dates.SORTABLE
+	Dates dateType = Dates.SORTABLE;
+	return getFirstDayOfWeek(dateType, date);
+    }
+
+    private String getFirstDayOfWeek(Dates dateType, String date) {
+	return dateType
 		.getDateFromString(date)
 		.toInstant()
 		.atZone(ZoneId.systemDefault())
