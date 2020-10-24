@@ -9,15 +9,20 @@ import java.util.Map.Entry;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.scott_tigers.oncall.bean.LTTRPlan;
-import com.scott_tigers.oncall.bean.TicketCounts;
 import com.scott_tigers.oncall.shared.Dates;
 import com.scott_tigers.oncall.shared.EngineerFiles;
+import com.scott_tigers.oncall.shared.Properties;
 import com.scott_tigers.oncall.shared.URL;
 
 public class CreateLTTRProjections extends Utility {
@@ -33,15 +38,34 @@ public class CreateLTTRProjections extends Utility {
     private String currentMonth;
 
     private void run() throws Exception {
-	List<TicketCounts> ticketCounts = EngineerFiles.ENGINE_TICKET_COUNTS
-		.readCSVToPojo(TicketCounts.class);
+//	List<TicketCounts> ticketCounts = EngineerFiles.ENGINE_TICKET_COUNTS
+//		.readCSVToPojo(TicketCounts.class);
+//
+//	double fourWeekTrailingAverage = ticketCounts
+//		.subList(ticketCounts.size() - TRAILING_WEEKS, ticketCounts.size())
+//		.stream()
+//		.mapToInt(TicketCounts::getTickets)
+//		.average()
+//		.orElse(0.0);
 
-	double fourWeekTrailingAverage = ticketCounts
-		.subList(ticketCounts.size() - TRAILING_WEEKS, ticketCounts.size())
-		.stream()
-		.mapToInt(TicketCounts::getTickets)
+	WebDriver driver = getWebDriver();
+	driver.get(LTTRPage.GRAPH.getUrl());
+	List<WebElement> tds = driver
+		.findElement(By.xpath("//table/tbody/tr"))
+		.findElements(By.tagName("td"));
+
+	double fourWeekTrailingAverage = IntStream
+		.range(2, 8)
+		.mapToObj(tds::get)
+		.map(td -> td.getAttribute("innerHTML"))
+		.map(Double::parseDouble)
+		.mapToDouble(x -> x)
 		.average()
-		.orElse(0.0);
+		.orElse(Double.NaN);
+
+	System.out.println("fourWeekTrailingAverage=" + (fourWeekTrailingAverage));
+
+	driver.quit();
 
 	currentMonth = Dates.YEAR_MONTH.getFormattedString();
 
@@ -60,7 +84,9 @@ public class CreateLTTRProjections extends Utility {
 		.limit(NUMBER_OF_PROJECTION_MONTHS)
 		.peek(projectionAccumulator::accumulate)
 		.collect(Collectors.toList());
-	EngineerFiles.TICKET_REDUCTION_PROJECTION.write(w -> w.CSV(reductionList, TicketReduction.class));
+	EngineerFiles.TICKET_REDUCTION_PROJECTION
+		.write(w -> w.CSV(reductionList, Properties.MONTH, Properties.TICKETS_PER_MONTH));
+	EngineerFiles.TICKET_REDUCTION_PROJECTION_GRAPH.launch();
     }
 
     private boolean onOrAfterCurrentMonth(TicketReduction ticketReduction) {
@@ -160,7 +186,7 @@ public class CreateLTTRProjections extends Utility {
 	private transient double tickets;
 	private String month;
 	private String estimatedTicketReduction;
-	private String estimatedTicketsPerweek;
+	private String estimatedTicketsPerMonth;
 
 	public TicketReduction(String month, double tickets) {
 	    this.month = month;
@@ -177,7 +203,7 @@ public class CreateLTTRProjections extends Utility {
 	    return tickets;
 	}
 
-	@JsonProperty("Month")
+	@JsonProperty(Properties.MONTH)
 	public String getMonth() {
 	    return month;
 	}
@@ -187,7 +213,7 @@ public class CreateLTTRProjections extends Utility {
 	}
 
 	public void setEstimatedTicketsPerweek(String estimatedTicketsPerweek) {
-	    this.estimatedTicketsPerweek = estimatedTicketsPerweek;
+	    this.estimatedTicketsPerMonth = estimatedTicketsPerweek;
 	}
 
 	@SuppressWarnings("unused")
@@ -195,9 +221,9 @@ public class CreateLTTRProjections extends Utility {
 	    return estimatedTicketReduction;
 	}
 
-	@SuppressWarnings("unused")
-	public String getEstimatedTicketsPerweek() {
-	    return estimatedTicketsPerweek;
+	@JsonProperty(Properties.TICKETS_PER_MONTH)
+	public String getEstimatedTicketsPerMonth() {
+	    return estimatedTicketsPerMonth;
 	}
 
 	@Override

@@ -35,8 +35,9 @@ public class CreateTicketFlowReport extends Utility implements Command {
 		.flatMap(this::getDateRangeTicketStream)
 		.forEach(tfa::newTicket);
 
+	List<TTCMetric> ttcMetrics = tfa.getTtcMetrics();
+
 	List<TicketMetric> result = tfa.getMetrics();
-	result.remove(result.size() - 1);
 
 	OpenTicketComputer openTicketComputer = new OpenTicketComputer(
 		getTicketStreamFromUrl(URL.OPEN_CUSTOMER_ISSUE_TICKETS).count());
@@ -46,20 +47,19 @@ public class CreateTicketFlowReport extends Utility implements Command {
 		.sorted(Comparator.reverseOrder())
 		.forEach(openTicketComputer::updateOpenTickets);
 
+	EngineerFiles.TIME_TO_CLOSE.write(writer -> writer.CSV(ttcMetrics, Properties.DATE, Properties.DAYS));
+	EngineerFiles.TIME_TO_CLOSE_GRAPH.launch();
 	EngineerFiles.TICKET_FLOW_REPORT.write(writer -> writer
 		.CSV(result,
 			Properties.DATE,
 			Properties.CREATED,
 			Properties.RESOLVED,
 			Properties.OPEN));
-
-	waitForDataFileLaunch();
 	EngineerFiles.TICKET_FLOW_GRAPH.launch();
-	waitForDataFileLaunch();
 	EngineerFiles.TICKET_FLOW_GRAPH_WITH_OPENED.launch();
     }
 
-    private Stream<? extends TT> getDateRangeTicketStream(DateRange dateRange) {
+    private Stream<TT> getDateRangeTicketStream(DateRange dateRange) {
 	String url = URL_TEMPLATE.replaceAll("(.*?)START(.*?)END(.*)",
 		"$1" + dateRange.getStartDate() + "$2" + dateRange.getEndDate() + "$3");
 	try {
@@ -79,9 +79,8 @@ public class CreateTicketFlowReport extends Utility implements Command {
 	}
 
 	public void updateOpenTickets(TicketMetric ticketMetric) {
-	    ticketMetric.setOpen(openTickets);
 	    openTickets += (ticketMetric.getResolvedDateCount() - ticketMetric.getCreateDateCount());
-//	    openTickets += (ticketMetric.getCreateDateCount() - ticketMetric.getResolvedDateCount());
+	    ticketMetric.setOpen(openTickets);
 	}
     }
 

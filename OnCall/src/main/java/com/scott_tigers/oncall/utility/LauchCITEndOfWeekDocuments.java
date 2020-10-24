@@ -15,8 +15,8 @@ public class LauchCITEndOfWeekDocuments extends Utility implements Command {
 	EngineerFiles.CIT_DSU_TEMPLATE.launch();
 	EngineerFiles.CIT_EVALUATION_TEMPLATE.launch();
 	EngineerFiles.CUSTOMER_ISSUE_TEAM_INTRODUCTION.launch();
-	launchUrl(URL.CIT_TICKET_TRACKER);
 	EngineerFiles.CIT_END_OF_WEEK_EMAIL.launch();
+	launchUrl(URL.CIT_TICKET_TRACKER);
     }
 
 }

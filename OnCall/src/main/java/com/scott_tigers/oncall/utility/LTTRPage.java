@@ -21,7 +21,7 @@ public enum LTTRPage {
 	return Stream.of(values());
     }
 
-    String getUrl() {
+    public String getUrl() {
 	Date nowDate = new Date();
 	String end = Dates.LTTR_URL.getFormattedString(nowDate);
 	String start = Dates.LTTR_URL.getFormattedString(Dates.getWeekDelta(nowDate, -NUMBER_OF_WEEKS_IN_REPORT));

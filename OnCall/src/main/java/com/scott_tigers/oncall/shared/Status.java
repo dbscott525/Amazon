@@ -2,11 +2,18 @@ package com.scott_tigers.oncall.shared;
 
 import java.util.stream.Stream;
 
+import com.scott_tigers.oncall.bean.TT;
+
 public enum Status {
     ASSIGNED("Assigned"),
     CLOSED("Closed") {
 	@Override
 	public boolean needsWork() {
+	    return false;
+	}
+
+	@Override
+	public boolean isUnresolved() {
 	    return false;
 	}
     },
@@ -82,6 +89,11 @@ public enum Status {
 	public boolean needsWork() {
 	    return false;
 	}
+
+	@Override
+	public boolean isUnresolved() {
+	    return false;
+	}
     },
     WORK_IN_PROGRESS("Work In Progress"),
     ERROR("Error"),;
@@ -126,5 +138,13 @@ public enum Status {
 
     public int getWeight() {
 	return 0;
+    }
+
+    public static Status getStatus(TT tt) {
+	return get(tt.getStatus());
+    }
+
+    public boolean isUnresolved() {
+	return true;
     }
 }

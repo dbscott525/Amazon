@@ -47,10 +47,10 @@ public enum EngineerFiles {
     CIT_LAST_DAY_EMAIL                 ("CIT Last Day Email", Constants.DOCX_EXTENSION),
     CIT_SCHEDULE                       ("CIT Schedule",Constants.JSON_EXTENSION),
     CIT_WEEK_DATA                      ("CIT Week Data"),
-    CIT_WEEK_WELCOME                   ("CIT Week Welcome",Constants.DOCX_EXTENSION), 
+    CIT_WEEK_WELCOME                   ("CIT Week Welcome",Constants.DOCX_EXTENSION),
     CUSTOMER_ISSUE_BACKLOG             ("Customer Issue Backlog"),
     CUSTOMER_ISSUE_EMAIL               ("Customer Issue Emails"),
-    CUSTOMER_ISSUE_TEAM_INTRODUCTION   ("Customer Issue Team Introduction", Constants.PPTX_EXTENSION),
+    CUSTOMER_ISSUE_TEAM_INTRODUCTION   ("Customer Issue Team Introduction", Constants.PPTX_EXTENSION), 
     CUSTOMER_ISSUE_TEAM_SCHEDULE       ("Customer Issue Team Schedule", Constants.JSON_EXTENSION),
     DAILY_ON_CALL_REMINDER_EMAILS      ("Daily On Call Reminder Emails"),
     DAILY_STAND_UP_ATTENDEE_EMAILS     ("Daily Stand Up Attendee Emails"),
@@ -58,12 +58,13 @@ public enum EngineerFiles {
     DSU_DATA                           ("DSU Data"),
     DSU_TEMPLATE                       ("DSU Template", Constants.XML_EXTENSION),
     EMAILS                             ("Emails"),
-    ENGINE_TICKET_COUNTS               ("Engine Ticket Counts"),    
+    ENGINE_TICKET_COUNTS               ("Engine Ticket Counts"),
     ENGINE_TICKET_DAILY_REVIEW         ("Engine Ticket Daily Review"),
     ENGINEER_ADDS                      ("Engineers to be Added"),
+    ESCALATED_TICKETS                  ("Escalated Tickets"),
     ESCALATION_CHOOSER                 ("Escalation Chooser"),
     ESCALATION_OWNERSHIP               ("Escalation Ownership"),
-    ESCALATIONS_BY_TYPE                ("Escalations By Type"),
+    ESCALATIONS_BY_TYPE                ("Escalations By Type"),    
     ESCALATIONS_TYPE_PIE_CHART         ("Escalations Type Pie Chart", Constants.XLSX_EXTENSION),
     EXCLUDED_TICKETS                   ("Excluded Tickets"),
     FOO                                ("foo"),
@@ -78,6 +79,8 @@ public enum EngineerFiles {
     MODULE_LABEL_TAXONOMY	       ("Module Label Taxonomy"),
     MODULE_LABEL_TAXONOMY_RAW_DATA     ("Module Label Taxonomy Raw Data"),
     NEW_LEVEL_ENGINEERS                ("New Level Engineers"),
+    NEW_TICKET_ESCALATION              ("New Ticket Escalation"),
+    NEW_TICKET_ESCALATION_EMAIL        ("New Ticket Escalation Email" , Constants.DOCX_EXTENSION),
     OFFSHORE_UIDS                      ("Offshore UIDs"),
     ON_CALL_DAILY_REMINDER_EMAIL       ("On Call Daily Reminder Email",Constants.DOCX_EXTENSION),
     ON_CALL_SCHEDULE                   ("On Call Schedule"),
@@ -97,7 +100,10 @@ public enum EngineerFiles {
     TICKET_FLOW_GRAPH_WITH_OPENED      ("Ticket Flow Graph With Opened", Constants.XLSX_EXTENSION),
     TICKET_FLOW_REPORT                 ("Ticket Flow Report"),
     TICKET_REDUCTION_PROJECTION        ("Ticket Reduction Projection"),
+    TICKET_REDUCTION_PROJECTION_GRAPH  ("Ticket Reduction Projection Graph", Constants.XLSX_EXTENSION),
     TICKET_SUMMARY                     ("Ticket Summary"),
+    TIME_TO_CLOSE                      ("Time To Close"),
+    TIME_TO_CLOSE_GRAPH                ("Time To Close Graph", Constants.XLSX_EXTENSION),
     TRAINEE_EMAILS                     ("Trainee Emails"),
     TRAINEES                           ("Trainees"),
     TRAINING_DAILY_SCHEDULE	       ("Training Daily Schedule"),
@@ -204,6 +210,7 @@ public enum EngineerFiles {
     public void launch() {
 	System.out.println("Launching " + getFileName());
 	launch(getFileName());
+	Util.waitForDataFileLaunch();
     }
 
     public void launch(String fileName) {

@@ -4,6 +4,8 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -36,15 +38,35 @@ public class Util {
     }
 
     public static boolean foundIn(String target, String searchString) {
-        return target
-        	.toLowerCase()
-        	.contains(searchString
-        		.toLowerCase()
-        		.trim());
+	return target
+		.toLowerCase()
+		.contains(searchString
+			.toLowerCase()
+			.trim());
     }
 
     public static Function<String, String> toAmazonEmail() {
-        return uid -> uid + "@amazon.com";
+	return uid -> uid + "@amazon.com";
+    }
+
+    public static Integer getCaseId(String ticketUrl) {
+	return Optional
+		.ofNullable(ticketUrl)
+		.map(url -> url.replaceAll(".*?(\\d).*?", "$1"))
+		.filter(Util::isDigits)
+		.map(Integer::parseInt)
+		.orElse(0);
+    }
+
+    private static boolean isDigits(String line) {
+	return line.matches("[0-9]+");
+    }
+
+    public static void waitForDataFileLaunch() {
+	try {
+	    TimeUnit.SECONDS.sleep(3);
+	} catch (InterruptedException e) {
+	}
     }
 
 }

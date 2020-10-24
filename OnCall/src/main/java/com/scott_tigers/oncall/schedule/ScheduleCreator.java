@@ -135,6 +135,9 @@ public class ScheduleCreator {
     private void createEngineerDateMap() {
 	dateMap = getShiftDateStream()
 		.collect(Collectors.toMap(Function.identity(), this::availableEngs));
+
+	dateMap.entrySet().stream().map(x -> x.getKey() + ": " + x.getValue().size()).sorted()
+		.forEach(System.out::println);
     }
 
     private void createUidMap() {

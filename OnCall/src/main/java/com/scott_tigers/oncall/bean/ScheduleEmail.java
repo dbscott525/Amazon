@@ -21,6 +21,15 @@ public class ScheduleEmail {
     private String engineer4;
     private String engineer5;
     private String engineer6;
+    private String engineer7;
+    private String engineer8;
+    private String engineer9;
+    private String engineer10;
+    private String engineer11;
+    private String engineer12;
+    private String engineer13;
+    private String engineer14;
+    private String engineer15;
 
     public ScheduleEmail(Shift shift) {
 
@@ -41,12 +50,15 @@ public class ScheduleEmail {
 	teamLead = engineers.get(0).getFirstName();
 
 	IntStream.range(0, citEngineers.size()).forEach(index -> {
+	    Engineer engineer = citEngineers.get(index);
 	    try {
 		ScheduleEmail.class
 			.getMethod("setEngineer" + (index + 1), String.class)
-			.invoke(this, citEngineers.get(index).getFirstName());
+			.invoke(this, engineer.getFirstName());
 	    } catch (Exception e) {
+		System.out.println("engineer=" + (engineer));
 		e.printStackTrace();
+		System.exit(0);
 	    }
 	});
     }
@@ -137,6 +149,78 @@ public class ScheduleEmail {
 
     public String getEngineer1() {
 	return engineer1;
+    }
+
+    public String getEngineer7() {
+	return engineer7;
+    }
+
+    public void setEngineer7(String engineer7) {
+	this.engineer7 = engineer7;
+    }
+
+    public String getEngineer8() {
+	return engineer8;
+    }
+
+    public void setEngineer8(String engineer8) {
+	this.engineer8 = engineer8;
+    }
+
+    public String getEngineer9() {
+	return engineer9;
+    }
+
+    public void setEngineer9(String engineer9) {
+	this.engineer9 = engineer9;
+    }
+
+    public String getEngineer10() {
+	return engineer10;
+    }
+
+    public void setEngineer10(String engineer10) {
+	this.engineer10 = engineer10;
+    }
+
+    public String getEngineer11() {
+	return engineer11;
+    }
+
+    public void setEngineer11(String engineer11) {
+	this.engineer11 = engineer11;
+    }
+
+    public String getEngineer12() {
+	return engineer12;
+    }
+
+    public void setEngineer12(String engineer12) {
+	this.engineer12 = engineer12;
+    }
+
+    public String getEngineer13() {
+	return engineer13;
+    }
+
+    public void setEngineer13(String engineer13) {
+	this.engineer13 = engineer13;
+    }
+
+    public String getEngineer14() {
+	return engineer14;
+    }
+
+    public void setEngineer14(String engineer14) {
+	this.engineer14 = engineer14;
+    }
+
+    public String getEngineer15() {
+	return engineer15;
+    }
+
+    public void setEngineer15(String engineer15) {
+	this.engineer15 = engineer15;
     }
 
 }

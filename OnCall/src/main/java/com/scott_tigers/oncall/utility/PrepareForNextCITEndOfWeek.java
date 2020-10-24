@@ -10,7 +10,6 @@ public class PrepareForNextCITEndOfWeek extends Utility {
     private void run() {
 	runCommands(
 		UpdateMasterListWithTicketsClosed.class,
-		CreateCITOnlineSchedule.class,
 		CreateCITWeekData.class,
 		CreateCITResolvedTicketsTable.class,
 		CreateTicketFlowReport.class,

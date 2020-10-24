@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -83,11 +84,21 @@ public class CreateCustomerIssueReadyQueue extends Utility {
     }
 
     private List<TT> getTickets(TTReader reader) throws Exception {
-	return getTicketStreamFromUrl(reader.getUrl())
+	wip = 0;
+	AtomicInteger candidateTickets = new AtomicInteger();
+
+	List<TT> tickets = getTicketStreamFromUrl(reader.getUrl())
+		.peek(x -> candidateTickets.incrementAndGet())
 		.filter(tt -> reader.getFilter().test(tt))
 		.filter(this::notAssigned)
 		.peek(this::fixUpForDisplay)
 		.collect(Collectors.toList());
+	System.out.println(reader.getTitle() + ":");
+	System.out.println("Candidate Tickets: " + (candidateTickets));
+	System.out.println("Work in Progress: " + (wip));
+	System.out.println("Backlog: " + tickets.size());
+	reader.printReport();
+	return tickets;
     }
 
     private void readPointData() {

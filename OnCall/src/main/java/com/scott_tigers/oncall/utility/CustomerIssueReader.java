@@ -8,6 +8,9 @@ import com.scott_tigers.oncall.shared.Status;
 import com.scott_tigers.oncall.shared.URL;
 
 public class CustomerIssueReader extends Utility implements TTReader {
+    private int statusExcludedFromQueue = 0;
+    private int excludedByAge = 0;
+
     @Override
     public String getUrl() {
 	return URL.RECENT_OPEN_CUSTOMER_ISSUE_SEARCH;
@@ -16,7 +19,6 @@ public class CustomerIssueReader extends Utility implements TTReader {
     @Override
     public Predicate<TT> getFilter() {
 	return tt -> {
-
 	    Status status = Status.get(tt.getStatus());
 
 	    if (status.isAlwaysInQueue()) {
@@ -24,13 +26,32 @@ public class CustomerIssueReader extends Utility implements TTReader {
 	    }
 
 	    if (status.isNeverInQueue()) {
+		statusExcludedFromQueue++;
+		System.out.println(tt.getUrl() + ": " + tt.getStatus());
 		return false;
 	    }
 
 	    int age = Integer.parseInt(tt.getAge());
 
-	    return status.agedLongEnough(age);
+	    boolean ageIsOK = status.agedLongEnough(age);
+
+	    if (!ageIsOK) {
+		excludedByAge++;
+		System.out.println(tt.getUrl() + ": age=" + age);
+	    }
+	    return ageIsOK;
 	};
+    }
+
+    @Override
+    public String getTitle() {
+	return "CustomerIssue";
+    }
+
+    @Override
+    public void printReport() {
+	System.out.println("Auto Resolve: " + (statusExcludedFromQueue));
+	System.out.println("Too Early: " + (excludedByAge));
     }
 
 }

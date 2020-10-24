@@ -9,11 +9,8 @@ import java.util.stream.Stream;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 
 import com.scott_tigers.oncall.bean.LTTRTicket;
-import com.scott_tigers.oncall.shared.Constants;
 import com.scott_tigers.oncall.shared.EngineerFiles;
 import com.scott_tigers.oncall.shared.Json;
 import com.scott_tigers.oncall.shared.Lambda;
@@ -28,13 +25,10 @@ public abstract class PickNextLttrSim extends Utility {
 		.map(LTTRTicket::getTicketUrl)
 		.collect(Collectors.toList());
 
-	System.setProperty(WebElements.WEBDRIVER_CHROME_DRIVER_PROPERTY, Constants.CHROMEDRIVER_EXE_LOCATION);
-	ChromeOptions chromeProfile = new ChromeOptions();
-	chromeProfile
-		.addArguments(WebElements.USER_DATA_DIR_PROPERTY + Constants.CHROME_USER_DATA_LOCATION);
-	WebDriver driver = new ChromeDriver(chromeProfile);
+	WebDriver driver = getWebDriver();
 
 	driver.get(LTTRPage.TOP.getUrl());
+	System.out.println("page loaded");
 	Thread.sleep(2000);
 	driver
 		.findElement(By.id(WebElements.TBL_PRIORITIZATION_ID))
@@ -45,6 +39,7 @@ public abstract class PickNextLttrSim extends Utility {
 		.filter(webTicket -> !planTickets.contains(webTicket.getTicketUrl()))
 		.findFirst()
 		.ifPresent(ticket -> {
+		    System.out.println("found ticket");
 		    driver.get(ticket.getSearchUrl());
 		    try {
 			TimeUnit.SECONDS.sleep(2);

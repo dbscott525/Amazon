@@ -88,6 +88,10 @@ public class CreateRootCauseToDoList extends Utility implements TTReader {
 
     private boolean needsWork(TT tt) {
 
+	if (tt.getAge().equals("0")) {
+	    return false;
+	}
+
 	Predicate<TT> needsWork = t -> Status.get(t.getStatus()).needsWork();
 	Predicate<TT> noRootCause = t -> {
 	    String rootCauseDetails = t.getRootCauseDetails().toLowerCase();
@@ -103,6 +107,16 @@ public class CreateRootCauseToDoList extends Utility implements TTReader {
     public Predicate<TT> getFilter() {
 	return tt -> needsWork(tt);
 //	return tt -> unresolved(tt) && !tt.getDescription().contains("Cross Issue Event - CIE");
+    }
+
+    @Override
+    public String getTitle() {
+	return "Engine";
+
+    }
+
+    @Override
+    public void printReport() {
     }
 
 }

@@ -38,4 +38,15 @@ public class RootCauseReader implements TTReader {
 	return Dates.SORTABLE.getFormattedDelta(Dates.SORTABLE.getFormattedString(), -2);
     }
 
+    @Override
+    public String getTitle() {
+	return "Engine";
+    }
+
+    @Override
+    public void printReport() {
+	// TODO Auto-generated method stub
+
+    }
+
 }

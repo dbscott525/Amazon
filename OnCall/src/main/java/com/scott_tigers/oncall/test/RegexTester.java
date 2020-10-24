@@ -14,9 +14,7 @@ public class RegexTester {
     }
 
     enum Test {
-	Test1("Displaying 1 to 6 of 6 matches", "Displaying(.*)", "$1", " 1 to 6 of 6 matches"),
-	Test2("Displaying 1 to 6 of 6 matches", "Displaying .*?of (\\d*) matches", "$1", "6"),
-	Test3("Displaying 1 to 17 of 17 matches", "Displaying .*?of (\\d*) matches", "$1", "17");
+	Test1("2020-09-15 09:07:48PM GMT-0700", "(.*?)(PM|AM) GMT.*", "$1 $2", "2020-09-15 09:07:48 PM");
 
 	private String input;
 	private String regex;

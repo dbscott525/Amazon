@@ -21,8 +21,10 @@ public class Constants {
     public static final String CHROMEDRIVER_EXE_LOCATION = "P:\\bin\\chromedriver.exe";
     public static final String CSV_EXTENSION = ".csv";
     public static final double CUSTOMER_ISSUE_AGE_EXPONENT = .6;
+    public static final int CUSTOMER_ISSUE_TICKETS_ON_THE_QUEUE = 10;
     public static final String DOCX_EXTENSION = ".docx";
-    public static final int ENGINE_TICKET_TRAILING_DAYS = 4;
+    public static final int ENGINE_TICKET_TRAILING_DAYS = 7;
+    public static final int ENGINE_TICKETS_ON_THE_QUEUE = 15;
     public static final String ENGINEER_TYPE_TRAINEE = "Trainee";
     public static final String ITEM_CUSTOMER_ISSUE = "CustomerIssue";
     public static final String ITEM_ENGINE = "Engine";
@@ -65,5 +67,6 @@ public class Constants {
     };
     public static final String XLSX_EXTENSION = ".xlsx";
     public static final String XML_EXTENSION = ".xml";
+    public static final int CIT_SHIFT_SIZE = 15;
 
 }

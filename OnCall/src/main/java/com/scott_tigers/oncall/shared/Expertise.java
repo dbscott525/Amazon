@@ -1,21 +1,21 @@
 package com.scott_tigers.oncall.shared;
 
 public enum Expertise {
-    QP,
-    Binlog,
-    MySQL8 {
+    QP(1),
+    Binlog(1),
+    MySQL8(1) {
 	@Override
 	public String getNotation() {
 	    return "";
 	}
     },
-    NONE {
+    NONE(1000) {
 	@Override
 	public String getNotation() {
 	    return "";
 	}
     },
-    Serverless {
+    Serverless(1) {
 	@Override
 	public int getRequiredOrder() {
 	    return 0;
@@ -25,7 +25,14 @@ public enum Expertise {
 	public String getNotation() {
 	    return "";
 	}
-    };
+    },
+    Replication(1);
+
+    private int maximum;
+
+    Expertise(int maximum) {
+	this.maximum = maximum;
+    }
 
     public static Expertise get(String expertise) {
 	try {
@@ -42,6 +49,10 @@ public enum Expertise {
 
     public int getRequiredOrder() {
 	return 1;
+    }
+
+    public boolean allowedNumber(Integer expertCount) {
+	return expertCount <= maximum;
     }
 
 }

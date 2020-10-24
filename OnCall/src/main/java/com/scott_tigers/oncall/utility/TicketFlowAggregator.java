@@ -2,9 +2,11 @@ package com.scott_tigers.oncall.utility;
 
 import java.time.DayOfWeek;
 import java.time.ZoneId;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -15,10 +17,32 @@ public class TicketFlowAggregator {
     private static final String RESOLVED_DATE = "ResolvedDate";
     private static final String CREATE_DATE = "CreateDate";
     private HashMap<String, TicketMetric> metricMap = new HashMap<String, TicketMetric>();
+    private HashMap<String, TTCMetric> ttcMap = new HashMap<>();
+
+    public HashMap<String, TTCMetric> getTtcMap() {
+	return ttcMap;
+    }
 
     public void newTicket(TT tt) {
 	Stream.of(CREATE_DATE, RESOLVED_DATE)
 		.forEach(dateType -> addMetric(tt, dateType));
+	addTimeToCloseMetric(tt);
+    }
+
+    private void addTimeToCloseMetric(TT tt) {
+	String resolved = tt.getResolvedDate();
+	String created = tt.getCreateDate();
+	if (resolved.length() != 0 && created.length() != 0) {
+	    Date resolvedDate = Dates.TT_DATE.getDateFromString(resolved);
+	    long resolvedMillis = resolvedDate.getTime();
+	    long createdMillis = Dates.TT_DATE.getDateFromString(created).getTime();
+	    long days = TimeUnit.DAYS.convert(resolvedMillis - createdMillis, TimeUnit.MILLISECONDS);
+	    String firstDayOfMonth = Dates.SORTABLE.getFirstDayOfMonth(Dates.SORTABLE.getFormattedString(resolvedDate));
+	    TTCMetric ttcMetric = ttcMap.get(firstDayOfMonth);
+	    ttcMetric = ttcMetric == null ? new TTCMetric() : ttcMetric;
+	    ttcMap.put(firstDayOfMonth, ttcMetric);
+	    ttcMetric.add(firstDayOfMonth, days);
+	}
     }
 
     private void addMetric(TT tt, String dateType) {
@@ -65,6 +89,14 @@ public class TicketFlowAggregator {
 
     public List<TicketMetric> getMetrics() {
 	return metricMap
+		.values()
+		.stream()
+		.sorted()
+		.collect(Collectors.toList());
+    }
+
+    public List<TTCMetric> getTtcMetrics() {
+	return ttcMap
 		.values()
 		.stream()
 		.sorted()

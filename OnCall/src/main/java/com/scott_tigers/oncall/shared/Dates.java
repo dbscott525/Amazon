@@ -8,6 +8,8 @@ import java.time.ZoneId;
 import java.time.temporal.TemporalAdjusters;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
+import java.util.function.Function;
 
 public enum Dates {
     TIME_STAMP("yyyy-MM-dd-HH-mm-ss"),
@@ -18,7 +20,8 @@ public enum Dates {
     ONLINE_SCHEDULE("M/d/yy"),
     ICS("yyyyMMdd"),
     DAY_OF_WEEK("EEEE, MMMM d, yyyy"),
-    YEAR_MONTH("yyyy-MM");
+    YEAR_MONTH("yyyy-MM"),
+    TT_DATE("yyyy-MM-dd hh:mm:ssaa");
 
     private static final int DAYS_PER_WEEK = 7;
     private String format;
@@ -33,7 +36,7 @@ public enum Dates {
 
     public Date getDateFromString(String dateString) {
 	try {
-	    return new SimpleDateFormat(format).parse(dateString);
+	    return new SimpleDateFormat(format, Locale.getDefault()).parse(dateString);
 	} catch (ParseException e) {
 	    return new Date();
 	}
@@ -152,17 +155,25 @@ public enum Dates {
     }
 
     public String getFirstDayOfWeek(String date) {
-	LocalDate monday = getDateFromString(date)
-		.toInstant()
-		.atZone(ZoneId.systemDefault())
-		.toLocalDate()
-		.with(DayOfWeek.MONDAY);
+	return getFormattedDate(date, ld -> ld.with(DayOfWeek.MONDAY));
+    }
 
-	Date mondayDate = java.util.Date.from(monday.atStartOfDay()
-		.atZone(ZoneId.systemDefault())
-		.toInstant());
+    public String getFirstDayOfMonth(String date) {
+	return getFormattedDate(date, ld -> ld.withDayOfMonth(1));
+    }
 
-	return getFormattedString(mondayDate);
+    private String getFormattedDate(String date, Function<LocalDate, LocalDate> supplier) {
+
+	LocalDate localDate = supplier.apply(
+		getDateFromString(date)
+			.toInstant()
+			.atZone(ZoneId.systemDefault())
+			.toLocalDate());
+
+	return getFormattedString(
+		Date.from(localDate.atStartOfDay()
+			.atZone(ZoneId.systemDefault())
+			.toInstant()));
     }
 
 }

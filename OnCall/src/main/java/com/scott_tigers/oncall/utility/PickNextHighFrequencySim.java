@@ -5,11 +5,19 @@ import org.openqa.selenium.WebDriver;
 import com.scott_tigers.oncall.bean.LTTRTicket;
 import com.scott_tigers.oncall.shared.Constants;
 import com.scott_tigers.oncall.shared.EngineerFiles;
+import com.scott_tigers.oncall.shared.URL;
 
 public class PickNextHighFrequencySim extends PickNextLttrSim {
 
     public static void main(String[] args) throws InterruptedException {
 	new PickNextHighFrequencySim().run();
+    }
+
+    @Override
+    protected void run() throws InterruptedException {
+	super.run();
+	launchUrl(URL.LTTR_CANDIDATES);
+	launchUrl(URL.COMPONENT_LABELS);
     }
 
     @Override

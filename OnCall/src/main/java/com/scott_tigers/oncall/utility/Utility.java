@@ -23,6 +23,10 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+
 import com.scott_tigers.oncall.bean.Email;
 import com.scott_tigers.oncall.bean.EmailsByDate;
 import com.scott_tigers.oncall.bean.Engineer;
@@ -40,6 +44,7 @@ import com.scott_tigers.oncall.shared.EngineerType;
 import com.scott_tigers.oncall.shared.Executor;
 import com.scott_tigers.oncall.shared.Oncall;
 import com.scott_tigers.oncall.shared.URL;
+import com.scott_tigers.oncall.shared.WebElements;
 import com.scott_tigers.oncall.test.Company;
 
 public class Utility {
@@ -52,6 +57,7 @@ public class Utility {
     private Map<String, Double> uidToLevelMap = null;
     protected String templateDoc;
     protected Map<String, EngineerMetric> metricMap = new HashMap<>();
+    protected int wip;
 
     protected void successfulFileCreation(EngineerFiles fileType) {
 	successfulFileCreation(fileType, fileType.getFileName());
@@ -239,7 +245,11 @@ public class Utility {
 		.ofNullable(assignedTicketIds)
 		.orElseGet(() -> getAssingedTicketIds());
 
-	return !assignedTicketIds.contains(tt.getIntCaseId());
+	boolean notAssigned = !assignedTicketIds.contains(tt.getIntCaseId());
+	if (!notAssigned) {
+	    wip++;
+	}
+	return notAssigned;
     }
 
     private List<Integer> getAssingedTicketIds() {
@@ -429,7 +439,7 @@ public class Utility {
 			.concat(Stream.of(
 				shift.getDate()),
 				shift
-					.getEngineers(7)
+					.getEngineers(Constants.CIT_SHIFT_SIZE)
 					.stream()
 					.map(Engineer::getFullNameWithExertise))
 			.collect(Collectors.joining(",")))
@@ -469,13 +479,6 @@ public class Utility {
 			System.exit(1);
 		    }
 		});
-    }
-
-    protected void waitForDataFileLaunch() {
-	try {
-	    TimeUnit.SECONDS.sleep(10);
-	} catch (InterruptedException e) {
-	}
     }
 
     protected <T> Stream<T> readFromUrl(String url, Class<T> pojoClass) {
@@ -536,6 +539,15 @@ public class Utility {
 		CreateCITOnlineSchedule.class,
 		CreateCITEmails.class,
 		LauchCITMidweekDocuments.class);
+    }
+
+    protected WebDriver getWebDriver() {
+	System.setProperty(WebElements.WEBDRIVER_CHROME_DRIVER_PROPERTY, Constants.CHROMEDRIVER_EXE_LOCATION);
+	ChromeOptions chromeProfile = new ChromeOptions();
+	chromeProfile
+		.addArguments(WebElements.USER_DATA_DIR_PROPERTY + Constants.CHROME_USER_DATA_LOCATION);
+	WebDriver driver = new ChromeDriver(chromeProfile);
+	return driver;
     }
 
 }

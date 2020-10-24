@@ -6,13 +6,14 @@ import com.scott_tigers.oncall.bean.Unavailability;
 import com.scott_tigers.oncall.shared.EngineerFiles;
 import com.scott_tigers.oncall.shared.URL;
 
-public class UpdateUnavailabilityFromQuip extends Utility {
+public class UpdateUnavailabilityFromQuip extends Utility implements Command {
 
     public static void main(String[] args) {
 	new UpdateUnavailabilityFromQuip().run();
     }
 
-    private void run() {
+    @Override
+    public void run() {
 	EngineerFiles.UNAVAILABILITY
 		.write(w -> w.CSV(
 			readFromUrl(

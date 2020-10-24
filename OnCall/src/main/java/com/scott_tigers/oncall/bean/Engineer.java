@@ -278,7 +278,7 @@ public class Engineer {
 	return Optional
 		.ofNullable(trainingDate)
 		.filter(Predicate.not(String::isEmpty))
-//		.filter(this::isAfterToday) THIS SEEMS NOT TO BE NECESSARY
+		.filter(this::isAfterToday)
 		.isPresent();
     }
 

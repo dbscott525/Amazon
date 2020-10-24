@@ -34,7 +34,6 @@ public class CreateTicketEscalationMetrics extends Utility {
 
 	EngineerFiles.TICKET_ESCLATIONS_PER_WEEK
 		.write(w -> w.CSV(escalationsByWeek, Properties.DATE, Properties.COUNT));
-	waitForDataFileLaunch();
 	EngineerFiles.TICKET_ESCALATIONS_BAR_CHART.launch();
 
 	List<TypeEscalation> esclationtypes = escalations
@@ -46,10 +45,8 @@ public class CreateTicketEscalationMetrics extends Utility {
 		.map(TypeEscalation::new)
 		.collect(Collectors.toList());
 
-	waitForDataFileLaunch();
 	EngineerFiles.ESCALATIONS_BY_TYPE
 		.write(w -> w.CSV(esclationtypes, Properties.TYPE, Properties.COUNT));
-	waitForDataFileLaunch();
 	EngineerFiles.ESCALATIONS_TYPE_PIE_CHART.launch();
     }
 

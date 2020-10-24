@@ -62,7 +62,7 @@ public class EngineerMetric {
 	this.name = name;
     }
 
-    @JsonProperty(Properties.TICKETS_PER_WEEK)
+    @JsonProperty(Properties.TICKETS_PER_MONTH)
     public double getTicketsPerWeek() {
 	return ticketsPerWeek;
     }

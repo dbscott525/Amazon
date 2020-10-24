@@ -7,4 +7,8 @@ public interface TTReader {
 
     public Predicate<TT> getFilter();
 
+    public String getTitle();
+
+    public void printReport();
+
 }

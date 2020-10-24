@@ -2,23 +2,30 @@ package com.scott_tigers.oncall.schedule;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 
 import com.scott_tigers.oncall.bean.Engineer;
 import com.scott_tigers.oncall.bean.ScheduleContainer;
 import com.scott_tigers.oncall.shared.Dates;
+import com.scott_tigers.oncall.shared.Expertise;
 
 public class Schedule {
 
+    private static final int MAXIMUM_SHIFT_FIND_RETRIES = 10;
     private List<Shift> shifts;
     private Double levelStandardDeviation;
     private transient ScheduleCreator scheduleCreator;
@@ -45,10 +52,10 @@ public class Schedule {
 		.orElseGet(() -> {
 		    levelStandardDeviation = new StandardDeviation(false)
 			    .evaluate(shifts
-			        .stream()
-			        .filter(s -> !s.isBefore(scheduleCreator.getStartDate()))
-			        .mapToDouble(Shift::getSumOfLevels)
-			        .toArray());
+				    .stream()
+				    .filter(s -> !s.isBefore(scheduleCreator.getStartDate()))
+				    .mapToDouble(Shift::getSumOfLevels)
+				    .toArray());
 		    return levelStandardDeviation;
 		});
     }
@@ -72,8 +79,73 @@ public class Schedule {
 
     public List<Engineer> getCandidates(String date, List<Engineer> candidateEngineers)
 	    throws ImpossibleScheduleCombinationException {
-	Integer index = Optional
-		.ofNullable(shifts.size() - scheduleCreator.getMaximumShiftFrequency())
+
+	return IntStream.rangeClosed(0, scheduleCreator.getMaximumShiftFrequency())
+		.map(n -> scheduleCreator.getMaximumShiftFrequency() - n)
+		.mapToObj(maximumShiftFrequency -> IntStream
+			.range(0, MAXIMUM_SHIFT_FIND_RETRIES)
+			.mapToObj(n -> getRandomShift(candidateEngineers, maximumShiftFrequency))
+			.filter(list -> list.size() >= scheduleCreator.getShiftSize())
+			.findFirst()
+			.orElse(null))
+		.filter(Objects::nonNull)
+		.findFirst()
+		.orElseThrow(ImpossibleScheduleCombinationException::new)
+		.subList(0, scheduleCreator.getShiftSize());
+
+    }
+
+    @SuppressWarnings("unused")
+    private List<Engineer> extractedExperimental(List<Engineer> candidateEngineers, int maximumShiftFrequency) {
+	Random random = new Random();
+	Map<Engineer, Long> shiftCounts = getShiftCounts();
+
+	int index = Optional
+		.ofNullable(shifts.size() - maximumShiftFrequency)
+		.filter(i -> i > 0)
+		.orElse(0);
+
+	System.out.println("before candidateEngineers.size()=" + (candidateEngineers.size()));
+	Stream<Engineer> e1 = shifts
+		.subList(index, shifts.size())
+		.stream()
+		.map(Shift::getEngineers)
+		.flatMap(List<Engineer>::stream)
+		.distinct();
+	Stream<RandomUid> e2 = e1
+		.map(engineer -> new RandomUid(engineer, shiftCounts.get(engineer), random.nextDouble()));
+	Stream<RandomUid> e3 = e2.sorted(Comparator.reverseOrder());
+	Stream<RandomUid> e4 = e3.filter(r -> candidateEngineers.size() >= scheduleCreator.getShiftSize());
+	e4.forEach(r -> {
+	    candidateEngineers.remove(r.getEngineer());
+	});
+	System.out.println("aftercandidateEngineers.size()=" + (candidateEngineers.size()));
+
+//	Map<Engineer, Engineer> excludedEngineers = shifts
+//		.subList(index, shifts.size())
+//		.stream()
+//		.map(Shift::getEngineers)
+//		.flatMap(List<Engineer>::stream)
+//		.distinct()
+//		.collect(Collectors.toMap(Function.identity(), Function.identity()));
+
+	DuplicateSmeEliminator duplicateSmeEliminator = new DuplicateSmeEliminator();
+
+	List<Engineer> finalList = candidateEngineers
+		.stream()
+//		.filter(Predicate.not(excludedEngineers::containsKey))
+		.map(engineer -> new RandomUid(engineer, shiftCounts.get(engineer), random.nextDouble()))
+		.sorted()
+		.map(RandomUid::getEngineer)
+		.filter(engineer -> duplicateSmeEliminator.notDuplicate(engineer))
+		.collect(Collectors.toList());
+
+	return finalList;
+    }
+
+    private List<Engineer> getRandomShift(List<Engineer> candidateEngineers, int maximumShiftFrequency) {
+	int index = Optional
+		.ofNullable(shifts.size() - maximumShiftFrequency)
 		.filter(i -> i > 0)
 		.orElse(0);
 
@@ -100,12 +172,7 @@ public class Schedule {
 		.filter(engineer -> duplicateSmeEliminator.notDuplicate(engineer))
 		.collect(Collectors.toList());
 
-	if (finalList.size() < scheduleCreator.getShiftSize()) {
-	    throw new ImpossibleScheduleCombinationException();
-	}
-
-	return finalList
-		.subList(0, scheduleCreator.getShiftSize());
+	return finalList;
     }
 
     private Map<Engineer, Long> getShiftCounts() {
@@ -125,7 +192,7 @@ public class Schedule {
 	    new DecimalFormat("#.000").format(getLevelStandardDeviation());
 	    System.out.println(new Date() + " Try="
 		    + String.format("%,12.0f", (double) tryCount)
-		    + " STD=" + new DecimalFormat("0.000000000").format(getLevelStandardDeviation()));
+		    + " STD=" + new DecimalFormat("0.00").format(getLevelStandardDeviation()));
 	    return this;
 	} else {
 	    return currentBestSchedule;
@@ -170,8 +237,6 @@ public class Schedule {
 		return shifts - o.shifts;
 	    }
 
-//	    return 0;
-
 	    return (int) ((random - o.random) * 10000);
 	}
 
@@ -182,21 +247,21 @@ public class Schedule {
     }
 
     private class DuplicateSmeEliminator {
-	private List<String> foundSMEs = new ArrayList<>();
+	private static final boolean EXPERTISE_LIMITATION = true;
+	private Map<Expertise, Integer> smeMap = new HashMap<>();
 
 	public boolean notDuplicate(Engineer engineer) {
-	    String expertise = engineer.getExpertise();
-	    if (expertise.length() == 0) {
+	    if (EXPERTISE_LIMITATION) {
+		Expertise expert = Expertise.get(engineer.getExpertise());
+
+		Integer expertCount = smeMap.get(expert);
+		expertCount = expertCount == null ? 1 : expertCount + 1;
+		smeMap.put(expert, expertCount);
+
+		return expert.allowedNumber(expertCount);
+	    } else {
 		return true;
 	    }
-
-	    if (foundSMEs.contains(expertise)) {
-		return false;
-	    }
-
-	    foundSMEs.add(expertise);
-
-	    return true;
 	}
 
     }

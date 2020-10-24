@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.GsonBuilder;
 import com.scott_tigers.oncall.shared.Properties;
+import com.scott_tigers.oncall.shared.Util;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TT {
@@ -24,6 +25,7 @@ public class TT {
     private String item;
     private String resolvedBy;
     private String lastModifiedBy;
+    private String lastModifiedDate;
     private int impact;
 
     @JsonProperty(Properties.CASE_ID)
@@ -187,6 +189,15 @@ public class TT {
 	return impact;
     }
 
+    @JsonProperty(Properties.LAST_MODIFIED_DATE)
+    public String getLastModifiedDate() {
+	return lastModifiedDate;
+    }
+
+    public void setLastModifiedDate(String lastModifiedDate) {
+	this.lastModifiedDate = lastModifiedDate;
+    }
+
     public void setImpact(int impact) {
 	this.impact = impact;
     }
@@ -197,5 +208,9 @@ public class TT {
 
     public Integer getIntAge() {
 	return Integer.valueOf(age);
+    }
+
+    public Integer getIntegerCaseId() {
+	return Util.getCaseId(url);
     }
 }

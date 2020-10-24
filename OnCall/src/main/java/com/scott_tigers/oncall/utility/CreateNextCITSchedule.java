@@ -14,12 +14,12 @@ public class CreateNextCITSchedule extends Utility {
 
     private void run() throws IOException {
 	new ScheduleCreator()
-		.startDate("2020-10-26")
-//	        .endDate("2020-12-31")
-		.endAfterMonths(6)
-//	        .shifts(24)
-		.shiftSize(7)
-		.maximumShiftFrequency(3)
+		.startDate("2020-11-02")
+		.endDate("2020-12-31")
+//		.endAfterMonths(6)
+//		.shifts(8)
+		.shiftSize(9)
+		.maximumShiftFrequency(4)
 		.daysBetweenShifts(7)
 //		.iterations(10000)
 		.timeLimit(20)

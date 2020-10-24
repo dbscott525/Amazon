@@ -85,8 +85,10 @@ public class Shift {
     }
 
     public Collection<Engineer> getEngineers(int shiftSize) {
-	Optional<Engineer> serverless = engineers.stream()
-		.filter(eng -> eng.getExpertise().contentEquals(Expertise.Serverless.toString())).findFirst();
+	Optional<Engineer> serverless = engineers
+		.stream()
+		.filter(eng -> eng.getExpertise().contentEquals(Expertise.Serverless.toString()))
+		.findFirst();
 	if (serverless.isPresent()) {
 	    Engineer serverlessEng = serverless.get();
 	    ArrayList<Engineer> newlist = new ArrayList<Engineer>(engineers);

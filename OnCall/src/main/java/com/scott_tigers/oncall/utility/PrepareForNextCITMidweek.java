@@ -9,9 +9,7 @@ public class PrepareForNextCITMidweek extends Utility {
     @SuppressWarnings("unchecked")
     private void run() {
 	runCommands(
-		UpdateMasterListWithTicketsClosed.class,
-		CreateOncallSchedule.class,
-		CreateDailyOnCallReminderEmails.class);
+		UpdateMasterListWithTicketsClosed.class);
 
 	launchCITUpdater();
     }

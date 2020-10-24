@@ -2,6 +2,7 @@ package com.scott_tigers.oncall.utility;
 
 import com.scott_tigers.oncall.bean.EngineerMetric;
 import com.scott_tigers.oncall.shared.EngineerFiles;
+import com.scott_tigers.oncall.shared.Util;
 
 public class CreateTicketClosureReport extends Utility implements Command {
 
@@ -16,7 +17,7 @@ public class CreateTicketClosureReport extends Utility implements Command {
 		.fileType(EngineerFiles.TICKET_CLOSURES)
 		.CSV(getTicketClosedMetrics(), EngineerMetric.class));
 
-	waitForDataFileLaunch();
+	Util.waitForDataFileLaunch();
 
 	EngineerFiles.TICKET_CLOSURE_BAR_GRAPH.launch();
     }

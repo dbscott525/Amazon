@@ -13,7 +13,7 @@ public enum TicketType {
     CustomerIssue {
 	@Override
 	public Integer getMaximumTickets() {
-	    return 8;
+	    return Constants.CUSTOMER_ISSUE_TICKETS_ON_THE_QUEUE;
 	}
 
 	@Override
@@ -45,7 +45,7 @@ public enum TicketType {
     Engine {
 	@Override
 	public Integer getMaximumTickets() {
-	    return 8;
+	    return Constants.ENGINE_TICKETS_ON_THE_QUEUE;
 	}
 
 	@Override
@@ -81,4 +81,5 @@ public enum TicketType {
     public abstract Integer getMaximumTickets();
 
     public abstract int getWeight(WeightContext weightContext);
+
 }
