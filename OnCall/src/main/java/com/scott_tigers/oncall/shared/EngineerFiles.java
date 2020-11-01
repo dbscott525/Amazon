@@ -38,7 +38,6 @@ public enum EngineerFiles {
     ASSIGNED_TICKETS                   ("Assigned Tickets"),
     AVAILABILTY_SCHEDULE               ("Availabilty Schedule",Constants.XML_EXTENSION),
     AVAILABILTY_SCHEDULE_TEMPLATE      ("Availabilty Schedule Template",Constants.XML_EXTENSION),
-    CIT_CANDIDATES_FROM_POOYA          ("CIT Candidates From Pooya"),
     CIT_DOC_INJECTION_TEMPLATE         ("CIT Doc Injection Template", Constants.DOCX_EXTENSION),
     CIT_DSU_TEMPLATE                   ("CIT DSU Template",Constants.DOCX_EXTENSION),
     CIT_END_OF_WEEK_EMAIL              ("CIT End of Week Email",Constants.DOCX_EXTENSION),
@@ -64,8 +63,8 @@ public enum EngineerFiles {
     ESCALATED_TICKETS                  ("Escalated Tickets"),
     ESCALATION_CHOOSER                 ("Escalation Chooser"),
     ESCALATION_OWNERSHIP               ("Escalation Ownership"),
-    ESCALATIONS_BY_TYPE                ("Escalations By Type"),    
-    ESCALATIONS_TYPE_PIE_CHART         ("Escalations Type Pie Chart", Constants.XLSX_EXTENSION),
+    ESCALATIONS_BY_TYPE                ("Escalations By Type"),
+    ESCALATIONS_TYPE_PIE_CHART         ("Escalations Type Pie Chart", Constants.XLSX_EXTENSION),    
     EXCLUDED_TICKETS                   ("Excluded Tickets"),
     FOO                                ("foo"),
     FROM_ONLINE_SCHEDULE               ("From Online Schedule"),
@@ -83,6 +82,7 @@ public enum EngineerFiles {
     NEW_TICKET_ESCALATION_EMAIL        ("New Ticket Escalation Email" , Constants.DOCX_EXTENSION),
     OFFSHORE_UIDS                      ("Offshore UIDs"),
     ON_CALL_DAILY_REMINDER_EMAIL       ("On Call Daily Reminder Email",Constants.DOCX_EXTENSION),
+    LTTR_CANDIDATE_EMAIL_DATA_COPY     ("LTTR Candidate Email Data - Copy"),
     ON_CALL_SCHEDULE                   ("On Call Schedule"),
     ONLINE_SCHEDULE                    ("Online Schedule", Constants.JSON_EXTENSION),
     RESOLVED_TICKET_SUMMARY            ("Resolved Ticket Summary"),
@@ -107,8 +107,9 @@ public enum EngineerFiles {
     TRAINEE_EMAILS                     ("Trainee Emails"),
     TRAINEES                           ("Trainees"),
     TRAINING_DAILY_SCHEDULE	       ("Training Daily Schedule"),
-    TT_DOWNLOAD                        ("TT Download"), 
-    UNAVAILABILITY                     ("Unavailability");
+    TT_DOWNLOAD                        ("TT Download"),
+    UNAVAILABILITY                     ("Unavailability"), 
+    UPDATED_QUIP_LTTR_PLAN             ("Updated Quip LTTR Plan");
     
     // @formatter:on
 

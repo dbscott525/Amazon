@@ -3,14 +3,12 @@ package com.scott_tigers.oncall.test;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.IntStream;
-
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.scott_tigers.oncall.utility.LTTRPage;
+import com.scott_tigers.oncall.bean.LTTRTicket;
+import com.scott_tigers.oncall.shared.EngineerFiles;
+import com.scott_tigers.oncall.shared.Properties;
 import com.scott_tigers.oncall.utility.Utility;
 
 @JsonIgnoreProperties
@@ -21,24 +19,20 @@ public class Test extends Utility {
     }
 
     private void run() throws Exception {
-	WebDriver driver = getWebDriver();
-	driver.get(LTTRPage.GRAPH.getUrl());
-	List<WebElement> tds = driver
-		.findElement(By.xpath("//table/tbody/tr"))
-		.findElements(By.tagName("td"));
+	List<LTTRTicket> list = EngineerFiles.LTTR_CANDIDATE_EMAIL_DATA_COPY
+		.readCSVToPojo(LTTRTicket.class)
+		.stream()
+		.collect(Collectors.toList());
 
-	double average = IntStream
-		.range(2, 8)
-		.mapToObj(tds::get)
-		.map(td -> td.getAttribute("innerHTML"))
-		.map(Double::parseDouble)
-		.mapToDouble(x -> x)
-		.average()
-		.orElse(Double.NaN);
+//	Json.print(list);
 
-	System.out.println("average=" + (average));
+	System.out.println("before write");
+	EngineerFiles.LTTR_CANDIDATE_EMAIL_DATA.write(w -> w.CSV(list, LTTRTicket.class));
+	EngineerFiles.LTTR_CANDIDATE_EMAIL_DATA.write(w -> w.CSV(list, Properties.TICKET_ID));
+//	EngineerFiles.LTTR_CANDIDATE_EMAIL_DATA.write(w -> w.CSV(list, Properties.TICKET_ID,
+//		Properties.EMAIL, Properties.TO, Properties.TICKETS,
+//		Properties.DESCRIPTION, Properties.TICKET, Properties.SEARCH_URL, Properties.TOTAL_TICKETS));
 
-	driver.quit();
     }
 
     @SuppressWarnings("unused")

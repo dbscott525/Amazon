@@ -1,0 +1,15 @@
+Any crashes or restarts recently?
+Any recent issues in the observed events or crash reports?
+Is AmVU enabled for these clusters? Could it happen on these days?
+How are various performance-related metrics for the cluster? Any unusual spikes?
+Are we close to 64TB limit?
+Any pending DDL recovery? 
+Any outstanding TTs or customer reach-out?
+Are instance types same for the writer and reader?
+Any notation/warning on the cluster/instance pages?
+
+    o Rollback segment length
+    o CPU usage
+    o Freeable memory
+    o Number of connections
+    o Select and commit latencies

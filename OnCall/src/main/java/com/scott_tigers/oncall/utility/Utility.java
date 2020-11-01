@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -31,6 +32,7 @@ import com.scott_tigers.oncall.bean.Email;
 import com.scott_tigers.oncall.bean.EmailsByDate;
 import com.scott_tigers.oncall.bean.Engineer;
 import com.scott_tigers.oncall.bean.EngineerMetric;
+import com.scott_tigers.oncall.bean.LTTRTicket;
 import com.scott_tigers.oncall.bean.OnCallScheduleRow;
 import com.scott_tigers.oncall.bean.ScheduleRow;
 import com.scott_tigers.oncall.bean.TT;
@@ -44,6 +46,7 @@ import com.scott_tigers.oncall.shared.EngineerType;
 import com.scott_tigers.oncall.shared.Executor;
 import com.scott_tigers.oncall.shared.Oncall;
 import com.scott_tigers.oncall.shared.URL;
+import com.scott_tigers.oncall.shared.Util;
 import com.scott_tigers.oncall.shared.WebElements;
 import com.scott_tigers.oncall.test.Company;
 
@@ -548,6 +551,22 @@ public class Utility {
 		.addArguments(WebElements.USER_DATA_DIR_PROPERTY + Constants.CHROME_USER_DATA_LOCATION);
 	WebDriver driver = new ChromeDriver(chromeProfile);
 	return driver;
+    }
+
+    protected Stream<LTTRTicket> getLttrTicketStream(WebDriver driver) {
+	driver.get(LTTRPage.TOP.getUrl());
+	System.out.println("page loaded");
+	Util.sleep(2);
+	return driver
+		.findElement(By.id(WebElements.TBL_PRIORITIZATION_ID))
+		.findElements(By.tagName(WebElements.TABLE_ROW_TAG))
+		.stream()
+		.map(LTTRTicket::new)
+		.filter(LTTRTicket::validTicket);
+    }
+
+    protected Stream<LTTRTicket> getLttrQuipPlan() {
+	return readFromUrl(URL.LTTR_PLAN, LTTRTicket.class);
     }
 
 }

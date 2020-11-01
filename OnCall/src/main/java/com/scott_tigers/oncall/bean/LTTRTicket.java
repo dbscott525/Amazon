@@ -1,6 +1,9 @@
 package com.scott_tigers.oncall.bean;
 
+import java.beans.Transient;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.IntStream;
@@ -10,7 +13,10 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.scott_tigers.oncall.shared.Dates;
 import com.scott_tigers.oncall.shared.Lambda;
+import com.scott_tigers.oncall.shared.Properties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class LTTRTicket {
@@ -25,6 +31,8 @@ public class LTTRTicket {
     private String area;
     private String assignee;
     private String count;
+    private String currentTicketsPerWeek;
+    private String date;
     private String description;
     private String email;
     private String notes;
@@ -35,7 +43,7 @@ public class LTTRTicket {
     private String ticketId;
     private String tickets;
     private String ticketsPerWeek;
-    private String ticketUrl;
+    private String ticket;
     private String to;
     private String totalTickets;
 
@@ -49,7 +57,7 @@ public class LTTRTicket {
 	description = getValue(cells, 1).split("\n")[0];
 	tickets = getValue(cells, 2);
 	ticketsPerWeek = getValue(cells, 3);
-	ticketUrl = getTicketUrl(cells);
+	ticket = getTicketUrl(cells);
 	searchUrl = SEARCH_TEMPLATE.replaceAll("(.*?)" + TICKET_ID_MARKER + "(.*)", "$1" + ticketId + "$2");
 
 	if (DEBUG) {
@@ -146,6 +154,7 @@ public class LTTRTicket {
 	return true;
     }
 
+    @JsonProperty(Properties.AREA)
     public String getArea() {
 	return area;
     }
@@ -154,6 +163,7 @@ public class LTTRTicket {
 	this.area = area;
     }
 
+    @JsonProperty(Properties.ASSIGNEE)
     public String getAssignee() {
 	return assignee;
     }
@@ -162,6 +172,7 @@ public class LTTRTicket {
 	this.assignee = assignee;
     }
 
+    @JsonProperty(Properties.COUNT)
     public String getCount() {
 	return count;
     }
@@ -170,6 +181,25 @@ public class LTTRTicket {
 	this.count = count;
     }
 
+    @JsonProperty(Properties.CURRENT_TICKETS_PER_WEEK)
+    public String getCurrentTicketsPerWeek() {
+	return currentTicketsPerWeek;
+    }
+
+    public void setCurrentTicketsPerWeek(String currentTicketsPerWeek) {
+	this.currentTicketsPerWeek = currentTicketsPerWeek;
+    }
+
+    @JsonProperty(Properties.DATE)
+    public String getDate() {
+	return date;
+    }
+
+    public void setDate(String date) {
+	this.date = date;
+    }
+
+    @JsonProperty(Properties.DESCRIPTION)
     public String getDescription() {
 	return description;
     }
@@ -178,6 +208,7 @@ public class LTTRTicket {
 	this.description = description;
     }
 
+    @JsonProperty(Properties.EMAIL)
     public String getEmail() {
 	return email;
     }
@@ -190,10 +221,12 @@ public class LTTRTicket {
 	return notes;
     }
 
+    @JsonProperty(Properties.NOTES)
     public void setNotes(String notes) {
 	this.notes = notes;
     }
 
+    @JsonProperty(Properties.RELEASE)
     public String getRelease() {
 	return release;
     }
@@ -202,6 +235,7 @@ public class LTTRTicket {
 	this.release = release;
     }
 
+    @JsonProperty(Properties.RELEASE_DATE)
     public String getReleaseDate() {
 	return releaseDate;
     }
@@ -210,6 +244,7 @@ public class LTTRTicket {
 	this.releaseDate = releaseDate;
     }
 
+    @JsonProperty(Properties.SEARCH_URL)
     public String getSearchUrl() {
 	return searchUrl;
     }
@@ -218,6 +253,7 @@ public class LTTRTicket {
 	this.searchUrl = searchUrl;
     }
 
+    @JsonProperty(Properties.STATE)
     public String getState() {
 	return state;
     }
@@ -226,6 +262,7 @@ public class LTTRTicket {
 	this.state = state;
     }
 
+    @JsonProperty(Properties.TICKET_ID)
     public String getTicketId() {
 	return ticketId;
     }
@@ -234,6 +271,7 @@ public class LTTRTicket {
 	this.ticketId = ticketId;
     }
 
+    @JsonProperty(Properties.TICKETS)
     public String getTickets() {
 	return tickets;
     }
@@ -242,6 +280,7 @@ public class LTTRTicket {
 	this.tickets = tickets;
     }
 
+    @JsonProperty(Properties.TICKETS_PER_WEEK)
     public String getTicketsPerWeek() {
 	return ticketsPerWeek;
     }
@@ -250,14 +289,16 @@ public class LTTRTicket {
 	this.ticketsPerWeek = ticketsPerWeek;
     }
 
-    public String getTicketUrl() {
-	return ticketUrl;
+    @JsonProperty(Properties.TICKET)
+    public String getTicket() {
+	return ticket;
     }
 
-    public void setTicketUrl(String ticketUrl) {
-	this.ticketUrl = ticketUrl;
+    public void setTicket(String ticket) {
+	this.ticket = ticket;
     }
 
+    @JsonProperty(Properties.TO)
     public String getTo() {
 	return to;
     }
@@ -266,6 +307,7 @@ public class LTTRTicket {
 	this.to = to;
     }
 
+    @JsonProperty(Properties.TOTAL_TICKETS)
     public String getTotalTickets() {
 	return totalTickets;
     }
@@ -273,6 +315,54 @@ public class LTTRTicket {
     public void setTotalTickets(String totalTickets) {
 	this.totalTickets = totalTickets;
 
+    }
+
+    @Transient
+    public Double getDoubleTicketsPerWeek() {
+	return ticketsPerWeek == null ? 0 : Double.valueOf(ticketsPerWeek);
+    }
+
+    @Transient
+    public String getMonth() {
+	return date == null ? null : Dates.ONLINE_SCHEDULE.convertFormat(date, Dates.YEAR_MONTH);
+    }
+
+//    public void update(LTTRTicket lttrTicket) {
+//	description = lttrTicket.getDescription();
+//	if (Dates.ONLINE_SCHEDULE.getDateFromString(date).compareTo(new Date()) > 0) {
+//	    currentTicketsPerWeek = "";
+//	    if (lttrTicket == null) {
+//		ticketsPerWeek = "0";
+//	    } else {
+//		ticketsPerWeek = lttrTicket.getTicketsPerWeek();
+//	    }
+//	    ticketsPerWeek = lttrTicket.getTicketsPerWeek();
+//	    currentTicketsPerWeek = "";
+//	} else {
+//	    currentTicketsPerWeek = lttrTicket.getTicketsPerWeek();
+//	}
+//    }
+
+    public boolean isCandidate() {
+	return "Candidate".equals(state);
+    }
+
+    public boolean isNotTotal() {
+	return !"Total".equals(ticket);
+    }
+
+    public void update(Map<String, LTTRTicket> lttrMap) {
+	if ("Availability".equals(area)) {
+	    return;
+	}
+	LTTRTicket frequencyTicket = lttrMap.get(ticket);
+	String tpw = frequencyTicket == null ? "0" : frequencyTicket.getTicketsPerWeek();
+	if (Dates.ONLINE_SCHEDULE.getDateFromString(date).compareTo(new Date()) > 0) {
+	    ticketsPerWeek = tpw;
+	    currentTicketsPerWeek = "";
+	} else {
+	    currentTicketsPerWeek = tpw;
+	}
     }
 
 }

@@ -15,8 +15,11 @@ public class FileWriter {
     };
 
     public void write() {
+	System.out.println("archiver.run();");
 	archiver.run();
+	System.out.println("writer.run();");
 	writer.run();
+	System.out.println("opener.run();");
 	opener.run();
     }
 

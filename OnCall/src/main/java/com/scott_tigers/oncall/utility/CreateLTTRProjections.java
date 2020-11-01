@@ -19,17 +19,15 @@ import org.openqa.selenium.WebElement;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.scott_tigers.oncall.bean.LTTRPlan;
+import com.scott_tigers.oncall.bean.LTTRTicket;
 import com.scott_tigers.oncall.shared.Dates;
 import com.scott_tigers.oncall.shared.EngineerFiles;
 import com.scott_tigers.oncall.shared.Properties;
-import com.scott_tigers.oncall.shared.URL;
 
 public class CreateLTTRProjections extends Utility {
 
     private static final int PROJECTION_MONTHS = 12;
     private static final int NUMBER_OF_PROJECTION_MONTHS = 12;
-    private static final int TRAILING_WEEKS = 4;
 
     public static void main(String[] args) throws Exception {
 	new CreateLTTRProjections().run();
@@ -38,15 +36,6 @@ public class CreateLTTRProjections extends Utility {
     private String currentMonth;
 
     private void run() throws Exception {
-//	List<TicketCounts> ticketCounts = EngineerFiles.ENGINE_TICKET_COUNTS
-//		.readCSVToPojo(TicketCounts.class);
-//
-//	double fourWeekTrailingAverage = ticketCounts
-//		.subList(ticketCounts.size() - TRAILING_WEEKS, ticketCounts.size())
-//		.stream()
-//		.mapToInt(TicketCounts::getTickets)
-//		.average()
-//		.orElse(0.0);
 
 	WebDriver driver = getWebDriver();
 	driver.get(LTTRPage.GRAPH.getUrl());
@@ -71,7 +60,7 @@ public class CreateLTTRProjections extends Utility {
 
 	ProjectionAccumulator projectionAccumulator = new ProjectionAccumulator(fourWeekTrailingAverage);
 
-	List<TicketReduction> reductionList = readFromUrl(URL.LTTR_PLAN, LTTRPlan.class)
+	List<TicketReduction> reductionList = getLttrQuipPlan()
 		.map(LttrProjection::new)
 		.flatMap(LttrProjection::getTicketReductions)
 		.collect(Collectors.groupingBy(TicketReduction::getMonth,
@@ -96,20 +85,20 @@ public class CreateLTTRProjections extends Utility {
     private class LttrProjection {
 
 	private LttrType lttrType;
-	private LTTRPlan lttrPlan;
+	private LTTRTicket lttrTicet;
 
-	public LttrProjection(LTTRPlan lttrPlan) {
-	    this.lttrPlan = lttrPlan;
+	public LttrProjection(LTTRTicket lttrTicet) {
+	    this.lttrTicet = lttrTicet;
 	    lttrType = Arrays
 		    .asList(LttrType.values())
 		    .stream()
-		    .filter(type -> type.is(lttrPlan))
+		    .filter(type -> type.is(lttrTicet))
 		    .findFirst()
 		    .orElse(LttrType.DEFAULT);
 	}
 
 	public Stream<TicketReduction> getTicketReductions() {
-	    return lttrType.getTicketReductions(lttrPlan);
+	    return lttrType.getTicketReductions(lttrTicet);
 	}
 
     }
@@ -139,46 +128,47 @@ public class CreateLTTRProjections extends Utility {
     enum LttrType {
 	AMVU {
 	    @Override
-	    boolean is(LTTRPlan lttrPlan) {
-		return lttrPlan.getRelease().toLowerCase().contains("amvu");
+	    boolean is(LTTRTicket lttrTicet) {
+		return lttrTicet.getRelease().toLowerCase().contains("amvu");
 	    }
 
 	    @Override
-	    protected Stream<TicketReduction> getTicketReductions(LTTRPlan lttrPlan) {
-		return getOneTimeStream(lttrPlan, .77);
+	    protected Stream<TicketReduction> getTicketReductions(LTTRTicket lttrTicet) {
+		return getOneTimeStream(lttrTicet, .77);
 	    }
 
 	},
 	SERVERLESS {
 	    @Override
-	    boolean is(LTTRPlan lttrPlan) {
-		return lttrPlan.getArea().toLowerCase().matches(".*serverless|cp.*");
+	    boolean is(LTTRTicket lttrTicet) {
+		return lttrTicet.getArea().toLowerCase().matches(".*serverless|cp.*");
 	    }
 
 	    @Override
-	    protected Stream<TicketReduction> getTicketReductions(LTTRPlan lttrPlan) {
-		return getOneTimeStream(lttrPlan, 1);
+	    protected Stream<TicketReduction> getTicketReductions(LTTRTicket lttrTicet) {
+		return getOneTimeStream(lttrTicet, 1);
 	    }
 	},
 	DEFAULT {
 	    @Override
-	    boolean is(LTTRPlan lttrPlan) {
+	    boolean is(LTTRTicket lttrTicet) {
 		return true;
 	    }
 
 	    @Override
-	    protected Stream<TicketReduction> getTicketReductions(LTTRPlan lttrPlan) {
-		return getTicketAdoptionStream(lttrPlan);
+	    protected Stream<TicketReduction> getTicketReductions(LTTRTicket lttrTicet) {
+		return getTicketAdoptionStream(lttrTicet);
 	    }
 
 	};
 
-	abstract boolean is(LTTRPlan lttrPlan);
+	abstract boolean is(LTTRTicket lttrTicet);
 
-	protected abstract Stream<TicketReduction> getTicketReductions(LTTRPlan lttrPlan);
+	protected abstract Stream<TicketReduction> getTicketReductions(LTTRTicket lttrTicet);
 
-	private static Stream<TicketReduction> getOneTimeStream(LTTRPlan lttrPlan, double percentage) {
-	    return Stream.of(new TicketReduction(lttrPlan.getMonth(), lttrPlan.getDoubleTicketsPerWeek() * percentage));
+	private static Stream<TicketReduction> getOneTimeStream(LTTRTicket lttrTicet, double percentage) {
+	    return Stream
+		    .of(new TicketReduction(lttrTicet.getMonth(), lttrTicet.getDoubleTicketsPerWeek() * percentage));
 	}
     }
 
@@ -233,14 +223,14 @@ public class CreateLTTRProjections extends Utility {
 
     }
 
-    private static Stream<TicketReduction> getTicketAdoptionStream(LTTRPlan lttrPlan) {
+    private static Stream<TicketReduction> getTicketAdoptionStream(LTTRTicket lttrTicet) {
 
 	return StreamSupport.stream(
 		Spliterators.spliteratorUnknownSize(
 			new Iterator<TicketReduction>() {
 
-			    Date currentDate = Dates.ONLINE_SCHEDULE.getDateFromString(lttrPlan.getDate());
-			    double tickets = lttrPlan.getDoubleTicketsPerWeek();
+			    Date currentDate = Dates.ONLINE_SCHEDULE.getDateFromString(lttrTicet.getDate());
+			    double tickets = lttrTicet.getDoubleTicketsPerWeek();
 			    int iteration = 0;
 
 			    @Override

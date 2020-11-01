@@ -2,7 +2,6 @@ package com.scott_tigers.oncall.utility;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -14,7 +13,8 @@ import com.scott_tigers.oncall.bean.LTTRTicket;
 import com.scott_tigers.oncall.shared.EngineerFiles;
 import com.scott_tigers.oncall.shared.Json;
 import com.scott_tigers.oncall.shared.Lambda;
-import com.scott_tigers.oncall.shared.WebElements;
+import com.scott_tigers.oncall.shared.Properties;
+import com.scott_tigers.oncall.shared.Util;
 
 public abstract class PickNextLttrSim extends Utility {
 
@@ -22,29 +22,18 @@ public abstract class PickNextLttrSim extends Utility {
 	List<String> planTickets = getTickertPlanFile()
 		.readCSVToPojo(LTTRTicket.class)
 		.stream()
-		.map(LTTRTicket::getTicketUrl)
+		.map(LTTRTicket::getTicket)
 		.collect(Collectors.toList());
 
 	WebDriver driver = getWebDriver();
 
-	driver.get(LTTRPage.TOP.getUrl());
-	System.out.println("page loaded");
-	Thread.sleep(2000);
-	driver
-		.findElement(By.id(WebElements.TBL_PRIORITIZATION_ID))
-		.findElements(By.tagName(WebElements.TABLE_ROW_TAG))
-		.stream()
-		.map(LTTRTicket::new)
-		.filter(LTTRTicket::validTicket)
-		.filter(webTicket -> !planTickets.contains(webTicket.getTicketUrl()))
+	getLttrTicketStream(driver)
+		.filter(webTicket -> !planTickets.contains(webTicket.getTicket()))
 		.findFirst()
 		.ifPresent(ticket -> {
 		    System.out.println("found ticket");
 		    driver.get(ticket.getSearchUrl());
-		    try {
-			TimeUnit.SECONDS.sleep(2);
-		    } catch (InterruptedException e) {
-		    }
+		    Util.sleep(2);
 		    List<WebElement> o1 = driver.findElements(By.xpath("//*[contains(text(),'matches')]"));
 		    String totalTickets = Optional
 			    .ofNullable(o1)
@@ -60,7 +49,7 @@ public abstract class PickNextLttrSim extends Utility {
 
 		    LTTRList.addTicket(getTicketType(), ticket);
 
-		    launchUrl(ticket.getTicketUrl());
+		    launchUrl(ticket.getTicket());
 		});
 
 	driver.quit();
@@ -77,13 +66,16 @@ public abstract class PickNextLttrSim extends Utility {
     }
 
     enum LTTRList {
-	EMAIL(TicketType.HIGH_FREQUENCY, EngineerFiles.LTTR_CANDIDATE_EMAIL_DATA, "ticketId", "email", "to", "tickets",
-		"description", "ticketUrl", "searchUrl", "totalTickets"),
-	PLAN(TicketType.HIGH_FREQUENCY, EngineerFiles.LTTR_PLAN_TICKETS, "ticketUrl", "ticketsPerWeek", "description",
-		"area", "release", "releaseDate", "totalTickets", "assignee", "ticketId", "state", "notes"),
-	AUTOMATION(TicketType.AUTOMATION, EngineerFiles.SIM_AUTOMATION_PLAN, "ticketUrl", "description",
-		"ticketsPerWeek",
-		"totalTickets", "notes", "state");
+	EMAIL(TicketType.HIGH_FREQUENCY, EngineerFiles.LTTR_CANDIDATE_EMAIL_DATA, Properties.TICKET_ID,
+		Properties.EMAIL, Properties.TO, Properties.TICKETS,
+		Properties.DESCRIPTION, Properties.TICKET, Properties.SEARCH_URL, Properties.TOTAL_TICKETS),
+	PLAN(TicketType.HIGH_FREQUENCY, EngineerFiles.LTTR_PLAN_TICKETS, Properties.TICKET,
+		Properties.TICKETS_PER_WEEK, Properties.DESCRIPTION,
+		Properties.AREA, Properties.RELEASE, Properties.RELEASE_DATE, Properties.TOTAL_TICKETS,
+		Properties.ASSIGNEE, Properties.TICKET_ID, Properties.STATE, Properties.NOTES),
+	AUTOMATION(TicketType.AUTOMATION, EngineerFiles.SIM_AUTOMATION_PLAN, Properties.TICKET, Properties.DESCRIPTION,
+		Properties.TICKETS_PER_WEEK,
+		Properties.TOTAL_TICKETS, Properties.NOTES, Properties.STATE);
 
 	private EngineerFiles fileType;
 	private String[] columnHeaders;
@@ -102,7 +94,6 @@ public abstract class PickNextLttrSim extends Utility {
 	}
 
 	void addTicketToList(LTTRTicket ticket) {
-	    System.out.println("this=" + (this));
 	    List<LTTRTicket> newList = Stream
 		    .concat(
 			    Stream.of(ticket),

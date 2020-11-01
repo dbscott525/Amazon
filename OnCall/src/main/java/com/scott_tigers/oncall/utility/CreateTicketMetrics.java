@@ -21,6 +21,9 @@ public class CreateTicketMetrics extends Utility {
 
     private void run() {
 
+	lastDate = Dates.SORTABLE.getLastMondayFormattedDate();
+	System.out.println("lastDate=" + (lastDate));
+
 	TicketSummaryMetrics ticketSummaryMetrics = new TicketSummaryMetrics();
 
 	startDate = getCompletedShifts()
@@ -28,8 +31,6 @@ public class CreateTicketMetrics extends Utility {
 		.sorted()
 		.findFirst()
 		.orElse("error - should never happen");
-
-	lastDate = Dates.SORTABLE.getLastMondayFormattedDate();
 
 	long ticketsClosed = getTicketsClosed();
 
@@ -96,6 +97,7 @@ public class CreateTicketMetrics extends Utility {
     }
 
     private Stream<Shift> getCompletedShifts() {
+	System.out.println("lastDate=" + (lastDate));
 	return getShiftStream().filter(s -> s.isBefore(lastDate));
     }
 
@@ -161,7 +163,7 @@ public class CreateTicketMetrics extends Utility {
 	    }
 	};
 
-	private static final int CIT_SIZE = 7;
+	private static final int CIT_SIZE = 9;
 
 	protected abstract TicketSummaryRow getRow(TicketSummaryMetrics ticketSummaryMetrics);
 
