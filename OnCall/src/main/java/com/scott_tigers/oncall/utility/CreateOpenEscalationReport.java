@@ -30,10 +30,6 @@ public class CreateOpenEscalationReport extends Utility {
 
 	checkForDuplicates(escalationsFromQuip);
 
-//	Stream<Integer> s3 = s2.sorted();
-
-//	s3.forEach(System.out::println);
-
 	Map<Integer, TicketEscalation> quipMap = escalationsFromQuip.stream()
 		.collect(Collectors.toMap(x -> Util.getCaseId(x.getTicket()), Function.identity()));
 
@@ -48,7 +44,7 @@ public class CreateOpenEscalationReport extends Utility {
 	    TT tt = escalatedTicketsMap.get(caseId);
 	    if (tt != null) {
 		ticket.setDescription(tt.getDescription());
-		ticket.setStatus(tt.getStatus());
+		ticket.setStatus(tt.getStatus().replace("Pending Pending", "Pending"));
 		ticket.setLastModifiedDate(Dates.TT_DATE.convertFormat(tt.getLastModifiedDate(), Dates.TIME_STAMP));
 	    } else {
 		ticket.setStatus(Status.CLOSED.getValue());

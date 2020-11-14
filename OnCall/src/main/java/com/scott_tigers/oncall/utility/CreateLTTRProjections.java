@@ -6,16 +6,15 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -39,18 +38,12 @@ public class CreateLTTRProjections extends Utility {
 
 	WebDriver driver = getWebDriver();
 	driver.get(LTTRPage.GRAPH.getUrl());
-	List<WebElement> tds = driver
-		.findElement(By.xpath("//table/tbody/tr"))
-		.findElements(By.tagName("td"));
-
-	double fourWeekTrailingAverage = IntStream
-		.range(2, 8)
-		.mapToObj(tds::get)
-		.map(td -> td.getAttribute("innerHTML"))
+	Double fourWeekTrailingAverage = Optional
+		.ofNullable(driver)
+		.map(d -> d.findElement(By.xpath("//table/tbody/tr/td[2]")))
+		.map(e -> e.getAttribute("innerHTML"))
 		.map(Double::parseDouble)
-		.mapToDouble(x -> x)
-		.average()
-		.orElse(Double.NaN);
+		.orElse(0.0);
 
 	System.out.println("fourWeekTrailingAverage=" + (fourWeekTrailingAverage));
 

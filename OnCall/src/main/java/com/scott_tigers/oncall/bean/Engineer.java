@@ -278,8 +278,14 @@ public class Engineer {
 	return Optional
 		.ofNullable(trainingDate)
 		.filter(Predicate.not(String::isEmpty))
-		.filter(this::isAfterToday)
+		.filter(t -> isWithinAMonth(t))
 		.isPresent();
+    }
+
+    private boolean isWithinAMonth(String date) {
+	String trainingDateString = Dates.ONLINE_SCHEDULE.convertFormat(date, Dates.SORTABLE);
+	String fourWeeksAgo = Dates.SORTABLE.getFormattedDelta(Dates.SORTABLE.getFormattedString(), -4 * 7);
+	return trainingDateString.compareTo(fourWeeksAgo) >= 0;
     }
 
     @SuppressWarnings("unused")

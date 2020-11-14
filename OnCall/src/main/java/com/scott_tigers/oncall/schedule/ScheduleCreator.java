@@ -1,6 +1,5 @@
 package com.scott_tigers.oncall.schedule;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -102,7 +101,7 @@ public class ScheduleCreator {
 	}
 
 	List<Engineer> candidates = candidateSchedule.getCandidates(date, dateMap.get(date));
-	Collections.shuffle(candidates);
+//	Collections.shuffle(candidates);
 
 	candidateSchedule.addShift(new Shift(this, date, candidates));
 	addShift(Dates.SORTABLE.getFormattedDelta(date, daysBetweenShifts));
@@ -253,6 +252,12 @@ public class ScheduleCreator {
 
     public ScheduleCreator endAfterMonths(int months) {
 	endDate = Dates.SORTABLE.addMonths(Dates.SORTABLE.getFormattedString(), months);
+	System.out.println("endDate=" + (endDate));
+	return this;
+    }
+
+    public ScheduleCreator endAfterWeeksFromNow(int weeks) {
+	endDate = Dates.SORTABLE.getFormattedDelta(Dates.SORTABLE.getFormattedString(), 7 * weeks);
 	System.out.println("endDate=" + (endDate));
 	return this;
     }

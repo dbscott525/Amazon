@@ -3,11 +3,12 @@ package com.scott_tigers.oncall.utility;
 import java.util.stream.Stream;
 
 import com.scott_tigers.oncall.bean.LTTRTicket;
+import com.scott_tigers.oncall.shared.URL;
 
-public class UpdateLttrPlanFrequencies extends UpdateLttrTicketFrequencies {
+public class UpdateLttrCandidateFrequencies extends UpdateLttrTicketFrequencies {
 
     public static void main(String[] args) {
-	new UpdateLttrPlanFrequencies().run();
+	new UpdateLttrCandidateFrequencies().run();
     }
 
     @Override
@@ -17,6 +18,6 @@ public class UpdateLttrPlanFrequencies extends UpdateLttrTicketFrequencies {
 
     @Override
     protected Stream<LTTRTicket> getQuipLttrTicketStream() {
-        return getLttrQuipPlan();
+	return readFromUrl(URL.LTTR_CANDIDATES, LTTRTicket.class);
     }
 }

@@ -1,14 +1,14 @@
 package com.scott_tigers.oncall.shared;
 
 public enum Expertise {
-    Binlog(1),
+    Binlog(2),
     BLR(1) {
-	@Override
-	public String getNotation() {
-	    return "";
-	}
+//	@Override
+//	public String getNotation() {
+//	    return "";
+//	}
     },
-    MySQL8(1) {
+    MySQL8(2) {
 	@Override
 	public String getNotation() {
 	    return "";

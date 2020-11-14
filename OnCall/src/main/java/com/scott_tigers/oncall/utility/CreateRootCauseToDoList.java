@@ -88,6 +88,10 @@ public class CreateRootCauseToDoList extends Utility implements TTReader {
 
     private boolean needsWork(TT tt) {
 
+	if (tt.getDescription().contains("FoundIncorrectUserPermissions")) {
+	    return false;
+	}
+
 	if (tt.getAge().equals("0")) {
 	    return false;
 	}

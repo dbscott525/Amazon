@@ -357,7 +357,7 @@ public class LTTRTicket {
 	}
 	LTTRTicket frequencyTicket = lttrMap.get(ticket);
 	String tpw = frequencyTicket == null ? "0" : frequencyTicket.getTicketsPerWeek();
-	if (Dates.ONLINE_SCHEDULE.getDateFromString(date).compareTo(new Date()) > 0) {
+	if (date != null && Dates.ONLINE_SCHEDULE.getDateFromString(date).compareTo(new Date()) > 0) {
 	    ticketsPerWeek = tpw;
 	    currentTicketsPerWeek = "";
 	} else {

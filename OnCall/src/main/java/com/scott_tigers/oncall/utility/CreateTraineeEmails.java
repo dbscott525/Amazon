@@ -21,7 +21,10 @@ public class CreateTraineeEmails extends Utility {
 		.map(EmailsByDate::fromTrainee)
 		.sorted(Comparator.comparing(EmailsByDate::getDate))
 		.collect(Collectors.toList());
+
 	EngineerFiles.TRAINEE_EMAILS.write(w -> w.CSV(traineeEmailList, EmailsByDate.class));
+	EngineerFiles.TRAINEE_INTRODUCTION.launch();
+	EngineerFiles.TRAINEE_TRAINING_COMPLETE.launch();
     }
 
 }

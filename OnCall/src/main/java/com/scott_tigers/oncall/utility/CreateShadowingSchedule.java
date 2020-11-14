@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import com.scott_tigers.oncall.bean.TrainingDaySchedule;
 import com.scott_tigers.oncall.bean.TrainingSchedule;
 import com.scott_tigers.oncall.shared.EngineerFiles;
+import com.scott_tigers.oncall.shared.URL;
 
 public class CreateShadowingSchedule extends Utility {
 
@@ -14,8 +15,6 @@ public class CreateShadowingSchedule extends Utility {
     }
 
     private void run() {
-//	Map<String, List<Engineer>> x1 = getTraineesByDate();
-//	Json.print(x1);
 	EngineerFiles.TRAINING_DAILY_SCHEDULE.writeLines(getTraineesByDate()
 		.entrySet()
 		.stream()
@@ -27,6 +26,7 @@ public class CreateShadowingSchedule extends Utility {
 		.collect(Collectors.toList()));
 
 	successfulFileCreation(EngineerFiles.TRAINING_DAILY_SCHEDULE);
+	launchUrl(URL.PRIMARY_SHADOWING_SCHEDULE);
     }
 
 }
