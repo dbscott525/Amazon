@@ -22,6 +22,7 @@ import com.scott_tigers.oncall.bean.LTTRTicket;
 import com.scott_tigers.oncall.shared.Dates;
 import com.scott_tigers.oncall.shared.EngineerFiles;
 import com.scott_tigers.oncall.shared.Properties;
+import com.scott_tigers.oncall.shared.Util;
 
 public class CreateLTTRProjections extends Utility {
 
@@ -36,7 +37,7 @@ public class CreateLTTRProjections extends Utility {
 
     private void run() throws Exception {
 
-	WebDriver driver = getWebDriver();
+	WebDriver driver = Util.getWebDriver();
 	driver.get(LTTRPage.GRAPH.getUrl());
 	Double fourWeekTrailingAverage = Optional
 		.ofNullable(driver)

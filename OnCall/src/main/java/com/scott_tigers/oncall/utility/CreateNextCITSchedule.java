@@ -2,6 +2,7 @@ package com.scott_tigers.oncall.utility;
 
 import java.io.IOException;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.scott_tigers.oncall.schedule.ScheduleCreator;
 import com.scott_tigers.oncall.shared.Dates;
 import com.scott_tigers.oncall.shared.EngineerFiles;
@@ -43,6 +44,7 @@ public class CreateNextCITSchedule extends Utility {
 	EngineerFiles.CIT_SCHEDULE_CHANGE_NOTIFICATION_EMAIL.launch();
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     static class Notification {
 	private String email;
 	private String date;

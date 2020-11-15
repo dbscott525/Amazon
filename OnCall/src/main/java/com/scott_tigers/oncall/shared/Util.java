@@ -9,6 +9,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+
 import com.scott_tigers.oncall.bean.Engineer;
 
 public class Util {
@@ -74,6 +78,15 @@ public class Util {
             TimeUnit.SECONDS.sleep(seconds);
         } catch (InterruptedException e) {
         }
+    }
+
+    public static WebDriver getWebDriver() {
+        System.setProperty(WebElements.WEBDRIVER_CHROME_DRIVER_PROPERTY, Constants.CHROMEDRIVER_EXE_LOCATION);
+        ChromeOptions chromeProfile = new ChromeOptions();
+        chromeProfile
+        	.addArguments(WebElements.USER_DATA_DIR_PROPERTY + Constants.CHROME_USER_DATA_LOCATION);
+        WebDriver driver = new ChromeDriver(chromeProfile);
+        return driver;
     }
 
 }

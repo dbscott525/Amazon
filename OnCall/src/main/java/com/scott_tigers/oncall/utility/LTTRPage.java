@@ -1,6 +1,9 @@
 package com.scott_tigers.oncall.utility;
 
 import java.util.Date;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.openqa.selenium.By;
@@ -72,6 +75,11 @@ public enum LTTRPage {
 		.stream()
 		.map(LTTRTicket::new)
 		.filter(LTTRTicket::validTicket);
+    }
+
+    Map<String, LTTRTicket> getMap(WebDriver driver) {
+	return getLttrTicketStream(driver)
+		.collect(Collectors.toMap(LTTRTicket::getTicket, Function.identity()));
     }
 
 }

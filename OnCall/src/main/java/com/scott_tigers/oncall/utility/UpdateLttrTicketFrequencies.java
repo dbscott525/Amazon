@@ -2,7 +2,6 @@ package com.scott_tigers.oncall.utility;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -11,6 +10,7 @@ import org.openqa.selenium.WebDriver;
 import com.scott_tigers.oncall.bean.LTTRTicket;
 import com.scott_tigers.oncall.shared.EngineerFiles;
 import com.scott_tigers.oncall.shared.Properties;
+import com.scott_tigers.oncall.shared.Util;
 
 public abstract class UpdateLttrTicketFrequencies extends Utility {
 
@@ -18,10 +18,8 @@ public abstract class UpdateLttrTicketFrequencies extends Utility {
 
     protected void run() {
 
-	WebDriver driver = getWebDriver();
-	lttrMap = LTTRPage.TOP
-		.getLttrTicketStream(driver)
-		.collect(Collectors.toMap(LTTRTicket::getTicket, Function.identity()));
+	WebDriver driver = Util.getWebDriver();
+	lttrMap = LTTRPage.TOP.getMap(driver);
 	driver.close();
 
 	List<LTTRTicket> lttrPlanTickets = getQuipLttrTicketStream()

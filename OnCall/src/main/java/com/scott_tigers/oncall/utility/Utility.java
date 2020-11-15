@@ -25,8 +25,6 @@ import java.util.stream.Stream;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 
 import com.scott_tigers.oncall.bean.Email;
 import com.scott_tigers.oncall.bean.EmailsByDate;
@@ -542,15 +540,6 @@ public class Utility {
 		CreateCITOnlineSchedule.class,
 		CreateCITEmails.class,
 		LauchCITMidweekDocuments.class);
-    }
-
-    protected WebDriver getWebDriver() {
-	System.setProperty(WebElements.WEBDRIVER_CHROME_DRIVER_PROPERTY, Constants.CHROMEDRIVER_EXE_LOCATION);
-	ChromeOptions chromeProfile = new ChromeOptions();
-	chromeProfile
-		.addArguments(WebElements.USER_DATA_DIR_PROPERTY + Constants.CHROME_USER_DATA_LOCATION);
-	WebDriver driver = new ChromeDriver(chromeProfile);
-	return driver;
     }
 
     protected Stream<LTTRTicket> getLttrTicketStream(WebDriver driver) {

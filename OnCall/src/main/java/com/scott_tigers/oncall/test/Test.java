@@ -15,7 +15,7 @@ public class Test extends Utility {
     }
 
     private void run() throws Exception {
-	EngineerFiles.CIT_SCHEDULE_CHANGE_NOTIFICATION_EMAIL.launch();
+	EngineerFiles.CIT_LAST_DAY_EMAIL.launch();
     }
 
     @SuppressWarnings("unused")
