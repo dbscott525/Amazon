@@ -110,18 +110,22 @@ public class CreateTicketMetrics extends Utility {
 	    label = ticketSummary.getLabel();
 	}
 
+	@SuppressWarnings("unused")
 	public String getLabel() {
 	    return label;
 	}
 
+	@SuppressWarnings("unused")
 	public void setLabel(String label) {
 	    this.label = label;
 	}
 
+	@SuppressWarnings("unused")
 	public Double getValue() {
 	    return value;
 	}
 
+	@SuppressWarnings("unused")
 	public void setValue(Double value) {
 	    this.value = value;
 	}

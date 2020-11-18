@@ -55,5 +55,6 @@ public class Properties {
     public static final String UID = "UID";
     public static final String URL = "URL";
     public static final String WEIGHT = "weight";
+    public static final String DELTA = "Delta";
 
 }

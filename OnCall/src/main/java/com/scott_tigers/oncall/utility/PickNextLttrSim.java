@@ -27,7 +27,8 @@ public abstract class PickNextLttrSim extends Utility {
 
 	WebDriver driver = Util.getWebDriver();
 
-	getLttrTicketStream(driver)
+//	getLttrTicketStream(driver)
+	LTTRPage.TOP.getLttrTicketStream(driver)
 		.filter(webTicket -> !planTickets.contains(webTicket.getTicket()))
 		.findFirst()
 		.ifPresent(ticket -> {

@@ -23,9 +23,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-
 import com.scott_tigers.oncall.bean.Email;
 import com.scott_tigers.oncall.bean.EmailsByDate;
 import com.scott_tigers.oncall.bean.Engineer;
@@ -44,8 +41,6 @@ import com.scott_tigers.oncall.shared.EngineerType;
 import com.scott_tigers.oncall.shared.Executor;
 import com.scott_tigers.oncall.shared.Oncall;
 import com.scott_tigers.oncall.shared.URL;
-import com.scott_tigers.oncall.shared.Util;
-import com.scott_tigers.oncall.shared.WebElements;
 import com.scott_tigers.oncall.test.Company;
 
 public class Utility {
@@ -540,18 +535,6 @@ public class Utility {
 		CreateCITOnlineSchedule.class,
 		CreateCITEmails.class,
 		LauchCITMidweekDocuments.class);
-    }
-
-    protected Stream<LTTRTicket> getLttrTicketStream(WebDriver driver) {
-	driver.get(LTTRPage.TOP.getUrl());
-	System.out.println("page loaded");
-	Util.sleep(2);
-	return driver
-		.findElement(By.id(WebElements.TBL_PRIORITIZATION_ID))
-		.findElements(By.tagName(WebElements.TABLE_ROW_TAG))
-		.stream()
-		.map(LTTRTicket::new)
-		.filter(LTTRTicket::validTicket);
     }
 
     protected Stream<LTTRTicket> getLttrQuipPlan() {

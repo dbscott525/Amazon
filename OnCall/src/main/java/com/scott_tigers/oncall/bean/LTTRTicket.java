@@ -46,6 +46,8 @@ public class LTTRTicket {
     private String ticket;
     private String to;
     private String totalTickets;
+    private String type;
+    private String delta;
 
     public LTTRTicket() {
     }
@@ -327,21 +329,23 @@ public class LTTRTicket {
 	return date == null ? null : Dates.ONLINE_SCHEDULE.convertFormat(date, Dates.YEAR_MONTH);
     }
 
-//    public void update(LTTRTicket lttrTicket) {
-//	description = lttrTicket.getDescription();
-//	if (Dates.ONLINE_SCHEDULE.getDateFromString(date).compareTo(new Date()) > 0) {
-//	    currentTicketsPerWeek = "";
-//	    if (lttrTicket == null) {
-//		ticketsPerWeek = "0";
-//	    } else {
-//		ticketsPerWeek = lttrTicket.getTicketsPerWeek();
-//	    }
-//	    ticketsPerWeek = lttrTicket.getTicketsPerWeek();
-//	    currentTicketsPerWeek = "";
-//	} else {
-//	    currentTicketsPerWeek = lttrTicket.getTicketsPerWeek();
-//	}
-//    }
+    @JsonProperty(Properties.TYPE)
+    public String getType() {
+	return type;
+    }
+
+    public void setType(String type) {
+	this.type = type;
+    }
+
+    @JsonProperty(Properties.DELTA)
+    public String getDelta() {
+	return delta;
+    }
+
+    public void setDelta(String delta) {
+	this.delta = delta;
+    }
 
     public boolean isCandidate() {
 	return "Candidate".equals(state);
@@ -365,4 +369,13 @@ public class LTTRTicket {
 	}
     }
 
+    @Transient
+    public Integer getDeltaInteger() {
+	return Integer.parseInt(delta);
+    }
+
+    @Transient
+    public int getIntTickets() {
+	return Integer.parseInt(tickets);
+    }
 }

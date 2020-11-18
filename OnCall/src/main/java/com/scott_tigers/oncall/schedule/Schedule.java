@@ -171,43 +171,11 @@ public class Schedule {
 		.sorted()
 		.collect(Collectors.toList());
 
-	List<String> sortedPrintList = selected.stream().map(RandomUid::getPrintLine).collect(Collectors.toList());
-
-//	boolean kdae = selected.stream().map(x -> x.getEngineer()).map(x -> x.getUid())
-//		.anyMatch(x -> "ramashw".equals(x));
-//	boolean ramashw = selected.stream().map(x -> x.getEngineer()).map(x -> x.getUid())
-//		.anyMatch(x -> "kdae".equals(x));
-//	boolean rozedavi = selected.stream().map(x -> x.getEngineer()).map(x -> x.getUid())
-//		.anyMatch(x -> "rozedavi".equals(x));
-//	if (kdae && ramashw) {
-//	    Json.print(sortedPrintList);
-//	    if (++count > 20) {
-//		System.exit(1);
-//	    }
-//	}
-
 	List<Engineer> finalList = selected
 		.stream()
 		.map(RandomUid::getEngineer)
 		.filter(engineer -> duplicateSmeEliminator.notDuplicate(engineer))
 		.collect(Collectors.toList());
-
-//	List<Engineer> finalList = candidateEngineers
-//		.stream()
-//		.filter(Predicate.not(excludedEngineers::containsKey))
-//		.map(engineer -> new RandomUid(engineer, shiftCounts.get(engineer), random.nextDouble()))
-//		.sorted()
-//		.map(RandomUid::getEngineer)
-//		.filter(engineer -> duplicateSmeEliminator.notDuplicate(engineer))
-//		.collect(Collectors.toList());
-//	List<Engineer> finalList = candidateEngineers
-//		.stream()
-//		.filter(Predicate.not(excludedEngineers::containsKey))
-//		.map(engineer -> new RandomUid(engineer, shiftCounts.get(engineer), random.nextDouble()))
-//		.sorted()
-//		.map(RandomUid::getEngineer)
-//		.filter(engineer -> duplicateSmeEliminator.notDuplicate(engineer))
-//		.collect(Collectors.toList());
 
 	return finalList;
     }
@@ -261,10 +229,6 @@ public class Schedule {
 		    .map(Long::intValue)
 		    .orElse(0);
 	    this.random = random;
-	}
-
-	public String getPrintLine() {
-	    return "" + engineer.getRequiredOrder() + " " + shifts + " " + random + " " + engineer.getUid();
 	}
 
 	@Override

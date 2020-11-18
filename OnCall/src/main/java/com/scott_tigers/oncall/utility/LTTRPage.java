@@ -53,7 +53,8 @@ public enum LTTRPage {
     public String getUrl() {
 	Date nowDate = new Date();
 	String end = Dates.LTTR_URL.getFormattedString(Dates.getWeekDelta(nowDate, -getLastWeekDelta()));
-	String start = Dates.LTTR_URL.getFormattedString(Dates.getWeekDelta(nowDate, -(getNumberOfWeeks() + 1)));
+	String start = Dates.LTTR_URL
+		.getFormattedString(Dates.getWeekDelta(nowDate, -(getNumberOfWeeks() + getLastWeekDelta())));
 	return urlTemplate.replaceAll("(.*)START(.*)END(.*)", "$1" + start + "$2" + end + "$3");
     }
 
@@ -77,9 +78,12 @@ public enum LTTRPage {
 		.filter(LTTRTicket::validTicket);
     }
 
-    Map<String, LTTRTicket> getMap(WebDriver driver) {
-	return getLttrTicketStream(driver)
+    Map<String, LTTRTicket> getMap() {
+	WebDriver driver = Util.getWebDriver();
+	Map<String, LTTRTicket> map = getLttrTicketStream(driver)
 		.collect(Collectors.toMap(LTTRTicket::getTicket, Function.identity()));
+	driver.close();
+	return map;
     }
 
 }

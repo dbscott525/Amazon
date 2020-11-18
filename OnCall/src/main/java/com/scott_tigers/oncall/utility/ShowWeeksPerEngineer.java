@@ -42,18 +42,22 @@ public class ShowWeeksPerEngineer extends Utility {
 	    name = entry.getKey();
 	}
 
+	@SuppressWarnings("unused")
 	public Long getCount() {
 	    return count;
 	}
 
+	@SuppressWarnings("unused")
 	public void setCount(Long count) {
 	    this.count = count;
 	}
 
+	@SuppressWarnings("unused")
 	public String getName() {
 	    return name;
 	}
 
+	@SuppressWarnings("unused")
 	public void setName(String name) {
 	    this.name = name;
 	}

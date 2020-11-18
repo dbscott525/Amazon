@@ -27,7 +27,6 @@ public class CustomerIssueReader extends Utility implements TTReader {
 
 	    if (status.isNeverInQueue()) {
 		statusExcludedFromQueue++;
-		System.out.println(tt.getUrl() + ": " + tt.getStatus());
 		return false;
 	    }
 
