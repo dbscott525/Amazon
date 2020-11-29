@@ -30,7 +30,7 @@ public enum Dates {
 	this.format = format;
     }
 
-    String getFormattedDate() {
+    public String getFormattedDate() {
 	return new SimpleDateFormat(format).format(new Date());
     }
 

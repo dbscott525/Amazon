@@ -22,8 +22,7 @@ public class CreateCITOnlineSchedule extends Utility implements Command {
 		.map(CitScheduleRow::new)
 		.collect(Collectors.toList());
 
-	EngineerFiles.ONLINE_SCHEDULE.write(w -> w
-		.json(onlineSchedule));
+	EngineerFiles.ONLINE_SCHEDULE.write(w -> w.json(onlineSchedule));
 	launchUrl("https://oncall.corp.amazon.com/#/view/aurora-head-ams-customer-issues-team/schedule");
     }
 }

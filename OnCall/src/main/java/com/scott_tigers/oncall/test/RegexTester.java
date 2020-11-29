@@ -3,6 +3,8 @@ package com.scott_tigers.oncall.test;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import com.scott_tigers.oncall.shared.Dates;
+
 public class RegexTester {
 
     public static void main(String[] args) {
@@ -14,7 +16,9 @@ public class RegexTester {
     }
 
     enum Test {
-	Test1("2020-09-15 09:07:48PM GMT-0700", "(.*?)(PM|AM) GMT.*", "$1 $2", "2020-09-15 09:07:48 PM");
+	Test1("J:\\SupportEngineering\\OnCallData\\Online Schedule.json", ".*\\\\(.*)(\\..*)",
+		"$1 " + Dates.TIME_STAMP.getFormattedDate() + "$2",
+		"Online Schedule 2020-11-20-12-38-16.json");
 
 	private String input;
 	private String regex;
@@ -33,6 +37,9 @@ public class RegexTester {
 	    Optional<String> o2 = o1.filter(x -> expectedOutput.compareTo(x) != 0);
 	    o2.ifPresentOrElse(
 		    result -> {
+			System.out.println("INVALID RESULT");
+			System.out.println("EXPECTED: " + (expectedOutput) + " |");
+			System.out.println("ACTUAL:   " + (input.replaceAll(regex, replacement)) + " |");
 			System.out.println("invalid result: " + result);
 		    },
 		    () -> {

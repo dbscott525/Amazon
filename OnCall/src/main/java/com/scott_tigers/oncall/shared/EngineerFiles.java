@@ -50,8 +50,8 @@ public enum EngineerFiles {
     CIT_WEEK_DATA                               ("CIT Week Data"),
     CIT_WEEK_WELCOME                            ("CIT Week Welcome",Constants.DOCX_EXTENSION),
     CUSTOMER_ISSUE_BACKLOG                      ("Customer Issue Backlog"),
-    CUSTOMER_ISSUE_EMAIL                        ("Customer Issue Emails"), 
-    CUSTOMER_ISSUE_TEAM_INTRODUCTION            ("Customer Issue Team Introduction", Constants.PPTX_EXTENSION),
+    CUSTOMER_ISSUE_EMAIL                        ("Customer Issue Emails"),
+    CUSTOMER_ISSUE_TEAM_INTRODUCTION            ("Customer Issue Team Introduction", Constants.PPTX_EXTENSION), 
     CUSTOMER_ISSUE_TEAM_SCHEDULE                ("Customer Issue Team Schedule", Constants.JSON_EXTENSION),
     DAILY_ON_CALL_REMINDER_EMAILS               ("Daily On Call Reminder Emails"),
     DAILY_STAND_UP_ATTENDEE_EMAILS              ("Daily Stand Up Attendee Emails"),
@@ -69,8 +69,8 @@ public enum EngineerFiles {
     ESCALATIONS_BY_TYPE                         ("Escalations By Type"),
     ESCALATIONS_TYPE_PIE_CHART                  ("Escalations Type Pie Chart", Constants.XLSX_EXTENSION),
     EXCLUDED_TICKETS                            ("Excluded Tickets"),
-    FOO                                         ("foo"),    
-    FROM_ONLINE_SCHEDULE                        ("From Online Schedule"),
+    FOO                                         ("foo"),
+    FROM_ONLINE_SCHEDULE                        ("From Online Schedule"),    
     KEYWORD_POINTS                              ("Keyword Points"),
     LEVELS_FROM_QUIP                            ("Levels From Quip"),
     LTTR_CANDIDATE_EMAIL_DATA                   ("LTTR Candidate Email Data"),
@@ -114,10 +114,13 @@ public enum EngineerFiles {
     TRAINEES                                    ("Trainees"),
     TRAINING_DAILY_SCHEDULE	                ("Training Daily Schedule"),
     TT_DOWNLOAD                                 ("TT Download"),
+    UID_INPUT                                   ("UID Input"),
     UNAVAILABILITY                              ("Unavailability"), 
     UPDATED_QUIP_LTTR_PLAN                      ("Updated Quip LTTR Plan");
     
     // @formatter:on
+
+    private static final String ON_CALL_DATA_ARCHIVE = "J:\\SupportEngineering\\OnCallDataArchive\\";
 
     static Map<String, String> programMap = new HashMap<>() {
 	private static final long serialVersionUID = 1L;
@@ -192,14 +195,11 @@ public enum EngineerFiles {
     }
 
     private String getArchivePath() {
-	File file = new File(getFileName());
-	var regex = "(.+\\\\)(.+)(\\.)";
-	String replacement = "$1Revisions\\\\$2 " + Dates.TIME_STAMP.getFormattedDate() + "$3";
-
-	String archivePath = file
+	String regex = ".*\\\\(.*)(\\..*)";
+	String replacement = "$1 " + Dates.TIME_STAMP.getFormattedDate() + "$2";
+	return ON_CALL_DATA_ARCHIVE + new File(getFileName())
 		.getPath()
 		.replaceAll(regex, replacement);
-	return archivePath;
     }
 
     public String getFileName() {

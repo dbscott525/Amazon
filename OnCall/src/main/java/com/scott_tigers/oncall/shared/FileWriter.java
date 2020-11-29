@@ -10,7 +10,6 @@ public class FileWriter {
     private Executor archiver = () -> {
     };
     private Executor opener = () -> {
-	System.out.println("Launching " + getFileName());
 	fileType.launch();
     };
 
