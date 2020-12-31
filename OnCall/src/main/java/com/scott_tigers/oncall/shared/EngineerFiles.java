@@ -247,7 +247,6 @@ public enum EngineerFiles {
 	try {
 	    Runtime.getRuntime().exec(new String[] {
 		    programMap.get(extension),
-//		    "C:\\Program Files (x86)\\Microsoft Office\\Office16\\EXCEL.EXE",
 		    fileName
 	    });
 	} catch (IOException e) {
