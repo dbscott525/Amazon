@@ -2,9 +2,9 @@ package com.scott_tigers.oncall.test;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.scott_tigers.oncall.shared.EngineerFiles;
 import com.scott_tigers.oncall.utility.Utility;
 
 @JsonIgnoreProperties
@@ -15,7 +15,14 @@ public class Test extends Utility {
     }
 
     private void run() throws Exception {
-	EngineerFiles.CIT_LAST_DAY_EMAIL.launch();
+	Map<String, String> env = System.getenv();
+	String foo = env.get("STDATA");
+	System.out.println("foo=" + (foo));
+	for (String envName : env.keySet()) {
+	    System.out.format("%s=%s%n",
+		    envName,
+		    env.get(envName));
+	}
     }
 
     @SuppressWarnings("unused")

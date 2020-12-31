@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -125,16 +126,16 @@ public enum EngineerFiles {
     
     // @formatter:on
 
-    private static final String ON_CALL_DATA_ARCHIVE = "J:\\SupportEngineering\\OnCallDataArchive\\";
+    private static String serviceTeamDirectory = null;
 
     static Map<String, String> programMap = new HashMap<>() {
 	private static final long serialVersionUID = 1L;
 	{
-	    put(Constants.XML_EXTENSION, "C:\\\\Program Files (x86)\\\\Microsoft Office\\\\Office16\\WINWORD.EXE");
-	    put(Constants.DOCX_EXTENSION, "C:\\\\Program Files (x86)\\\\Microsoft Office\\\\Office16\\WINWORD.EXE");
-	    put(Constants.CSV_EXTENSION, "C:\\Program Files (x86)\\Microsoft Office\\Office16\\EXCEL.EXE");
-	    put(Constants.XLSX_EXTENSION, "C:\\Program Files (x86)\\Microsoft Office\\Office16\\EXCEL.EXE");
-	    put(Constants.PPTX_EXTENSION, "C:\\Program Files (x86)\\Microsoft Office\\Office16\\POWERPNT.EXE");
+	    put(Constants.XML_EXTENSION, Constants.WINWORD_LOCATION);
+	    put(Constants.DOCX_EXTENSION, Constants.WINWORD_LOCATION);
+	    put(Constants.CSV_EXTENSION, Constants.EXCEL_LOCATION);
+	    put(Constants.XLSX_EXTENSION, Constants.EXCEL_LOCATION);
+	    put(Constants.PPTX_EXTENSION, Constants.WINDOWS_PROGRAM_FILES_FOLDER + "POWERPNT.EXE");
 	    put(Constants.JSON_EXTENSION, "C:\\Users\\bruscob\\eclipse\\jee-2020-062\\eclipse\\eclipse.exe");
 	}
     };
@@ -202,13 +203,29 @@ public enum EngineerFiles {
     private String getArchivePath() {
 	String regex = ".*\\\\(.*)(\\..*)";
 	String replacement = "$1 " + Dates.TIME_STAMP.getFormattedDate() + "$2";
-	return ON_CALL_DATA_ARCHIVE + new File(getFileName())
+	return getServiceTeamDirectory() + Constants.ON_CALL_DATA_ARCHIVE_SUB_DIRECTORY + new File(getFileName())
 		.getPath()
 		.replaceAll(regex, replacement);
     }
 
     public String getFileName() {
-	return "J:\\SupportEngineering\\OnCallData\\" + fileName + extension();
+	return getServiceTeamDirectory()
+		+ Constants.ON_CALL_DATA_SUB_DIRECTORY + fileName + extension();
+    }
+
+    private String getServiceTeamDirectory() {
+	return Optional
+		.ofNullable(serviceTeamDirectory)
+		.orElseGet(
+			() -> {
+			    serviceTeamDirectory = Optional
+				    .ofNullable(System
+					    .getenv()
+					    .get(Constants.SERVICE_TEAM_ENVIRONMENT_VARIABLE_NAME))
+				    .orElse(Constants.DEFAULT_SERVICE_TEAM_DIRECTORY);
+			    return serviceTeamDirectory;
+			});
+
     }
 
     public List<String> getFirstNames() {
