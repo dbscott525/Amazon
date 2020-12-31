@@ -8,7 +8,7 @@ public enum Expertise {
 //	    return "";
 //	}
     },
-    MySQL8(2) {
+    MySQL8(3) {
 	@Override
 	public String getNotation() {
 	    return "";

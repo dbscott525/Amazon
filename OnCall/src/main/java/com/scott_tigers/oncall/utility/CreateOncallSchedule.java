@@ -19,13 +19,19 @@ public class CreateOncallSchedule extends Utility implements Command {
     public void run() throws Exception {
 
 	EngineerFiles.ON_CALL_SCHEDULE.write(w -> w.CSV(
-		Stream
-			.concat(getOnCallStream(), getTraineeStream())
+		getOnCallStream()
 			.distinct()
 			.collect(Collectors.toList()),
 		OnCallScheduleRow.class));
+//	EngineerFiles.ON_CALL_SCHEDULE.write(w -> w.CSV(
+//		Stream
+//		.concat(getOnCallStream(), getTraineeStream())
+//		.distinct()
+//		.collect(Collectors.toList()),
+//		OnCallScheduleRow.class));
     }
 
+    @SuppressWarnings("unused")
     private Stream<OnCallScheduleRow> getTraineeStream() {
 	return EngineerFiles.TRAINING_DAILY_SCHEDULE
 		.readLines()

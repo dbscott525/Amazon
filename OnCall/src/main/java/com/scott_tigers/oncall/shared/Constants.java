@@ -20,8 +20,8 @@ public class Constants {
     public static final String CHROME_USER_DATA_LOCATION = "C:\\Users\\bruscob\\AppData\\Local\\Google\\Chrome\\User Data";
     public static final String CHROMEDRIVER_EXE_LOCATION = "P:\\bin\\chromedriver.exe";
     public static final String CSV_EXTENSION = ".csv";
-    public static final double CUSTOMER_ISSUE_AGE_EXPONENT = .7;
-    public static final int CUSTOMER_ISSUE_TICKETS_ON_THE_QUEUE = 10;
+    public static final double CUSTOMER_ISSUE_AGE_EXPONENT = .9;
+    public static final int CUSTOMER_ISSUE_TICKETS_ON_THE_QUEUE = 6;
     public static final String DOCX_EXTENSION = ".docx";
     public static final int ENGINE_TICKET_TRAILING_DAYS = 7;
     public static final int ENGINE_TICKETS_ON_THE_QUEUE = 10;
@@ -38,6 +38,7 @@ public class Constants {
     public static final int PRIORITY_ENGINEERS_PER_WEEK = 3;
     public static final String REPLACE_ME_EMAIL = "replace@me.com";
     public static final String SORTABLE_DATE_FORMAT = "yyyy-MM-dd";
+    public static final boolean SERVERLESS_ROTATION = false;
     public static Map<String, String> TEMPLATE_REPLACEMENTS = new HashMap<String, String>() {
 	private static final long serialVersionUID = 1L;
 

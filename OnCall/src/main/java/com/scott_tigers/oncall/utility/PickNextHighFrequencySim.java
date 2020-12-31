@@ -1,11 +1,12 @@
 package com.scott_tigers.oncall.utility;
 
-import org.openqa.selenium.WebDriver;
+import java.util.stream.Stream;
 
 import com.scott_tigers.oncall.bean.LTTRTicket;
 import com.scott_tigers.oncall.shared.Constants;
 import com.scott_tigers.oncall.shared.EngineerFiles;
 import com.scott_tigers.oncall.shared.URL;
+import com.scott_tigers.oncall.shared.Util;
 
 public class PickNextHighFrequencySim extends PickNextLttrSim {
 
@@ -16,8 +17,10 @@ public class PickNextHighFrequencySim extends PickNextLttrSim {
     @Override
     protected void run() throws InterruptedException {
 	super.run();
-	launchUrl(URL.LTTR_CANDIDATES);
+	openLTTRDocuments();
 	launchUrl(URL.COMPONENT_LABELS);
+	Util.waitForUser("Edit candidate email file, save, close, and hit enter");
+	EngineerFiles.LTTR_CANDIDATE_EMAIL.launch();
     }
 
     @Override
@@ -26,7 +29,7 @@ public class PickNextHighFrequencySim extends PickNextLttrSim {
     }
 
     @Override
-    protected void processTicket(WebDriver driver, LTTRTicket ticket) {
+    protected void processTicket(LTTRTicket ticket) {
 	ticket.setEmail(Constants.REPLACE_ME_EMAIL);
 	ticket.setTo("SDM");
 	ticket.setState("Candidate");
@@ -38,4 +41,10 @@ public class PickNextHighFrequencySim extends PickNextLttrSim {
 	return TicketType.HIGH_FREQUENCY;
     }
 
+    @Override
+    protected Stream<LTTRTicket> getExistingTicketStream() {
+	return Stream
+		.of(URL.LTTR_CANDIDATES, URL.LTTR_PLAN, URL.LTTR_NOT_ACTIONABLE_SIMS)
+		.flatMap(url -> readFromUrl(url, LTTRTicket.class));
+    }
 }

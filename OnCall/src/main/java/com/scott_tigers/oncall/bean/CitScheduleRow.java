@@ -21,7 +21,7 @@ public class CitScheduleRow {
 		.map(Engineer::getUid)
 		.collect(Collectors.toList());
 
-	setDateTime(shift, 0, dateString -> startDateTime = dateString + " 8:00");
+	setDateTime(shift, -1, dateString -> startDateTime = dateString + " 8:00");
 	setDateTime(shift, 4, dateString -> endDateTime = dateString + " 22:00");
     }
 

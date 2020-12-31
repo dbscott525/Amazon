@@ -9,14 +9,20 @@ public class SetUpCIT extends Utility {
     @SuppressWarnings("unchecked")
     private void run() {
 	runCommands(
-		UpdateMasterListWithTicketsClosed.class,
-		CreateCITWeekData.class,
+
+		CreateTicketClosureReport.class,
 		CreateCITResolvedTicketsTable.class,
 		CreateTicketFlowReport.class,
-		CreateTicketClosureReport.class,
-		LauchCITEndOfWeekDocuments.class);
+		UpdateMasterListWithTicketsClosed.class,
+		CreateCSVSchedule.class,
+		CreateCITOnlineSchedule.class,
+		CreateCITEmails.class,
+		CreateCITWeekData.class,
+		OpenCurrentWeekCITDocuments.class,
+		OpenNextWeekCITDocuments.class
 
-	launchCITUpdater();
+	);
+
     }
 
 }

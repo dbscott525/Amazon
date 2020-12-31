@@ -29,10 +29,14 @@ public class CreateTicketFlowReport extends Utility implements Command {
 
     @Override
     public void run() throws Exception {
+
+	System.out.println("Creating Ticket Flow Report");
+
 	TicketFlowAggregator tfa = new TicketFlowAggregator();
 
 	getDateStream()
 		.flatMap(this::getDateRangeTicketStream)
+		.filter(this::validData)
 		.forEach(tfa::newTicket);
 
 	List<TTCMetric> ttcMetrics = tfa.getTtcMetrics();
@@ -57,6 +61,10 @@ public class CreateTicketFlowReport extends Utility implements Command {
 			Properties.OPEN));
 	EngineerFiles.TICKET_FLOW_GRAPH.launch();
 	EngineerFiles.TICKET_FLOW_GRAPH_WITH_OPENED.launch();
+    }
+
+    private boolean validData(TT tt) {
+	return tt.getCreateDate().compareTo(tt.getResolvedDate()) <= 0;
     }
 
     private Stream<TT> getDateRangeTicketStream(DateRange dateRange) {

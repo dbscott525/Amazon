@@ -11,6 +11,7 @@ public class CreateTicketClosureReport extends Utility implements Command {
 
     @Override
     public void run() throws Exception {
+	System.out.println("Creating Ticket Closure Report");
 
 	EngineerFiles.TICKET_CLOSURES.write(w -> w
 		.fileType(EngineerFiles.TICKET_CLOSURES)

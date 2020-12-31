@@ -15,6 +15,9 @@ public class UpdateMasterListWithTicketsClosed extends Utility implements Comman
 
     @Override
     public void run() throws Exception {
+
+	System.out.println("Updating Master Engineer List with Tickets Closed");
+
 	getMetricMap();
 
 	List<Engineer> engineers = EngineerFiles.MASTER_LIST.readCSV();

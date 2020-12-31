@@ -18,4 +18,6 @@ public class URL {
     public static final String PRIMARY_SHADOWING_SCHEDULE = "https://quip-amazon.com/LEM4AOi8b8Bg/Primary-Training-and-Shadowing-Schedule";
     public static final String LTTR_PRIORITY = "https://rds-portal.corp.amazon.com/lttr/reports/prioritization?week=START&range=END&team=Aurora+MySQL+-+Engine#";
     public static final String LTTR_TICKETS_LAST_WEEK_DELTA_REPORT = "https://quip-amazon.com/ealLAEy6mOKa/LTTR-Tickets-Last-Week-Delta-Report";
+    public static final String LTTR_NOT_ACTIONABLE_SIMS = "https://quip-amazon.com/kxeLAihnTUvH/LTTR-Not-Actionable-SIMs";
+    public static final String LTTR_NON_ACTIONABLE_SIMS = "https://quip-amazon.com/kxeLAihnTUvH/Aurora-MySQL-LTTR-Non-Actionable-SIMs";
 }

@@ -5,6 +5,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -74,19 +75,35 @@ public class Util {
     }
 
     public static void sleep(int seconds) {
-        try {
-            TimeUnit.SECONDS.sleep(seconds);
-        } catch (InterruptedException e) {
-        }
+	try {
+	    TimeUnit.SECONDS.sleep(seconds);
+	} catch (InterruptedException e) {
+	}
     }
 
     public static WebDriver getWebDriver() {
-        System.setProperty(WebElements.WEBDRIVER_CHROME_DRIVER_PROPERTY, Constants.CHROMEDRIVER_EXE_LOCATION);
-        ChromeOptions chromeProfile = new ChromeOptions();
-        chromeProfile
-        	.addArguments(WebElements.USER_DATA_DIR_PROPERTY + Constants.CHROME_USER_DATA_LOCATION);
-        WebDriver driver = new ChromeDriver(chromeProfile);
-        return driver;
+	waitForUser("Close all Chrome browsers and hit Enter in the Console to continue");
+
+	System.setProperty(WebElements.WEBDRIVER_CHROME_DRIVER_PROPERTY, Constants.CHROMEDRIVER_EXE_LOCATION);
+	ChromeOptions chromeProfile = new ChromeOptions();
+	chromeProfile
+		.addArguments(WebElements.USER_DATA_DIR_PROPERTY + Constants.CHROME_USER_DATA_LOCATION);
+	WebDriver driver = new ChromeDriver(chromeProfile);
+	return driver;
     }
 
+    public static void waitForUser(String message) {
+	@SuppressWarnings("resource")
+	Scanner scanner = new Scanner(System.in);
+	System.out.println(message);
+	scanner.nextLine();
+	System.out.println("Continuing");
+    }
 }
+//    public static void waitForUser(String message) {
+//	try (Scanner scanner = new Scanner(System.in)) {
+//	    System.out.println(message);
+//	    scanner.nextLine();
+//	    System.out.println("Continuing");
+//	}
+//    }

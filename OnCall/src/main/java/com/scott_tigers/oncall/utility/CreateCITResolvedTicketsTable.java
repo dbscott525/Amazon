@@ -20,6 +20,8 @@ public class CreateCITResolvedTicketsTable extends Utility implements Command {
     @Override
     public void run() throws Exception {
 
+	System.out.println("Creating Resolved Ticket Table");
+
 	List<TicketStatusCount> summaryList = getTicketStreamFromUrl(getUrl())
 //		.filter(tt -> !tt.getStatus().equals(TicketStatuses.PENDING_PENDING_ROOT_CAUSE))
 		.filter(tt -> Status.get(tt.getStatus()).includeInSummary())

@@ -18,49 +18,56 @@ import com.scott_tigers.oncall.shared.Util;
 
 public abstract class PickNextLttrSim extends Utility {
 
+    private WebDriver driver;
+
     protected void run() throws InterruptedException {
-	List<String> planTickets = getTickertPlanFile()
-		.readCSVToPojo(LTTRTicket.class)
-		.stream()
+
+	List<String> planTickets = getExistingTicketStream()
 		.map(LTTRTicket::getTicket)
 		.collect(Collectors.toList());
 
-	WebDriver driver = Util.getWebDriver();
+	driver = Util.getWebDriver();
 
-//	getLttrTicketStream(driver)
 	LTTRPage.TOP.getLttrTicketStream(driver)
 		.filter(webTicket -> !planTickets.contains(webTicket.getTicket()))
 		.findFirst()
-		.ifPresent(ticket -> {
-		    System.out.println("found ticket");
-		    driver.get(ticket.getSearchUrl());
-		    Util.sleep(2);
-		    List<WebElement> o1 = driver.findElements(By.xpath("//*[contains(text(),'matches')]"));
-		    String totalTickets = Optional
-			    .ofNullable(o1)
-			    .filter(Lambda.minSize(1))
-			    .map(Lambda.getElement(0))
-			    .map(WebElement::getText)
-			    .map(x -> x.replaceAll("Displaying .*?of (\\d*) matches", "$1"))
-			    .orElse("unknown");
-		    ticket.setTotalTickets(totalTickets);
-		    processTicket(driver, ticket);
+		.ifPresentOrElse(this::makeTicketCandidate, () -> driver.quit());
+    }
 
-		    Json.print(ticket);
-
-		    LTTRList.addTicket(getTicketType(), ticket);
-
-		    launchUrl(ticket.getTicket());
-		});
-
+    private void makeTicketCandidate(LTTRTicket ticket) {
+	System.out.println("found ticket");
+	driver.get(ticket.getSearchUrl());
+	Util.sleep(2);
+	List<WebElement> o1 = driver.findElements(By.xpath("//*[contains(text(),'matches')]"));
+	String totalTickets = Optional
+		.ofNullable(o1)
+		.filter(Lambda.minSize(1))
+		.map(Lambda.getElement(0))
+		.map(WebElement::getText)
+		.map(x -> x.replaceAll("Displaying .*?of (\\d*) matches", "$1"))
+		.orElse("unknown");
 	driver.quit();
+	ticket.setTotalTickets(totalTickets);
+	processTicket(ticket);
+
+	Json.print(ticket);
+
+	LTTRList.addTicket(getTicketType(), ticket);
+
+	launchUrl(ticket.getTicket());
+    }
+
+    protected Stream<LTTRTicket> getExistingTicketStream() {
+	return getTickertPlanFile()
+		.readCSVToPojo(LTTRTicket.class)
+		.stream();
     }
 
     protected abstract TicketType getTicketType();
 
     protected abstract EngineerFiles getTickertPlanFile();
 
-    protected abstract void processTicket(WebDriver driver, LTTRTicket ticket);
+    protected abstract void processTicket(LTTRTicket ticket);
 
     enum TicketType {
 	HIGH_FREQUENCY, AUTOMATION

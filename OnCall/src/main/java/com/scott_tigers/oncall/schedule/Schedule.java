@@ -27,11 +27,9 @@ public class Schedule {
 
     private static final int MAXIMUM_SHIFT_FIND_RETRIES = 10;
     private List<Shift> shifts;
-    private Double levelStandardDeviation;
+    private transient Double levelStandardDeviation;
     private transient ScheduleCreator scheduleCreator;
-    private long tryCount;
-    static int count = 0;
-//    private transient Random random = new Random();
+    private transient long tryCount;
 
     public Schedule(ScheduleContainer oldSchedule) {
 	shifts = oldSchedule
@@ -45,6 +43,10 @@ public class Schedule {
 	this.scheduleCreator = scheduleCreator;
 	shifts = new ArrayList<>(scheduleCreator.getExistingSchedule().shifts);
 	tryCount = scheduleCreator.getIterations();
+    }
+
+    public Schedule(List<Shift> shifts) {
+	this.shifts = shifts;
     }
 
     public double getLevelStandardDeviation() {
@@ -122,19 +124,10 @@ public class Schedule {
 	});
 	System.out.println("aftercandidateEngineers.size()=" + (candidateEngineers.size()));
 
-//	Map<Engineer, Engineer> excludedEngineers = shifts
-//		.subList(index, shifts.size())
-//		.stream()
-//		.map(Shift::getEngineers)
-//		.flatMap(List<Engineer>::stream)
-//		.distinct()
-//		.collect(Collectors.toMap(Function.identity(), Function.identity()));
-
 	DuplicateSmeEliminator duplicateSmeEliminator = new DuplicateSmeEliminator();
 
 	List<Engineer> finalList = candidateEngineers
 		.stream()
-//		.filter(Predicate.not(excludedEngineers::containsKey))
 		.map(engineer -> new RandomUid(engineer, shiftCounts.get(engineer), random.nextDouble()))
 		.sorted()
 		.map(RandomUid::getEngineer)
@@ -210,6 +203,10 @@ public class Schedule {
 
     private double getCompositeStandarDeviation() {
 	return getLevelStandardDeviation();
+    }
+
+    public void setShifts(List<Shift> shifts) {
+	this.shifts = shifts;
     }
 
     public List<Shift> getShifts() {

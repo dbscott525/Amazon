@@ -78,9 +78,6 @@ public class CreateCITWeekData extends Utility implements Command {
 	    Stream<String> hstream = Stream.of(getCommaSeparatedList(headerStream));
 	}
 
-//	Stream<Stream<String>> dataStream = Stream.empty();
-//	Stream<Stream<String>> hstream = Stream.empty();
-
 	Context context = new Context();
 
 	Stream<Stream<String>> headerStream = Stream.of(getSegmentStream()
@@ -95,8 +92,6 @@ public class CreateCITWeekData extends Utility implements Command {
 	List<String> lines = Stream.concat(headerStream, dataStream)
 		.map(x -> x.collect(Collectors.joining(",")))
 		.collect(Collectors.toList());
-
-//	List<String> lines = Stream.concat(hstream, dataStream).collect(Collectors.toList());
 
 	EngineerFiles.CIT_WEEK_DATA.write(writer -> writer.lines(lines));
     }
@@ -198,11 +193,6 @@ public class CreateCITWeekData extends Utility implements Command {
 	    @Override
 	    Stream<String> getDataStream(Context context) {
 		return getAttributeStream(context, eng -> "Entered by " + eng.getUid());
-//		return context
-//			.getEngineers()
-//			.stream()
-//			.map(Engineer::getUid)
-//			.map(uid -> "Entered by " + uid);
 	    }
 	},
 	UID {
@@ -214,10 +204,17 @@ public class CreateCITWeekData extends Utility implements Command {
 	    @Override
 	    Stream<String> getDataStream(Context context) {
 		return getAttributeStream(context, Engineer::getUid);
-//		return context
-//			.getEngineers()
-//			.stream()
-//			.map(Engineer::getUid);
+	    }
+	},
+	NAME {
+	    @Override
+	    Stream<String> getHeaderStream(Context context) {
+		return getHeaderStream("Name", context.getNumberOfEngineers());
+	    }
+
+	    @Override
+	    Stream<String> getDataStream(Context context) {
+		return getAttributeStream(context, Engineer::getFirstName);
 	    }
 	},
 	EMAIL {

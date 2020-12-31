@@ -97,9 +97,6 @@ public class Utility {
 		.collect(Collectors.toList());
 
 	fileType.write(w -> w.CSV(emailLines, EmailsByDate.class));
-//	fileType.writeCSV(emailLines, EmailsByDate.class);
-//
-//	successfulFileCreation(fileType);
     }
 
     protected List<OnCallScheduleRow> getOnCallSchedule() {
@@ -132,12 +129,6 @@ public class Utility {
 	return engineers;
     }
 
-    protected Optional<ScheduleRow> getScheduleForThisWeekDeprecated() {
-	return getScheduleRowStreamDeprecated()
-		.filter(this::forTodayDeprecated)
-		.findFirst();
-    }
-
     protected Optional<Shift> getShiftForThisWeek() {
 	return getShiftStream()
 		.filter(this::forToday)
@@ -162,13 +153,6 @@ public class Utility {
 
     protected boolean forToday(Shift shift) {
 	return shift.getDate().compareTo(Dates.SORTABLE.getClosestMonday()) == 0;
-//	Date scheduleStartDate = Dates.SORTABLE.getDateFromString(shift.getDate());
-//
-//	Date startDate = Dates.getDateDelta(scheduleStartDate, -3);
-//	Date endDate = Dates.getDateDelta(scheduleStartDate, 5);
-//
-//	Date currentDate = new Date();
-//	return startDate.compareTo(currentDate) <= 0 && currentDate.compareTo(endDate) <= 0;
     }
 
     protected Map<String, List<Engineer>> getTraineesByDate() {
@@ -192,7 +176,7 @@ public class Utility {
 	    launchUrl(url);
 	    while (downloadedFile.compareTo(newestFile) == 0) {
 		downloadedFile = getNewestFile();
-		System.out.println("downloadedFile=" + (downloadedFile));
+//		System.out.println("downloadedFile=" + (downloadedFile));
 		TimeUnit.SECONDS.sleep(3);
 	    }
 
@@ -266,10 +250,6 @@ public class Utility {
     private boolean isDigits(String line) {
 	return line.matches("[0-9]+");
     }
-
-//    private String getCaseId(String line) {
-//	return line.replaceAll(".*?https://tt\\.amazon\\.com/([0-9]+).*", "$1");
-//    }
 
     protected List<String> getCompanyList(EngineerFiles companyFile) {
 	List<String> list = companyListMap.get(companyFile);
@@ -534,11 +514,22 @@ public class Utility {
 		CreateCSVSchedule.class,
 		CreateCITOnlineSchedule.class,
 		CreateCITEmails.class,
-		LauchCITMidweekDocuments.class);
+		OpenNextWeekCITDocuments.class);
     }
 
     protected Stream<LTTRTicket> getLttrQuipPlan() {
 	return readFromUrl(URL.LTTR_PLAN, LTTRTicket.class);
+    }
+
+    protected Stream<LTTRTicket> getLTTRCandidates() {
+	return readFromUrl(URL.LTTR_CANDIDATES, LTTRTicket.class);
+    }
+
+    protected void openLTTRDocuments() {
+	launchUrl(URL.LTTR_NON_ACTIONABLE_SIMS);
+	launchUrl(URL.LTTR_CANDIDATES);
+	launchUrl(URL.LTTR_PLAN);
+	launchUrl(URL.LTTR_TICKETS_LAST_WEEK_DELTA_REPORT);
     }
 
 }

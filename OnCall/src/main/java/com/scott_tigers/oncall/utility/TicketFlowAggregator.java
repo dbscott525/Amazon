@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 
 import com.scott_tigers.oncall.bean.TT;
 import com.scott_tigers.oncall.shared.Dates;
+import com.scott_tigers.oncall.shared.Json;
 
 public class TicketFlowAggregator {
     private static final String RESOLVED_DATE = "ResolvedDate";
@@ -53,6 +54,9 @@ public class TicketFlowAggregator {
 		    .map(date -> date.substring(0, 10))
 		    .map(this::firstDayOfWeek)
 		    .ifPresentOrElse(date -> {
+			if (date.equals("2018-12-24")) {
+			    Json.print(tt);
+			}
 			TicketMetric metric = metricMap.get(date);
 
 			if (metric == null) {
@@ -73,12 +77,7 @@ public class TicketFlowAggregator {
     }
 
     private String firstDayOfWeek(String date) {
-	Dates dateType = Dates.SORTABLE;
-	return getFirstDayOfWeek(dateType, date);
-    }
-
-    private String getFirstDayOfWeek(Dates dateType, String date) {
-	return dateType
+	return Dates.SORTABLE
 		.getDateFromString(date)
 		.toInstant()
 		.atZone(ZoneId.systemDefault())

@@ -1,7 +1,5 @@
 package com.scott_tigers.oncall.utility;
 
-import org.openqa.selenium.WebDriver;
-
 import com.scott_tigers.oncall.bean.LTTRTicket;
 import com.scott_tigers.oncall.shared.EngineerFiles;
 
@@ -17,7 +15,7 @@ public class PickNextAutomationSim extends PickNextLttrSim {
     }
 
     @Override
-    protected void processTicket(WebDriver driver, LTTRTicket ticket) {
+    protected void processTicket(LTTRTicket ticket) {
 	ticket.setState("Not Automatable");
     }
 

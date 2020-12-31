@@ -14,7 +14,7 @@ public class PrepareForNextCITEndOfWeek extends Utility {
 		CreateCITResolvedTicketsTable.class,
 		CreateTicketFlowReport.class,
 		CreateTicketClosureReport.class,
-		LauchCITEndOfWeekDocuments.class);
+		OpenCurrentWeekCITDocuments.class);
     }
 
 }

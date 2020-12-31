@@ -37,6 +37,8 @@ public class CreateLTTRProjections extends Utility {
 
     private void run() throws Exception {
 
+	new UpdateLttrPlanFrequencies().run();
+
 	WebDriver driver = Util.getWebDriver();
 	driver.get(LTTRPage.GRAPH.getUrl());
 	Double fourWeekTrailingAverage = Optional
