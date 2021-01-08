@@ -229,7 +229,7 @@ public class CreateCITWeekData extends Utility implements Command {
 	    }
 	};
 
-	private static Stream<String> getHeaderStream(String prefix, int size) {
+	static Stream<String> getHeaderStream(String prefix, int size) {
 	    return IntStream.rangeClosed(1, size)
 		    .mapToObj(n -> {
 			return prefix + n;
