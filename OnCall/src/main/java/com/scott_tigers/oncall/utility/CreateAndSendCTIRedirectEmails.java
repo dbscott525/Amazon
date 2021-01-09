@@ -57,6 +57,7 @@ public class CreateAndSendCTIRedirectEmails extends Utility {
 
 	if (redirectEmailData.isEmpty()) {
 	    System.out.println("No redirects found");
+	    EngineerFiles.NO_TICKETS_FOUND.launch();
 	} else {
 	    EngineerFiles.CTI_ASSIGNMENT_REMINDER_DATA.write(w -> w.CSV(redirectEmailData, CTIRedirectEmail.class));
 	    EngineerFiles.CTI_ASSIGNMENT_REMINDER_EMAIL.launch();

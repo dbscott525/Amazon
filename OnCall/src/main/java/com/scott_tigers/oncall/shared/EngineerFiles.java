@@ -48,6 +48,7 @@ public enum EngineerFiles {
     CIT_LAST_DAY_EMAIL                          ("CIT Last Day Email", Constants.DOCX_EXTENSION),
     CIT_SCHEDULE                                ("CIT Schedule",Constants.JSON_EXTENSION),
     CIT_SCHEDULE_CHANGE_NOTIFICATION_EMAIL      ("CIT Schedule Change Notification Email", Constants.DOCX_EXTENSION),
+    TECH_ESC_ONLINE_SCHEDULE                    ("Tech Esc Online Schedule", Constants.JSON_EXTENSION),
     CIT_SCHEDULE_CHANGE_NOTIFICATION_EMAIL_DATA ("CIT Schedule Change Notification Email Data"),
     CIT_WEEK_DATA                               ("CIT Week Data"),
     CIT_WEEK_WELCOME                            ("CIT Week Welcome",Constants.DOCX_EXTENSION),
@@ -55,8 +56,8 @@ public enum EngineerFiles {
     CTI_ASSIGNMENT_REMINDER_EMAIL               ("CTI Assignment Reminder Email", Constants.DOCX_EXTENSION),
     CTI_REDIRECT_SIMS                           ("CTI Redirect SIMs"),
     CUSTOMER_ISSUE_BACKLOG                      ("Customer Issue Backlog"),
-    CUSTOMER_ISSUE_EMAIL                        ("Customer Issue Emails"), 
-    CUSTOMER_ISSUE_TEAM_INTRODUCTION            ("Customer Issue Team Introduction", Constants.PPTX_EXTENSION),
+    CUSTOMER_ISSUE_EMAIL                        ("Customer Issue Emails"),
+    CUSTOMER_ISSUE_TEAM_INTRODUCTION            ("Customer Issue Team Introduction", Constants.PPTX_EXTENSION), 
     CUSTOMER_ISSUE_TEAM_SCHEDULE                ("Customer Issue Team Schedule", Constants.JSON_EXTENSION),
     DAILY_ON_CALL_REMINDER_EMAILS               ("Daily On Call Reminder Emails"),
     DAILY_STAND_UP_ATTENDEE_EMAILS              ("Daily Stand Up Attendee Emails"),
@@ -76,8 +77,8 @@ public enum EngineerFiles {
     EXCLUDED_TICKETS                            ("Excluded Tickets"),
     FOO                                         ("foo"),
     FROM_ONLINE_SCHEDULE                        ("From Online Schedule"),
-    KEYWORD_POINTS                              ("Keyword Points"),    
-    LEVELS_FROM_QUIP                            ("Levels From Quip"),
+    KEYWORD_POINTS                              ("Keyword Points"),
+    LEVELS_FROM_QUIP                            ("Levels From Quip"),    
     LTTR_CANDIDATE_EMAIL                        ("LTTR Candidate Email", Constants.DOCX_EXTENSION),
     LTTR_CANDIDATE_EMAIL_DATA                   ("LTTR Candidate Email Data"),
     LTTR_CANDIDATE_EMAIL_DATA_COPY              ("LTTR Candidate Email Data - Copy"),
@@ -91,6 +92,7 @@ public enum EngineerFiles {
     NEW_LEVEL_ENGINEERS                         ("New Level Engineers"),
     NEW_TICKET_ESCALATION                       ("New Ticket Escalation"),
     NEW_TICKET_ESCALATION_EMAIL                 ("New Ticket Escalation Email", Constants.DOCX_EXTENSION),
+    NO_TICKETS_FOUND                            ("No Tickets Found", Constants.DOCX_EXTENSION),
     OFFSHORE_UIDS                               ("Offshore UIDs"),
     ON_CALL_DAILY_REMINDER_EMAIL                ("On Call Daily Reminder Email",Constants.DOCX_EXTENSION),
     ON_CALL_SCHEDULE                            ("On Call Schedule"),
@@ -126,8 +128,6 @@ public enum EngineerFiles {
     
     // @formatter:on
 
-    private static String serviceTeamDirectory = null;
-
     static Map<String, String> programMap = new HashMap<>() {
 	private static final long serialVersionUID = 1L;
 	{
@@ -139,6 +139,8 @@ public enum EngineerFiles {
 	    put(Constants.JSON_EXTENSION, "C:\\Users\\bruscob\\eclipse\\jee-2020-062\\eclipse\\eclipse.exe");
 	}
     };
+
+    private static String serviceTeamDirectory = null;
 
     public static ScheduleContainer getScheduleContainer() {
 	return CUSTOMER_ISSUE_TEAM_SCHEDULE.readJson(ScheduleContainer.class);
@@ -213,6 +215,14 @@ public enum EngineerFiles {
 		+ Constants.ON_CALL_DATA_SUB_DIRECTORY + fileName + extension();
     }
 
+    public List<String> getFirstNames() {
+	return Transform.list(readCSV(), x -> x.map(Engineer::getFirstName));
+    }
+
+    private Path getPath() {
+	return Paths.get(getFileName());
+    }
+
     private String getServiceTeamDirectory() {
 	return Optional
 		.ofNullable(serviceTeamDirectory)
@@ -226,14 +236,6 @@ public enum EngineerFiles {
 			    return serviceTeamDirectory;
 			});
 
-    }
-
-    public List<String> getFirstNames() {
-	return Transform.list(readCSV(), x -> x.map(Engineer::getFirstName));
-    }
-
-    private Path getPath() {
-	return Paths.get(getFileName());
     }
 
     public void launch() {

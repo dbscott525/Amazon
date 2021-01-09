@@ -43,7 +43,7 @@ public class Engineer {
     private String type;
     private String uid;
 
-    private int shiftsCompleted;
+    private transient int shiftsCompleted;
     private transient DateStringContainer oooDates;
     private transient ResultCache<String, Boolean> dateConflictCache = new ResultCache<String, Boolean>();
 
@@ -305,11 +305,23 @@ public class Engineer {
     }
 
     @JsonIgnore
+    public boolean isAfterStartDate() {
+	return !Optional.ofNullable(startDate)
+		.filter(endDate -> Dates.ONLINE_SCHEDULE.getDateFromString(startDate).compareTo(new Date()) >= 0)
+		.isPresent();
+    }
+
+    @JsonIgnore
     public boolean isNotServerless() {
 	return Expertise.get(expertise) != Expertise.Serverless;
     }
 
     public boolean isType(EngineerType engineerType) {
 	return type.compareTo(engineerType.toString()) == 0;
+    }
+
+    @JsonIgnore
+    public boolean isCurrent() {
+	return isBeforeEndDate() && isAfterStartDate();
     }
 }

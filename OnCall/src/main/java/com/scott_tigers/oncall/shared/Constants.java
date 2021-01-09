@@ -22,7 +22,7 @@ public class Constants {
     public static final int CIT_SHIFT_SIZE = 15;
     public static final String CSV_EXTENSION = ".csv";
     public static final double CUSTOMER_ISSUE_AGE_EXPONENT = .9;
-    public static final int CUSTOMER_ISSUE_TICKETS_ON_THE_QUEUE = 6;
+    public static final int CUSTOMER_ISSUE_TICKETS_ON_THE_QUEUE = 10;
     public static final String DEFAULT_SERVICE_TEAM_DIRECTORY = "W:\\Shared With Me\\Share";
     public static final String DOCX_EXTENSION = ".docx";
     public static final int ENGINE_TICKET_TRAILING_DAYS = 7;
@@ -33,7 +33,7 @@ public class Constants {
     public static final String JSON_EXTENSION = ".json";
     public static final int NUMBER_OF_PRIMARY_TRAINING_WEEKS = 3;
     public static final int NUMBER_OF_WEEKDAYS = 5;
-    public static final String ON_CALL_DATA_ARCHIVE_SUB_DIRECTORY = "\\OnCallDataArchive";
+    public static final String ON_CALL_DATA_ARCHIVE_SUB_DIRECTORY = "\\OnCallDataArchive\\";
     public static final String ON_CALL_DATA_SUB_DIRECTORY = "\\OnCallData\\";
     public static final int ON_CALL_DAYS_PER_INTERVAL = 1;
     public static final int ON_CALLS_PER_DAY = 4;

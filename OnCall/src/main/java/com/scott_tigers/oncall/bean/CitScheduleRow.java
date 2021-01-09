@@ -25,6 +25,13 @@ public class CitScheduleRow {
 	setDateTime(shift, 4, dateString -> endDateTime = dateString + " 22:00");
     }
 
+    public CitScheduleRow(String uid, String date) {
+	oncallMember = List.of(uid);
+	String nextDay = Dates.ONLINE_SCHEDULE.getFormattedDelta(date, 1);
+	startDateTime = date + " 10:00";
+	endDateTime = nextDay + " 10:00";
+    }
+
     private void setDateTime(Shift shift, int delta, Consumer<String> dateSetter) {
 	dateSetter
 		.accept(Dates.ONLINE_SCHEDULE

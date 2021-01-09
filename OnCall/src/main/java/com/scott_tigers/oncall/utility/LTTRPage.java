@@ -52,10 +52,21 @@ public enum LTTRPage {
 
     public String getUrl() {
 	Date nowDate = new Date();
-	String end = Dates.LTTR_URL.getFormattedString(Dates.getWeekDelta(nowDate, -getLastWeekDelta()));
-	String start = Dates.LTTR_URL
-		.getFormattedString(Dates.getWeekDelta(nowDate, -(getNumberOfWeeks() + getLastWeekDelta())));
+	Date endDate = Dates.getWeekDelta(nowDate, -getLastWeekDelta());
+
+	String end = fixWeekOf(Dates.LTTR_URL.getFormattedString(endDate));
+
+	String start = fixWeekOf(Dates.LTTR_URL
+		.getFormattedString(Dates
+			.getWeekDelta(
+				nowDate,
+				-(getNumberOfWeeks() + getLastWeekDelta()))));
+
 	return urlTemplate.replaceAll("(.*)START(.*)END(.*)", "$1" + start + "$2" + end + "$3");
+    }
+
+    String fixWeekOf(String date) {
+	return date.compareTo("2020-01") == 0 ? "2021-01" : date;
     }
 
     protected int getNumberOfWeeks() {

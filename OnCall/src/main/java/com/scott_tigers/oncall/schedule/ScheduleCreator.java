@@ -252,13 +252,11 @@ public class ScheduleCreator {
 
     public ScheduleCreator endAfterMonths(int months) {
 	endDate = Dates.SORTABLE.addMonths(Dates.SORTABLE.getFormattedString(), months);
-	System.out.println("endDate=" + (endDate));
 	return this;
     }
 
     public ScheduleCreator endAfterWeeksFromNow(int weeks) {
 	endDate = Dates.SORTABLE.getFormattedDelta(Dates.SORTABLE.getFormattedString(), 7 * weeks);
-	System.out.println("endDate=" + (endDate));
 	return this;
     }
 }

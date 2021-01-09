@@ -62,10 +62,7 @@ public enum Dates {
     }
 
     public String getFormattedDelta(String dateString, int delta) {
-	Date d1 = getDateFromString(dateString);
-	Date d2 = getDateDelta(d1, delta);
-	String d3 = getFormattedString(d2);
-	return d3;
+	return getFormattedString(getDateDelta(getDateFromString(dateString), delta));
     }
 
     public static Date getNextMondayDate() {
