@@ -54,11 +54,11 @@ public class CreateCITWeekData extends Utility implements Command {
     private void createCsvFile() {
 
 	if (OLD_STUFF) {
-	    Stream<String> dataStream = DateStream.getStream(shift.getDate(), Constants.NUMBER_OF_WEEKDAYS)
+	    Stream<String> dataStream = DateStream.get(shift.getDate(), Constants.NUMBER_OF_WEEKDAYS)
 		    .map(date -> {
 			List<String> randomEngineers = new ArrayList<String>(engineersOld);
 			Collections.shuffle(randomEngineers);
-			List<String> dates = DateStream.getStream(shift.getDate(), Constants.NUMBER_OF_WEEKDAYS)
+			List<String> dates = DateStream.get(shift.getDate(), Constants.NUMBER_OF_WEEKDAYS)
 				.collect(Collectors.toList());
 
 			Stream<String> foo = Stream
@@ -83,7 +83,7 @@ public class CreateCITWeekData extends Utility implements Command {
 	Stream<Stream<String>> headerStream = Stream.of(getSegmentStream()
 		.flatMap(x -> x.getHeaderStream(context)));
 
-	Stream<Stream<String>> dataStream = DateStream.getStream(shift.getDate(), Constants.NUMBER_OF_WEEKDAYS)
+	Stream<Stream<String>> dataStream = DateStream.get(shift.getDate(), Constants.NUMBER_OF_WEEKDAYS)
 		.map(date -> {
 		    context.setDate(date);
 		    return getSegmentStream().flatMap(x -> x.getDataStream(context));
@@ -181,7 +181,7 @@ public class CreateCITWeekData extends Utility implements Command {
 
 	    @Override
 	    Stream<String> getDataStream(Context context) {
-		return DateStream.getStream(context.getStartDate(), Constants.NUMBER_OF_WEEKDAYS);
+		return DateStream.get(context.getStartDate(), Constants.NUMBER_OF_WEEKDAYS);
 	    }
 	},
 	EMAIL_FILTER {

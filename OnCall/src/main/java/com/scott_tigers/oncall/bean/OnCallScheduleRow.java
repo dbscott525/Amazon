@@ -112,4 +112,9 @@ public class OnCallScheduleRow {
 	return Dates.SORTABLE.getFormattedString().compareTo(date) <= 0;
     }
 
+    public boolean before(String date) {
+	System.out.println("date=" + (date));
+	return date.compareTo(this.date) > 0;
+    }
+
 }

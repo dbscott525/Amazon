@@ -32,6 +32,11 @@ public class CitScheduleRow {
 	endDateTime = nextDay + " 10:00";
     }
 
+    public CitScheduleRow(OnCallScheduleRow onCallScheduleRow) {
+	this(onCallScheduleRow.getUid(),
+		Dates.SORTABLE.convertFormat(onCallScheduleRow.getDate(), Dates.ONLINE_SCHEDULE));
+    }
+
     private void setDateTime(Shift shift, int delta, Consumer<String> dateSetter) {
 	dateSetter
 		.accept(Dates.ONLINE_SCHEDULE
@@ -67,5 +72,14 @@ public class CitScheduleRow {
     @Override
     public String toString() {
 	return new GsonBuilder().setPrettyPrinting().create().toJson(this);
+    }
+
+    public boolean after(String date) {
+	String startDate = Dates.ONLINE_SCHEDULE.convertFormat(startDateTime, Dates.SORTABLE);
+	System.out.println("startDate=" + (startDate));
+	System.out.println("date=" + (date));
+	System.out.println("startDate.compareTo(date) =" + (startDate.compareTo(date)));
+	System.out.println("startDate.compareTo(date) < 0=" + (startDate.compareTo(date) >= 0));
+	return startDate.compareTo(date) >= 0;
     }
 }

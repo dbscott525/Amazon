@@ -9,6 +9,7 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 public enum Dates {
@@ -171,6 +172,19 @@ public enum Dates {
 		Date.from(localDate.atStartOfDay()
 			.atZone(ZoneId.systemDefault())
 			.toInstant()));
+    }
+
+    public int getDayOfWeek(String dateString) {
+	Date date = getDateFromString(dateString);
+	Calendar c = Calendar.getInstance();
+	c.setTime(date);
+	int dayOfWeek = c.get(Calendar.DAY_OF_WEEK);
+	return dayOfWeek;
+    }
+
+    public int getDifference(String start, String end) {
+	long milliDiff = getDateFromString(end).getTime() - getDateFromString(start).getTime();
+	return (int) TimeUnit.DAYS.convert(milliDiff, TimeUnit.MILLISECONDS);
     }
 
 }

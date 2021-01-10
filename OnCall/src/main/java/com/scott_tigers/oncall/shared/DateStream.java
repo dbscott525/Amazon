@@ -8,11 +8,15 @@ import java.util.stream.StreamSupport;
 
 public class DateStream {
 
-    public static Stream<String> getStream(String startDate, int days) {
-	return getStream(startDate, Dates.SORTABLE.getFormattedDelta(startDate, days - 1), 1);
+    public static Stream<String> get(String startDate, int days) {
+	return get(startDate, Dates.SORTABLE.getFormattedDelta(startDate, days - 1), 1);
     }
 
-    public static Stream<String> getStream(String startDate, String endDate, int delta) {
+    public static Stream<String> get(String startDate, String endDate) {
+	return get(startDate, endDate, 1);
+    }
+
+    public static Stream<String> get(String startDate, String endDate, int delta) {
 	return StreamSupport.stream(
 		Spliterators.spliteratorUnknownSize(
 			new Iterator<String>() {

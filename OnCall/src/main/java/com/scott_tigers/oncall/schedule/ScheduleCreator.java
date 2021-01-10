@@ -146,13 +146,13 @@ public class ScheduleCreator {
     private List<Engineer> availableEngs(String startDate) {
 	return engineers.stream()
 		.filter(eng -> DateStream
-			.getStream(startDate, Dates.SORTABLE.getFormattedDelta(startDate, daysInShift), 1)
+			.get(startDate, Dates.SORTABLE.getFormattedDelta(startDate, daysInShift), 1)
 			.noneMatch(eng::hasDateConflict))
 		.collect(Collectors.toList());
     }
 
     private Stream<String> getShiftDateStream() {
-	return DateStream.getStream(startDate, endDate, daysBetweenShifts);
+	return DateStream.get(startDate, endDate, daysBetweenShifts);
     }
 
     public ScheduleCreator shifts(int shifts) {
