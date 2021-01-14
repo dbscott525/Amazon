@@ -113,7 +113,6 @@ public class OnCallScheduleRow {
     }
 
     public boolean before(String date) {
-	System.out.println("date=" + (date));
 	return date.compareTo(this.date) > 0;
     }
 

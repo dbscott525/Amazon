@@ -187,4 +187,10 @@ public enum Dates {
 	return (int) TimeUnit.DAYS.convert(milliDiff, TimeUnit.MILLISECONDS);
     }
 
+    public String getLastDayOfLastFullWeek() {
+	Calendar date = Calendar.getInstance();
+	date.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+	return Dates.SORTABLE.getFormattedDelta(Dates.SORTABLE.getFormattedString(date.getTime()), -8);
+    }
+
 }

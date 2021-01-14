@@ -40,7 +40,9 @@ public class CreateLTTRProjections extends Utility {
 	new UpdateLttrPlanFrequencies().run();
 
 	WebDriver driver = Util.getWebDriver();
-	driver.get(LTTRPage.GRAPH.getUrl());
+	String graphUrl = LTTRPage.GRAPH.getUrl();
+	System.out.println("graphUrl=" + (graphUrl));
+	driver.get(graphUrl);
 	Double fourWeekTrailingAverage = Optional
 		.ofNullable(driver)
 		.map(d -> d.findElement(By.xpath("//table/tbody/tr/td[2]")))

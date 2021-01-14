@@ -1,5 +1,6 @@
 package com.scott_tigers.oncall.utility;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -15,13 +16,12 @@ import com.scott_tigers.oncall.bean.OnCallScheduleRow;
 import com.scott_tigers.oncall.shared.DateStream;
 import com.scott_tigers.oncall.shared.Dates;
 import com.scott_tigers.oncall.shared.EngineerFiles;
-import com.scott_tigers.oncall.shared.Json;
 import com.scott_tigers.oncall.shared.Oncall;
 
 @JsonIgnoreProperties
 public class CreateTechEscSchedule extends Utility {
 
-    private static final String START_DATE = "2021-01-26";
+    private static final String START_DATE = "2021-01-17";
 
     private static final boolean TEST_DATA = false;
 
@@ -112,22 +112,20 @@ public class CreateTechEscSchedule extends Utility {
 	String endDate = Dates.SORTABLE.getFormattedDelta(START_DATE, 28);
 	DateStream.get(START_DATE, endDate).forEach(date -> {
 	    int dateType = getDateType(date);
+
 	    TechEscMetric techEsc = techEscs.stream()
 		    .map(te -> new TechEscMetric(te, date, dateType, existingSchedule, random.nextInt(100)))
-		    .sorted()
-		    .peek(te -> Json.print(te))
-		    .findFirst()
-		    .orElseThrow();
+		    .min(Comparator.comparing(x -> x))
+		    .get();
+
 	    existingSchedule.add(new OnCallScheduleRow(date, techEsc.getUid()));
 	});
-	Json.print(existingSchedule);
-	List<CitScheduleRow> foo1 = existingSchedule
+	List<CitScheduleRow> newSchedule = existingSchedule
 		.stream()
 		.map(CitScheduleRow::new)
 		.filter(x -> x.after(START_DATE))
 		.collect(Collectors.toList());
-	Json.print(foo1);
-	EngineerFiles.TECH_ESC_ONLINE_SCHEDULE.write(w -> w.json(foo1));
+	EngineerFiles.TECH_ESC_ONLINE_SCHEDULE.write(w -> w.json(newSchedule));
     }
 
     private int getDateType(String date) {
@@ -159,26 +157,14 @@ public class CreateTechEscSchedule extends Utility {
     private static class Holiday {
 	private String date;
 
-	public Holiday() {
-	}
-
-	public Holiday(String date) {
-	    this.date = date;
-	}
-
 	public String getDate() {
 	    return date;
-	}
-
-	public void setDate(String date) {
-	    this.date = date;
 	}
 
     }
 
     private class TechEscMetric implements Comparable<TechEscMetric> {
 
-	private String date;
 	private int dateType;
 	private String uid;
 	private String lastScheduledDate = null;
@@ -190,7 +176,6 @@ public class CreateTechEscSchedule extends Utility {
 		int randomSort) {
 	    this.randomSort = randomSort;
 	    this.uid = techEsc.getUid();
-	    this.date = date;
 	    this.dateType = dateType;
 
 	    existingSchedule

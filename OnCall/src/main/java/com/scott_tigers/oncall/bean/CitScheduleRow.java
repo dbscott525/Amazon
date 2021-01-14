@@ -75,11 +75,6 @@ public class CitScheduleRow {
     }
 
     public boolean after(String date) {
-	String startDate = Dates.ONLINE_SCHEDULE.convertFormat(startDateTime, Dates.SORTABLE);
-	System.out.println("startDate=" + (startDate));
-	System.out.println("date=" + (date));
-	System.out.println("startDate.compareTo(date) =" + (startDate.compareTo(date)));
-	System.out.println("startDate.compareTo(date) < 0=" + (startDate.compareTo(date) >= 0));
-	return startDate.compareTo(date) >= 0;
+	return Dates.ONLINE_SCHEDULE.convertFormat(startDateTime, Dates.SORTABLE).compareTo(date) >= 0;
     }
 }

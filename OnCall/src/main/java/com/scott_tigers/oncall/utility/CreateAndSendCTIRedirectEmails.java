@@ -19,11 +19,11 @@ public class CreateAndSendCTIRedirectEmails extends Utility {
     private static final String CURRENT_MARKER = "CURRENT";
     private static final String PREVIOUS_MARKER = "PREVIOUS";
     private static final String DATE_REPLACEMENT_REGEX = "(.*?)" + PREVIOUS_MARKER + "(.*?)" + CURRENT_MARKER + "(.*?)";
-    // private static final String SEARCH_URL_TEMPLATE =
-    // "https://tt.amazon.com/search?category=AWS&type=RDS-AuroraMySQL&item=Engine&assigned_group=&status=Assigned%3BResearching%3BWork+In+Progress%3BPending%3BResolved%3BClosed&impact=&assigned_individual=&requester_login=&login_name=&cc_email=&phrase_search_text=&keyword_bq=&exact_bq=&or_bq1=&or_bq2=&or_bq3=&exclude_bq=&create_date=12%2F20%2F2020%2C12%2F29%2F2020&modified_date=&tags=&case_type=&building_id=&search=Search%21";
     private static final String SEARCH_URL_TEMPLATE = "https://tt.amazon.com/"
 	    + "search?category=AWS&type=RDS-AuroraMySQL&item=Engine&"
-	    + "assigned_group=&status=Assigned%3BResearching%3BWork+In+Progress%3BPending%3BResolved%3BClosed&impact=&"
+	    + "assigned_group=&"
+	    + "status=Resolved%3BClosed&"
+	    + "impact=&"
 	    + "assigned_individual=&requester_login=&login_name=&cc_email=&"
 	    + "phrase_search_text=&keyword_bq=&exact_bq=&or_bq1=&or_bq2=&or_bq3=&exclude_bq=&create_date="
 	    + PREVIOUS_MARKER
@@ -76,7 +76,10 @@ public class CreateAndSendCTIRedirectEmails extends Utility {
 
     private CTIRedirectEmail toRedirectEmail(TT tt) {
 	CTIRedirect simRedirect = redirects.stream()
-		.filter(rd -> tt.getRootCauseDetails().toLowerCase().contains(rd.getSim().toLowerCase()))
+		.filter(rd -> tt
+			.getRootCauseDetails()
+			.toLowerCase()
+			.contains(rd.getSim().toLowerCase()))
 		.findFirst()
 		.orElse(null);
 
@@ -85,9 +88,11 @@ public class CreateAndSendCTIRedirectEmails extends Utility {
 	}
 
 	CTIRedirectEmail redirect = new CTIRedirectEmail();
-	redirect.setEmail(tt.getResolvedBy() + "@amazon.com");
+	boolean resolvedByMinions = "flx-AuroraOps-Minions".equals(tt.getResolvedBy());
+	String uid = resolvedByMinions ? tt.getLastModifiedBy() : tt.getResolvedBy();
+	redirect.setEmail(uid + "@amazon.com");
 	String name = Optional
-		.ofNullable(engineerMap.get(tt.getResolvedBy()))
+		.ofNullable(engineerMap.get(uid))
 		.map(eng -> eng.getFirstName())
 		.orElse("unknown");
 	redirect.setName(name);

@@ -7,7 +7,6 @@ import com.scott_tigers.oncall.bean.CitScheduleRow;
 import com.scott_tigers.oncall.bean.Engineer;
 import com.scott_tigers.oncall.shared.Dates;
 import com.scott_tigers.oncall.shared.EngineerFiles;
-import com.scott_tigers.oncall.shared.Json;
 import com.scott_tigers.oncall.utility.Utility;
 
 public class CreateInitialTechEscSchedule extends Utility {
@@ -20,14 +19,16 @@ public class CreateInitialTechEscSchedule extends Utility {
 
     private void run() {
 	current = "1/17/21";
-	List<Engineer> foo = EngineerFiles.TECH_ESC.readCSVToPojo(Engineer.class);
-	List<CitScheduleRow> foo2 = foo.stream().map(eng -> {
-	    CitScheduleRow row = new CitScheduleRow(eng.getUid(), current);
-	    current = Dates.ONLINE_SCHEDULE.getFormattedDelta(current, 1);
-	    return row;
-	}).collect(Collectors.toList());
-	Json.print(foo2);
-	EngineerFiles.TECH_ESC_ONLINE_SCHEDULE.write(w -> w.json(foo2));
+	List<CitScheduleRow> schedule = EngineerFiles.TECH_ESC
+		.readCSVToPojo(Engineer.class)
+		.stream()
+		.map(eng -> {
+		    CitScheduleRow row = new CitScheduleRow(eng.getUid(), current);
+		    current = Dates.ONLINE_SCHEDULE.getFormattedDelta(current, 1);
+		    return row;
+		})
+		.collect(Collectors.toList());
+	EngineerFiles.TECH_ESC_ONLINE_SCHEDULE.write(w -> w.json(schedule));
 
     }
 }
