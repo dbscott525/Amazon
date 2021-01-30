@@ -213,4 +213,11 @@ public class TT {
     public Integer getIntegerCaseId() {
 	return Util.getCaseId(url);
     }
+
+    public boolean include() {
+	return !description.contains("Instance Unhealthy")
+		|| createDate.compareTo("2021-01-17 06:04:35PM GMT-0800") < 0
+		|| createDate.compareTo("2021-01-20 12:17:53AM GMT-0800") > 0;
+
+    }
 }

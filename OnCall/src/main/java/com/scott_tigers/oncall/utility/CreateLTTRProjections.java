@@ -41,7 +41,6 @@ public class CreateLTTRProjections extends Utility {
 
 	WebDriver driver = Util.getWebDriver();
 	String graphUrl = LTTRPage.GRAPH.getUrl();
-	System.out.println("graphUrl=" + (graphUrl));
 	driver.get(graphUrl);
 	Double fourWeekTrailingAverage = Optional
 		.ofNullable(driver)

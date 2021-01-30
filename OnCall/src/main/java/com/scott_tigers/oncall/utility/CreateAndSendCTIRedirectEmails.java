@@ -4,7 +4,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.scott_tigers.oncall.bean.CTIRedirect;
 import com.scott_tigers.oncall.bean.CTIRedirectEmail;
@@ -61,6 +63,17 @@ public class CreateAndSendCTIRedirectEmails extends Utility {
 	} else {
 	    EngineerFiles.CTI_ASSIGNMENT_REMINDER_DATA.write(w -> w.CSV(redirectEmailData, CTIRedirectEmail.class));
 	    EngineerFiles.CTI_ASSIGNMENT_REMINDER_EMAIL.launch();
+
+	    Stream<Function<CTIRedirectEmail, String>> stream = Stream.of(
+		    CTIRedirectEmail::getSim,
+		    CTIRedirectEmail::getTt);
+
+	    stream
+		    .flatMap(mapper -> redirectEmailData
+			    .stream()
+			    .map(mapper::apply))
+		    .distinct()
+		    .forEach(this::launchUrl);
 	}
 
     }

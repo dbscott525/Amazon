@@ -3,8 +3,6 @@ package com.scott_tigers.oncall.test;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import com.scott_tigers.oncall.shared.Dates;
-
 public class RegexTester {
 
     public static void main(String[] args) {
@@ -16,9 +14,14 @@ public class RegexTester {
     }
 
     enum Test {
-	Test1("J:\\SupportEngineering\\OnCallData\\Online Schedule.json", ".*\\\\(.*)(\\..*)",
-		"$1 " + Dates.TIME_STAMP.getFormattedDate() + "$2",
-		"Online Schedule 2020-11-20-12-38-16.json");
+	Test1(
+
+		"DTSTART;TZID=America/Los_Angeles:20210103T080000",
+		".*?:.*?T(\\d{2})(\\d{2})\\d{2}",
+		"$1:$2",
+		"08:00"
+
+	);
 
 	private String input;
 	private String regex;

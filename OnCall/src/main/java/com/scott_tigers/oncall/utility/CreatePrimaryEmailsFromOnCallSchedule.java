@@ -2,10 +2,10 @@ package com.scott_tigers.oncall.utility;
 
 import com.scott_tigers.oncall.shared.Oncall;
 
-public class CreateSecondaryEmailsFromOnCallSchedule extends CreateEmailsFromOnCallSchedule {
+public class CreatePrimaryEmailsFromOnCallSchedule extends CreateEmailsFromOnCallSchedule {
 
     public static void main(String[] args) {
-	new CreateSecondaryEmailsFromOnCallSchedule().run();
+	new CreatePrimaryEmailsFromOnCallSchedule().run();
     }
 
     protected void run() {
@@ -14,7 +14,7 @@ public class CreateSecondaryEmailsFromOnCallSchedule extends CreateEmailsFromOnC
 
     @Override
     protected Oncall getOnCallType() {
-	return Oncall.Secondary;
+	return Oncall.Primary;
     }
 
 }

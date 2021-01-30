@@ -2,8 +2,13 @@ package com.scott_tigers.oncall.test;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.scott_tigers.oncall.bean.OnCallScheduleRow;
+import com.scott_tigers.oncall.shared.Json;
+import com.scott_tigers.oncall.shared.Oncall;
 import com.scott_tigers.oncall.utility.Utility;
 
 @JsonIgnoreProperties
@@ -14,6 +19,10 @@ public class Test extends Utility {
     }
 
     private void run() throws Exception {
+	List<OnCallScheduleRow> schedule = Oncall.TechEsc
+		.getOnCallScheduleStream()
+		.collect(Collectors.toList());
+	Json.print(schedule);
     }
 
     @SuppressWarnings("unused")

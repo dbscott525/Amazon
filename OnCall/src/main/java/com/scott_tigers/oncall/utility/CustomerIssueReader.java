@@ -19,6 +19,11 @@ public class CustomerIssueReader extends Utility implements TTReader {
     @Override
     public Predicate<TT> getFilter() {
 	return tt -> {
+
+	    if (tt.getDescription().contains("Instance Unhealthy")) {
+		return false;
+	    }
+
 	    Status status = Status.get(tt.getStatus());
 
 	    if (status.isAlwaysInQueue()) {

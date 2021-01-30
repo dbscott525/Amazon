@@ -56,5 +56,8 @@ public class Properties {
     public static final String URL = "URL";
     public static final String WEIGHT = "weight";
     public static final String DELTA = "Delta";
+    public static final String PRIMARY = "Primary";
+    public static final String SECONDARY = "Secondary";
+    public static final String CIT = "CIT";
 
 }

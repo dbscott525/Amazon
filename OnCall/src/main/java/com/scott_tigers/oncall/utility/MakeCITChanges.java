@@ -6,8 +6,16 @@ public class MakeCITChanges extends Utility {
 	new MakeCITChanges().run();
     }
 
+    @SuppressWarnings("unchecked")
     private void run() {
-	launchCITUpdater();
+	runCommands(
+		CreateCSVSchedule.class,
+		CreateCITOnlineSchedule.class,
+		CreateCITEmails.class,
+		OpenNextWeekCITDocuments.class,
+		CreateCITWeekData.class,
+		OpenCurrentWeekCITDocuments.class,
+		OpenNextWeekCITDocuments.class);
     }
 
 }

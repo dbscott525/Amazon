@@ -98,7 +98,6 @@ public enum LTTRPage {
     }
 
     Stream<LTTRTicket> getLttrTicketStream(WebDriver driver) {
-	System.out.println("Stream<LTTRTicket> getLttrTicketStream(WebDriver driver) {");
 	System.out.println("getUrl()=" + (getUrl()));
 	driver.get(getUrl());
 	System.out.println("page loaded");
@@ -115,6 +114,7 @@ public enum LTTRPage {
     Map<String, LTTRTicket> getMap() {
 	getWeeks();
 	WebDriver driver = Util.getWebDriver();
+	System.out.println("this=" + (this));
 	Map<String, LTTRTicket> map = getLttrTicketStream(driver)
 		.collect(Collectors.toMap(LTTRTicket::getTicket, Function.identity()));
 	driver.close();

@@ -25,7 +25,7 @@ public class Constants {
     public static final int CUSTOMER_ISSUE_TICKETS_ON_THE_QUEUE = 10;
     public static final String DEFAULT_SERVICE_TEAM_DIRECTORY = "W:\\Shared With Me\\Share";
     public static final String DOCX_EXTENSION = ".docx";
-    public static final int ENGINE_TICKET_TRAILING_DAYS = 7;
+    public static final int ENGINE_TICKET_TRAILING_DAYS = 14;
     public static final int ENGINE_TICKETS_ON_THE_QUEUE = 10;
     public static final String ENGINEER_TYPE_TRAINEE = "Trainee";
     public static final String ITEM_CUSTOMER_ISSUE = "CustomerIssue";

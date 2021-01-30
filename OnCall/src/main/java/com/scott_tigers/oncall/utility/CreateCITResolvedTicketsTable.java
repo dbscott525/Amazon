@@ -25,6 +25,7 @@ public class CreateCITResolvedTicketsTable extends Utility implements Command {
 	List<TicketStatusCount> summaryList = getTicketStreamFromUrl(getUrl())
 //		.filter(tt -> !tt.getStatus().equals(TicketStatuses.PENDING_PENDING_ROOT_CAUSE))
 		.filter(tt -> Status.get(tt.getStatus()).includeInSummary())
+		.filter(TT::include)
 		.collect(Collectors.groupingBy(TT::getStatus))
 		.entrySet()
 		.stream()

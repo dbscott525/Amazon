@@ -50,6 +50,7 @@ public enum EngineerFiles {
     CIT_SCHEDULE                                ("CIT Schedule",Constants.JSON_EXTENSION),
     CIT_SCHEDULE_CHANGE_NOTIFICATION_EMAIL      ("CIT Schedule Change Notification Email", Constants.DOCX_EXTENSION),
     CIT_SCHEDULE_CHANGE_NOTIFICATION_EMAIL_DATA ("CIT Schedule Change Notification Email Data"),
+    UPDATED_ON_CALL_MAKEUP                      ("Updated On Call Makeup"),
     CIT_WEEK_DATA                               ("CIT Week Data"),
     CIT_WEEK_WELCOME                            ("CIT Week Welcome",Constants.DOCX_EXTENSION),
     CTI_ASSIGNMENT_REMINDER_DATA                ("CTI Assignment Reminder Data"),

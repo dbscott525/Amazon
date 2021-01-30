@@ -34,7 +34,7 @@ public class CitScheduleRow {
 
     public CitScheduleRow(OnCallScheduleRow onCallScheduleRow) {
 	this(onCallScheduleRow.getUid(),
-		Dates.SORTABLE.convertFormat(onCallScheduleRow.getDate(), Dates.ONLINE_SCHEDULE));
+		Dates.SORTABLE.convertFormat(onCallScheduleRow.getStartDate(), Dates.ONLINE_SCHEDULE));
     }
 
     private void setDateTime(Shift shift, int delta, Consumer<String> dateSetter) {

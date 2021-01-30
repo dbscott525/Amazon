@@ -8,7 +8,12 @@ public enum Oncall {
 
     Primary("https://oncall.corp.amazon.com/#/view/aurora-head-primary/schedule"),
     Secondary("https://oncall.corp.amazon.com/#/view/aurora-head-secondary/schedule"),
-    TechEsc("https://oncall.corp.amazon.com/#/view/aurora-tech-escalation/schedule");
+    TechEsc("https://oncall.corp.amazon.com/#/view/aurora-tech-escalation/schedule") {
+	@Override
+	public boolean isEngineer() {
+	    return false;
+	}
+    };
 
     private String url;
 
@@ -28,6 +33,10 @@ public enum Oncall {
 	return getOnCallSchedule()
 		.getOnCallScheduleList()
 		.stream();
+    }
+
+    public boolean isEngineer() {
+	return true;
     }
 
 }

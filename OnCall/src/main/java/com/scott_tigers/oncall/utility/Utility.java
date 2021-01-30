@@ -89,7 +89,7 @@ public class Utility {
     protected void writeEmailsByDate(List<OnCallScheduleRow> emailList, EngineerFiles fileType) {
 	List<EmailsByDate> emailLines = emailList
 		.stream()
-		.collect(Collectors.groupingBy(OnCallScheduleRow::getDate))
+		.collect(Collectors.groupingBy(OnCallScheduleRow::getStartDate))
 		.entrySet()
 		.stream()
 		.map(EmailsByDate::new)
@@ -357,7 +357,11 @@ public class Utility {
     protected List<EngineerMetric> getTicketClosedMetrics() {
 	try {
 	    getMetricMap();
-	    double average = metricMap.values().stream().map(x -> x.getTicketsPerWeek()).mapToDouble(x -> x)
+	    double average = metricMap
+		    .values()
+		    .stream()
+		    .map(EngineerMetric::getTicketsPerWeek)
+		    .mapToDouble(x -> x)
 		    .average()
 		    .orElse(Double.NaN);
 	    System.out.println("average=" + (average));
@@ -387,6 +391,7 @@ public class Utility {
 		.forEach(EngineerMetric::addWeek);
 
 	getTicketStreamFromUrl(URL.CIT_RESOLVED_TICKETS)
+		.filter(tt -> tt.include())
 		.map(this::getMetric)
 		.filter(Objects::nonNull)
 		.forEach(EngineerMetric::addTicket);
@@ -530,6 +535,15 @@ public class Utility {
 	launchUrl(URL.LTTR_CANDIDATES);
 	launchUrl(URL.LTTR_PLAN);
 	launchUrl(URL.LTTR_TICKETS_LAST_WEEK_DELTA_REPORT);
+    }
+
+    protected List<String> getOnCallUIDs(Oncall onCallType) {
+        return onCallType
+        	.getOnCallScheduleStream()
+        	.map(OnCallScheduleRow::getUid)
+        	.distinct()
+        	.sorted()
+        	.collect(Collectors.toList());
     }
 
 }

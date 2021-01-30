@@ -30,7 +30,7 @@ public class CreateDSUDoc extends Utility {
 
 	    getOnCallSchedule()
 		    .stream()
-		    .filter(eng -> eng.getDate().equals(today))
+		    .filter(eng -> eng.getStartDate().equals(today))
 		    .forEach(onCall -> {
 
 			Optional

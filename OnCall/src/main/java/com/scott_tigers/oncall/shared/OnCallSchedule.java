@@ -10,6 +10,7 @@ public class OnCallSchedule extends Utility {
 
     private static final String SUMMARY = "SUMMARY:";
     private static final String DTSTART_TZID = "DTSTART;TZID";
+    private static final String DTEND_TZID = "DTEND;TZID";
     private static final String BEGIN_VEVENT = "BEGIN:VEVENT";
 
     private Oncall oncall;
@@ -25,7 +26,7 @@ public class OnCallSchedule extends Utility {
 	List<String> lines = EngineerFiles.readLines(fileName);
 	lines.forEach(line -> {
 
-	    switch (line.replaceAll("(" + BEGIN_VEVENT + "|" + DTSTART_TZID + "|" + SUMMARY + ").*",
+	    switch (line.replaceAll("(" + BEGIN_VEVENT + "|" + DTSTART_TZID + "|" + DTEND_TZID + "|" + SUMMARY + ").*",
 		    "$1")) {
 
 	    case BEGIN_VEVENT:
@@ -33,7 +34,12 @@ public class OnCallSchedule extends Utility {
 		break;
 
 	    case DTSTART_TZID:
-		currentEvent.setDate(line.replaceAll(".*:(\\d{4})(\\d{2})(\\d{2}).*", "$1-$2-$3"));
+		currentEvent.setStartDate(getDate(line));
+		currentEvent.setStartTime(line.replaceAll(".*?:.*?T(\\d{2})(\\d{2})\\d{2}", "$1:$2"));
+		break;
+
+	    case DTEND_TZID:
+		currentEvent.setEndDate(getDate(line));
 		break;
 
 	    case SUMMARY:
@@ -44,6 +50,11 @@ public class OnCallSchedule extends Utility {
 	});
 
 	return onCallSchedules;
+    }
+
+    private String getDate(String line) {
+	String extractedDate = line.replaceAll(".*:(\\d{4})(\\d{2})(\\d{2}).*", "$1-$2-$3");
+	return extractedDate;
     }
 
     private void newEvent() {

@@ -21,7 +21,7 @@ import com.scott_tigers.oncall.shared.Oncall;
 @JsonIgnoreProperties
 public class CreateTechEscSchedule extends Utility {
 
-    private static final String START_DATE = "2021-01-17";
+    private static final String START_DATE = "2021-02-07";
 
     private static final boolean TEST_DATA = false;
 
@@ -30,6 +30,8 @@ public class CreateTechEscSchedule extends Utility {
     }
 
     private List<String> holidays;
+
+    private Random random;
 
     private static String TEST_SCHEDULE = "{\r\n"
 	    + "  \"schedule\": [\r\n"
@@ -78,11 +80,7 @@ public class CreateTechEscSchedule extends Utility {
 	    + "";
 
     private void run() throws Exception {
-	Random random = new Random();
-//	List<Holiday> holidays = DateStream.get(START_DATE, 3).map(date -> new Holiday(date))
-//		.collect(Collectors.toList());
-//	Json.print(holidays);
-//	EngineerFiles.AMAZON_HOLIDAYS.write(w -> w.CSV(holidays, Holiday.class).noOpen());
+	random = new Random();
 
 	holidays = EngineerFiles.AMAZON_HOLIDAYS
 		.readCSVToPojo(Holiday.class)
@@ -96,9 +94,9 @@ public class CreateTechEscSchedule extends Utility {
 	    schedule = new Gson().fromJson(TEST_SCHEDULE, OnCallContainer.class);
 
 	} else {
-	    List<OnCallScheduleRow> foo1 = Oncall.TechEsc
-		    .getOnCallScheduleStream().collect(Collectors.toList());
-	    schedule = new OnCallContainer(foo1);
+	    schedule = new OnCallContainer(Oncall.TechEsc
+		    .getOnCallScheduleStream()
+		    .collect(Collectors.toList()));
 
 	}
 
@@ -110,35 +108,23 @@ public class CreateTechEscSchedule extends Utility {
 
 	List<Engineer> techEscs = EngineerFiles.TECH_ESC.readCSVToPojo(Engineer.class);
 	String endDate = Dates.SORTABLE.getFormattedDelta(START_DATE, 28);
-	DateStream.get(START_DATE, endDate).forEach(date -> {
-	    int dateType = getDateType(date);
+	DateStream.get(START_DATE, endDate)
+		.forEach(date -> {
 
-	    TechEscMetric techEsc = techEscs.stream()
-		    .map(te -> new TechEscMetric(te, date, dateType, existingSchedule, random.nextInt(100)))
-		    .min(Comparator.comparing(x -> x))
-		    .get();
+		    TechEscMetric techEsc = techEscs.stream()
+			    .map(te -> new TechEscMetric(te, date, existingSchedule))
+			    .min(Comparator.comparing(x -> x))
+			    .get();
 
-	    existingSchedule.add(new OnCallScheduleRow(date, techEsc.getUid()));
-	});
+		    existingSchedule.add(new OnCallScheduleRow(date, techEsc.getUid()));
+		});
+
 	List<CitScheduleRow> newSchedule = existingSchedule
 		.stream()
 		.map(CitScheduleRow::new)
 		.filter(x -> x.after(START_DATE))
 		.collect(Collectors.toList());
 	EngineerFiles.TECH_ESC_ONLINE_SCHEDULE.write(w -> w.json(newSchedule));
-    }
-
-    private int getDateType(String date) {
-
-	if (holidays.contains(date)) {
-	    return 8;
-	}
-
-	if (holidays.contains(Dates.SORTABLE.getFormattedDelta(date, -1))) {
-	    return 9;
-	}
-
-	return Dates.SORTABLE.getDayOfWeek(date);
     }
 
     private class OnCallContainer {
@@ -154,6 +140,7 @@ public class CreateTechEscSchedule extends Utility {
 
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     private static class Holiday {
 	private String date;
 
@@ -165,21 +152,25 @@ public class CreateTechEscSchedule extends Utility {
 
     private class TechEscMetric implements Comparable<TechEscMetric> {
 
-	private int dateType;
 	private String uid;
 	private String lastScheduledDate = null;
 	private int numberOfPreviousDates = 0;
 	private int randomSort;
 	private int scheduleGap;
+	private int dayOfWeek;
+	private boolean holiday;
+	private int numberOfHolidays = 0;
 
-	public TechEscMetric(Engineer techEsc, String date, int dateType, List<OnCallScheduleRow> existingSchedule,
-		int randomSort) {
-	    this.randomSort = randomSort;
+	public TechEscMetric(Engineer techEsc, String date, List<OnCallScheduleRow> existingSchedule) {
+	    this.randomSort = random.nextInt(100);
 	    this.uid = techEsc.getUid();
-	    this.dateType = dateType;
+	    dayOfWeek = getDayOfWeek(date);
+	    holiday = isHoliday(date);
 
 	    existingSchedule
 		    .stream()
+		    .filter(scheduleRow -> scheduleRow.getUid().equals(uid))
+		    .map(OnCallScheduleRow::getStartDate)
 		    .forEach(this::scheduleDate);
 
 	    scheduleGap = Optional
@@ -188,21 +179,30 @@ public class CreateTechEscSchedule extends Utility {
 		    .orElse(1000);
 	}
 
-	public void scheduleDate(OnCallScheduleRow scheduleRow) {
-	    if (!scheduleRow.getUid().equals(uid)) {
-		return;
-	    }
+	private boolean isHoliday(String date) {
+	    System.out.println("date=" + (date));
+	    System.exit(1);
+	    return holidays.contains(date);
+	}
 
-	    String scheduleDate = scheduleRow.getDate();
+	public void scheduleDate(String scheduleDate) {
 
 	    lastScheduledDate = Optional
 		    .ofNullable(lastScheduledDate)
 		    .filter(lastDate -> lastDate.compareTo(scheduleDate) > 0)
 		    .orElse(scheduleDate);
 
-	    if (getDateType(scheduleDate) == dateType) {
+	    if (getDayOfWeek(scheduleDate) == dayOfWeek) {
 		numberOfPreviousDates++;
 	    }
+
+	    if (holiday && isHoliday(scheduleDate)) {
+		numberOfHolidays++;
+	    }
+	}
+
+	private int getDayOfWeek(String date) {
+	    return Dates.SORTABLE.getDayOfWeek(date);
 	}
 
 	public String getUid() {
@@ -213,6 +213,7 @@ public class CreateTechEscSchedule extends Utility {
 	public int compareTo(TechEscMetric o) {
 
 	    Stream<Supplier<Integer>> comparators = Stream.of(
+		    () -> numberOfHolidays - o.numberOfHolidays,
 		    () -> numberOfPreviousDates - o.numberOfPreviousDates,
 		    () -> o.scheduleGap - scheduleGap,
 		    () -> o.randomSort - randomSort);

@@ -37,6 +37,7 @@ public class CreateTicketFlowReport extends Utility implements Command {
 	getDateStream()
 		.flatMap(this::getDateRangeTicketStream)
 		.filter(this::validData)
+		.filter(TT::include)
 		.forEach(tfa::newTicket);
 
 	List<TTCMetric> ttcMetrics = tfa.getTtcMetrics();
@@ -44,7 +45,7 @@ public class CreateTicketFlowReport extends Utility implements Command {
 	List<TicketMetric> result = tfa.getMetrics();
 
 	OpenTicketComputer openTicketComputer = new OpenTicketComputer(
-		getTicketStreamFromUrl(URL.OPEN_CUSTOMER_ISSUE_TICKETS).count());
+		getTicketStreamFromUrl(URL.OPEN_CUSTOMER_ISSUE_TICKETS).filter(TT::include).count());
 
 	result
 		.stream()

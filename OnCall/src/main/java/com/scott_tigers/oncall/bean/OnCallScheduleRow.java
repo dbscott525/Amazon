@@ -5,7 +5,9 @@ import com.scott_tigers.oncall.shared.Dates;
 
 public class OnCallScheduleRow {
 
-    String date;
+    String startDate;
+    String endDate;
+    String startTime;
     String uid;
     String shift;
     String type;
@@ -13,7 +15,7 @@ public class OnCallScheduleRow {
     public OnCallScheduleRow(String date, String uid) {
 
 	this.uid = uid;
-	this.date = date;
+	this.startDate = date;
     }
 
     public OnCallScheduleRow() {
@@ -23,8 +25,16 @@ public class OnCallScheduleRow {
 	this.type = type;
     }
 
-    public String getDate() {
-	return date;
+    public String getStartDate() {
+	return startDate;
+    }
+
+    public String getEndDate() {
+	return endDate;
+    }
+
+    public void setEndDate(String endDate) {
+	this.endDate = endDate;
     }
 
     public String getUid() {
@@ -36,9 +46,6 @@ public class OnCallScheduleRow {
     }
 
     public OnCallScheduleRow canonicalDate() {
-//	System.out.println("original date=" + (date));
-//	date = Dates.SORTABLE.getFormattedString(Dates.ONLINE_SCHEDULE.getDateFromString(date));
-//	System.out.println("fixed date=" + (date));
 	return this;
     }
 
@@ -50,8 +57,16 @@ public class OnCallScheduleRow {
 	this.type = type;
     }
 
-    public void setDate(String date) {
-	this.date = date;
+    public void setStartDate(String startDate) {
+	this.startDate = startDate;
+    }
+
+    public String getStartTime() {
+	return startTime;
+    }
+
+    public void setStartTime(String startTime) {
+	this.startTime = startTime;
     }
 
     public void setUid(String uid) {
@@ -64,23 +79,23 @@ public class OnCallScheduleRow {
 
     @Override
     public String toString() {
-	return "OnCallScheduleRow [date=" + date + ", uid=" + uid + "]";
+	return "OnCallScheduleRow [date=" + startDate + ", uid=" + uid + "]";
     }
 
     public OnCallScheduleRow adjustDate() {
-	date = Dates.SORTABLE.getFormattedString(Dates.getDateDelta(Dates.SORTABLE.getDateFromString(date), -1));
+	startDate = Dates.SORTABLE.getFormattedString(Dates.getDateDelta(Dates.SORTABLE.getDateFromString(startDate), -1));
 	return this;
     }
 
     public boolean afterToday() {
-	return date.compareTo(Dates.SORTABLE.getFormattedString()) > 0;
+	return startDate.compareTo(Dates.SORTABLE.getFormattedString()) > 0;
     }
 
     @Override
     public int hashCode() {
 	final int prime = 31;
 	int result = 1;
-	result = prime * result + ((date == null) ? 0 : date.hashCode());
+	result = prime * result + ((startDate == null) ? 0 : startDate.hashCode());
 	result = prime * result + ((uid == null) ? 0 : uid.hashCode());
 	return result;
     }
@@ -94,10 +109,10 @@ public class OnCallScheduleRow {
 	if (getClass() != obj.getClass())
 	    return false;
 	OnCallScheduleRow other = (OnCallScheduleRow) obj;
-	if (date == null) {
-	    if (other.date != null)
+	if (startDate == null) {
+	    if (other.startDate != null)
 		return false;
-	} else if (!date.equals(other.date))
+	} else if (!startDate.equals(other.startDate))
 	    return false;
 	if (uid == null) {
 	    if (other.uid != null)
@@ -109,11 +124,11 @@ public class OnCallScheduleRow {
 
     @JsonIgnore
     public boolean isCurrent() {
-	return Dates.SORTABLE.getFormattedString().compareTo(date) <= 0;
+	return Dates.SORTABLE.getFormattedString().compareTo(startDate) <= 0;
     }
 
     public boolean before(String date) {
-	return date.compareTo(this.date) > 0;
+	return date.compareTo(this.startDate) > 0;
     }
 
 }

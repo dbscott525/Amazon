@@ -22,6 +22,8 @@ public abstract class PickNextLttrSim extends Utility {
 
     protected void run() throws InterruptedException {
 
+	LTTRPage.getWeeks();
+
 	List<String> planTickets = getExistingTicketStream()
 		.map(LTTRTicket::getTicket)
 		.collect(Collectors.toList());

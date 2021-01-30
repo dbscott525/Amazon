@@ -19,6 +19,8 @@ public class ShowCITEmails {
 		.filter(Engineer::isCurrent)
 		.collect(Collectors.toList());
 
+	System.out.println(engineers.size() + " engineer on the CIT");
+
 	System.out.println("EMAIL LIST");
 	engineers
 		.stream()

@@ -20,7 +20,7 @@ public class ShowEmailsAndUids extends Utility {
 	list = EngineerFiles.MASTER_LIST
 		.readCSV();
 	Stream.of(EngineerType.values()).forEach(engineerType -> {
-	    System.out.println(engineerType + " count: " + list.stream().filter(engineerType::is).count());
+	    System.out.println(engineerType + " count: " + getEngineerStream(engineerType).count());
 
 	    printList("UIDs", Engineer::getUid, engineerType);
 	    printList("Emails", Engineer::getEmail, engineerType);
@@ -34,13 +34,18 @@ public class ShowEmailsAndUids extends Utility {
     private void printListsByType(String message, Function<Engineer, String> mapper, EngineerType engineerrType) {
 	System.out.println(engineerrType.toString() + " " + message + ":");
 	System.out.println();
-	list
-		.stream()
-		.filter(engineerrType::is)
+	getEngineerStream(engineerrType)
 		.map(mapper)
 		.sorted()
 		.forEach(System.out::println);
 	System.out.println();
+    }
+
+    private Stream<Engineer> getEngineerStream(EngineerType engineerrType) {
+	return list
+		.stream()
+		.filter(Engineer::isCurrent)
+		.filter(engineerrType::is);
     }
 
 }
