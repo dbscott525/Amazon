@@ -4,14 +4,14 @@ import java.util.stream.Stream;
 
 import com.scott_tigers.oncall.bean.LTTRTicket;
 
-public class UpdateLttrCandidateFrequencies extends UpdateLttrTicketFrequencies {
+public class UpdateLttrCandidateFrequencies extends UpdateLttrTicketFrequencies implements Command {
 
     public static void main(String[] args) {
 	new UpdateLttrCandidateFrequencies().run();
     }
 
     @Override
-    protected void run() {
+    public void run() {
 	super.run();
     }
 

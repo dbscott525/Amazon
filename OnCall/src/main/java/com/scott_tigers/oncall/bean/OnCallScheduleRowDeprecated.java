@@ -3,7 +3,7 @@ package com.scott_tigers.oncall.bean;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.scott_tigers.oncall.shared.Dates;
 
-public class OnCallScheduleRow {
+public class OnCallScheduleRowDeprecated {
 
     String startDate;
     String endDate;
@@ -12,16 +12,16 @@ public class OnCallScheduleRow {
     String shift;
     String type;
 
-    public OnCallScheduleRow(String date, String uid) {
+    public OnCallScheduleRowDeprecated(String date, String uid) {
 
 	this.uid = uid;
 	this.startDate = date;
     }
 
-    public OnCallScheduleRow() {
+    public OnCallScheduleRowDeprecated() {
     }
 
-    public OnCallScheduleRow(String type) {
+    public OnCallScheduleRowDeprecated(String type) {
 	this.type = type;
     }
 
@@ -45,7 +45,7 @@ public class OnCallScheduleRow {
 	return shift;
     }
 
-    public OnCallScheduleRow canonicalDate() {
+    public OnCallScheduleRowDeprecated canonicalDate() {
 	return this;
     }
 
@@ -82,7 +82,7 @@ public class OnCallScheduleRow {
 	return "OnCallScheduleRow [date=" + startDate + ", uid=" + uid + "]";
     }
 
-    public OnCallScheduleRow adjustDate() {
+    public OnCallScheduleRowDeprecated adjustDate() {
 	startDate = Dates.SORTABLE.getFormattedString(Dates.getDateDelta(Dates.SORTABLE.getDateFromString(startDate), -1));
 	return this;
     }
@@ -108,7 +108,7 @@ public class OnCallScheduleRow {
 	    return false;
 	if (getClass() != obj.getClass())
 	    return false;
-	OnCallScheduleRow other = (OnCallScheduleRow) obj;
+	OnCallScheduleRowDeprecated other = (OnCallScheduleRowDeprecated) obj;
 	if (startDate == null) {
 	    if (other.startDate != null)
 		return false;

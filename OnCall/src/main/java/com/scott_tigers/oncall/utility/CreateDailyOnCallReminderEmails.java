@@ -2,7 +2,7 @@ package com.scott_tigers.oncall.utility;
 
 import java.util.stream.Collectors;
 
-import com.scott_tigers.oncall.bean.OnCallScheduleRow;
+import com.scott_tigers.oncall.bean.OnlineScheduleEvent;
 import com.scott_tigers.oncall.shared.EngineerFiles;
 
 public class CreateDailyOnCallReminderEmails extends Utility implements Command {
@@ -15,8 +15,7 @@ public class CreateDailyOnCallReminderEmails extends Utility implements Command 
 	writeEmailsByDate(
 		getOnCallSchedule()
 			.stream()
-			.filter(OnCallScheduleRow::afterToday)
-			.map(OnCallScheduleRow::adjustDate)
+			.filter(OnlineScheduleEvent::afterToday)
 			.collect(Collectors.toList()),
 		EngineerFiles.DAILY_ON_CALL_REMINDER_EMAILS);
     }

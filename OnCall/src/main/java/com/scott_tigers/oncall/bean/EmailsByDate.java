@@ -19,7 +19,7 @@ public class EmailsByDate {
 	return new EmailsByDate().trainee(entry);
     }
 
-    public EmailsByDate(Entry<String, List<OnCallScheduleRow>> entry) {
+    public EmailsByDate(Entry<String, List<OnlineScheduleEvent>> entry) {
 	date = entry.getKey();
 
 	emails = entry
@@ -44,8 +44,8 @@ public class EmailsByDate {
     public EmailsByDate() {
     }
 
-    private String uidToEmail(OnCallScheduleRow onCallScheduleRow) {
-	return onCallScheduleRow.getUid() + Constants.AMAZON_EMAIL_POSTFIX;
+    private String uidToEmail(OnlineScheduleEvent onCallScheduleEvent) {
+	return onCallScheduleEvent.getUid() + Constants.AMAZON_EMAIL_POSTFIX;
     }
 
     public String getDate() {

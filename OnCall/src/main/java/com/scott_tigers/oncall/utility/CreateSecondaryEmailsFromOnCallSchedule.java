@@ -1,6 +1,6 @@
 package com.scott_tigers.oncall.utility;
 
-import com.scott_tigers.oncall.shared.Oncall;
+import com.scott_tigers.oncall.shared.EngineerType;
 
 public class CreateSecondaryEmailsFromOnCallSchedule extends CreateEmailsFromOnCallSchedule {
 
@@ -13,8 +13,8 @@ public class CreateSecondaryEmailsFromOnCallSchedule extends CreateEmailsFromOnC
     }
 
     @Override
-    protected Oncall getOnCallType() {
-	return Oncall.Secondary;
+    protected EngineerType getOnCallType() {
+	return EngineerType.Secondary;
     }
 
 }

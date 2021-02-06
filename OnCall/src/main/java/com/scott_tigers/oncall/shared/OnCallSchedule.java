@@ -3,7 +3,7 @@ package com.scott_tigers.oncall.shared;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.scott_tigers.oncall.bean.OnCallScheduleRow;
+import com.scott_tigers.oncall.bean.OnlineScheduleEvent;
 import com.scott_tigers.oncall.utility.Utility;
 
 public class OnCallSchedule extends Utility {
@@ -13,16 +13,16 @@ public class OnCallSchedule extends Utility {
     private static final String DTEND_TZID = "DTEND;TZID";
     private static final String BEGIN_VEVENT = "BEGIN:VEVENT";
 
-    private Oncall oncall;
-    private OnCallScheduleRow currentEvent;
-    private List<OnCallScheduleRow> onCallSchedules = new ArrayList<>();
+    private EngineerType oncall;
+    private OnlineScheduleEvent currentEvent;
+    private List<OnlineScheduleEvent> onCallSchedules = new ArrayList<>();
 
-    public OnCallSchedule(Oncall oncall) {
+    public OnCallSchedule(EngineerType oncall) {
 	this.oncall = oncall;
     }
 
-    public List<OnCallScheduleRow> getOnCallScheduleList() {
-	String fileName = launchUrlAndWaitForDownload(oncall.getUrl());
+    public List<OnlineScheduleEvent> getOnCallScheduleList(String url) {
+	String fileName = launchUrlAndWaitForDownload(url);
 	List<String> lines = EngineerFiles.readLines(fileName);
 	lines.forEach(line -> {
 
@@ -34,12 +34,11 @@ public class OnCallSchedule extends Utility {
 		break;
 
 	    case DTSTART_TZID:
-		currentEvent.setStartDate(getDate(line));
-		currentEvent.setStartTime(line.replaceAll(".*?:.*?T(\\d{2})(\\d{2})\\d{2}", "$1:$2"));
+		currentEvent.processStartLine(oncall, line);
 		break;
 
 	    case DTEND_TZID:
-		currentEvent.setEndDate(getDate(line));
+		currentEvent.processEndLine(oncall, line);
 		break;
 
 	    case SUMMARY:
@@ -52,13 +51,8 @@ public class OnCallSchedule extends Utility {
 	return onCallSchedules;
     }
 
-    private String getDate(String line) {
-	String extractedDate = line.replaceAll(".*:(\\d{4})(\\d{2})(\\d{2}).*", "$1-$2-$3");
-	return extractedDate;
-    }
-
     private void newEvent() {
-	currentEvent = new OnCallScheduleRow(oncall.toString());
+	currentEvent = new OnlineScheduleEvent(oncall.toString());
 	onCallSchedules.add(currentEvent);
     }
 

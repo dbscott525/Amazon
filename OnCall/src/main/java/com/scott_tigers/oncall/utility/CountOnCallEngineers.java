@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.scott_tigers.oncall.bean.Engineer;
-import com.scott_tigers.oncall.bean.OnCallScheduleRow;
+import com.scott_tigers.oncall.bean.OnlineScheduleEvent;
 import com.scott_tigers.oncall.shared.EngineerFiles;
 import com.scott_tigers.oncall.shared.EngineerType;
 import com.scott_tigers.oncall.shared.Json;
@@ -25,7 +25,7 @@ public class CountOnCallEngineers {
 		.collect(Collectors.toList());
 
 	Map<String, Long> typeCounts = EngineerFiles.ON_CALL_SCHEDULE
-		.readCSVToPojo(OnCallScheduleRow.class)
+		.readCSVToPojo(OnlineScheduleEvent.class)
 		.stream()
 		.filter(engineer -> engineerTypes.contains(engineer.getType()))
 		.map(Engineer::new)

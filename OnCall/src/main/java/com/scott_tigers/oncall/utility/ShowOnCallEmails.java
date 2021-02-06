@@ -2,7 +2,7 @@ package com.scott_tigers.oncall.utility;
 
 import java.util.stream.Collectors;
 
-import com.scott_tigers.oncall.bean.OnCallScheduleRow;
+import com.scott_tigers.oncall.bean.OnlineScheduleEvent;
 
 public class ShowOnCallEmails extends Utility {
 
@@ -12,11 +12,11 @@ public class ShowOnCallEmails extends Utility {
 
     @SuppressWarnings("unchecked")
     private void run() {
-	runCommands(CreateOncallSchedule.class);
+	runCommands(CreateOncallCsvSchedule.class);
 
 	getOnCallSchedule()
 		.stream()
-		.map(OnCallScheduleRow::getUid)
+		.map(OnlineScheduleEvent::getUid)
 		.distinct()
 		.sorted()
 		.forEach(System.out::println);

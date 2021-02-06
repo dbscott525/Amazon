@@ -37,6 +37,7 @@ public class Engineer {
     private String firstName = "";
     private String lastName = "";
     private String ooo;
+    private String oncallStartDate;
     private String startDate;
     private String timeZone;
     private String trainingDate;
@@ -47,9 +48,9 @@ public class Engineer {
     private transient DateStringContainer oooDates;
     private transient ResultCache<String, Boolean> dateConflictCache = new ResultCache<String, Boolean>();
 
-    public Engineer(OnCallScheduleRow onCallScheduleRow) {
-	uid = onCallScheduleRow.getUid();
-	type = onCallScheduleRow.getType();
+    public Engineer(OnlineScheduleEvent onCallScheduleEvent) {
+	uid = onCallScheduleEvent.getUid();
+	type = onCallScheduleEvent.getType();
     }
 
     public Engineer() {
@@ -264,6 +265,17 @@ public class Engineer {
 
     public void setEndDate(String endDate) {
 	this.endDate = endDate;
+    }
+
+    public String getOncallStartDate() {
+	return oncallStartDate;
+    }
+
+    public void setOncallStartDate(String oncallStartDate) {
+	this.oncallStartDate = oncallStartDate.isEmpty()
+		? null
+		: Dates.ONLINE_SCHEDULE.convertFormat(oncallStartDate, Dates.SORTABLE);
+
     }
 
     public void candidateStartDate(String candidateStartDate) {

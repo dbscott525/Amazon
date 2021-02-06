@@ -3,7 +3,7 @@ package com.scott_tigers.oncall.utility;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.scott_tigers.oncall.shared.Oncall;
+import com.scott_tigers.oncall.shared.EngineerType;
 import com.scott_tigers.oncall.shared.Util;
 
 public abstract class CreateEmailsFromOnCallSchedule extends Utility {
@@ -31,6 +31,6 @@ public abstract class CreateEmailsFromOnCallSchedule extends Utility {
 
     }
 
-    protected abstract Oncall getOnCallType();
+    protected abstract EngineerType getOnCallType();
 
 }

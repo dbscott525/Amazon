@@ -11,7 +11,7 @@ public class CreateOnCallEmails extends Utility {
     @SuppressWarnings("unchecked")
     private void run() {
 	runCommands(
-		CreateOncallSchedule.class,
+		CreateOncallCsvSchedule.class,
 		CreateDailyOnCallReminderEmails.class);
 	EngineerFiles.ON_CALL_DAILY_REMINDER_EMAIL.launch();
     }

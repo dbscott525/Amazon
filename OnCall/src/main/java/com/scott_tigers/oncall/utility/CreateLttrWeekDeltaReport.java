@@ -14,7 +14,7 @@ import com.scott_tigers.oncall.shared.EngineerFiles;
 import com.scott_tigers.oncall.shared.Properties;
 import com.scott_tigers.oncall.shared.URL;
 
-public class CreateLttrWeekDeltaReport extends Utility {
+public class CreateLttrWeekDeltaReport extends Utility implements Command {
 
     public static void main(String[] args) {
 	new CreateLttrWeekDeltaReport().run();
@@ -23,7 +23,7 @@ public class CreateLttrWeekDeltaReport extends Utility {
     private Map<String, LTTRTicket> lastWeek;
     private Map<String, LTTRTicket> penultimateWeek;
 
-    private void run() {
+    public void run() {
 	lastWeek = LTTRPage.LAST_FULL_WEEK.getMap();
 	penultimateWeek = LTTRPage.PENULTIMATE_FULL_WEEK.getMap();
 	Stream<LTTRTicket> newStream = lastWeekStream()

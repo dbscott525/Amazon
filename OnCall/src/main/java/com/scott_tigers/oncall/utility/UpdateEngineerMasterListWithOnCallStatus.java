@@ -10,7 +10,7 @@ import java.util.stream.Stream;
 
 import com.scott_tigers.oncall.bean.Engineer;
 import com.scott_tigers.oncall.shared.EngineerFiles;
-import com.scott_tigers.oncall.shared.Oncall;
+import com.scott_tigers.oncall.shared.EngineerType;
 
 public class UpdateEngineerMasterListWithOnCallStatus extends Utility {
 
@@ -20,13 +20,13 @@ public class UpdateEngineerMasterListWithOnCallStatus extends Utility {
 
     private void run() {
 	List<String> validTypes = Stream
-		.of(Oncall.values())
-		.filter(Oncall::isEngineer)
-		.map(Oncall::toString).collect(Collectors.toList());
+		.of(EngineerType.values())
+		.filter(EngineerType::isEngineer)
+		.map(EngineerType::toString).collect(Collectors.toList());
 
 	Map<String, String> oncallMap = Stream
-		.of(Oncall.values())
-		.filter(Oncall::isEngineer)
+		.of(EngineerType.values())
+		.filter(EngineerType::isEngineer)
 		.flatMap(type -> getOnCallUIDs(type)
 			.stream()
 			.map(uid -> new AbstractMap.SimpleEntry<String, String>(uid, type.toString())))

@@ -31,7 +31,8 @@ public class ShowEmailsAndUids extends Utility {
 	printListsByType(message, mapper, engineerType);
     }
 
-    private void printListsByType(String message, Function<Engineer, String> mapper, EngineerType engineerrType) {
+    private void printListsByType(String message, Function<Engineer, String> mapper,
+	    EngineerType engineerrType) {
 	System.out.println(engineerrType.toString() + " " + message + ":");
 	System.out.println();
 	getEngineerStream(engineerrType)
@@ -45,7 +46,7 @@ public class ShowEmailsAndUids extends Utility {
 	return list
 		.stream()
 		.filter(Engineer::isCurrent)
-		.filter(engineerrType::is);
+		.filter(engineerrType::engineerIsType);
     }
 
 }

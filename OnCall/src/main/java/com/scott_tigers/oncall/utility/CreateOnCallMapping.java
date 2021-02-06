@@ -1,7 +1,6 @@
 package com.scott_tigers.oncall.utility;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -12,7 +11,6 @@ import com.scott_tigers.oncall.shared.EngineerFiles;
 
 public class CreateOnCallMapping extends Utility {
 
-    private static final String UPDATED_ON_CALL_MAKEUP = "Updated On Call Makeup";
     private static final String ON_CALL_MAKE_UP = "https://quip-amazon.com/WScHAveNOQlM/Organization#VFV9CAx3njr";
 
     public static void main(String[] args) {
@@ -21,8 +19,8 @@ public class CreateOnCallMapping extends Utility {
 
     private void run() {
 	List<OnCallMakeUp> onCallMakeUp = readFromUrl(ON_CALL_MAKE_UP, OnCallMakeUp.class).collect(Collectors.toList());
-	Map<String, Engineer> engineerMap = EngineerFiles.MASTER_LIST.readCSV().stream()
-		.collect(Collectors.toMap(x -> x.getLastName() + "," + x.getFirstName(), x -> x));
+//	Map<String, Engineer> engineerMap = EngineerFiles.MASTER_LIST.readCSV().stream()
+//		.collect(Collectors.toMap(x -> x.getLastName() + "," + x.getFirstName(), x -> x));
 	List<Engineer> engineers = EngineerFiles.MASTER_LIST.readCSV();
 	Stream<OnCallMakeUp> foo1 = onCallMakeUp.stream().map(makeup -> {
 	    Optional<Engineer> foundEngineer = engineers.stream()

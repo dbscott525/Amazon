@@ -28,7 +28,7 @@ import com.scott_tigers.oncall.bean.EmailsByDate;
 import com.scott_tigers.oncall.bean.Engineer;
 import com.scott_tigers.oncall.bean.EngineerMetric;
 import com.scott_tigers.oncall.bean.LTTRTicket;
-import com.scott_tigers.oncall.bean.OnCallScheduleRow;
+import com.scott_tigers.oncall.bean.OnlineScheduleEvent;
 import com.scott_tigers.oncall.bean.ScheduleRow;
 import com.scott_tigers.oncall.bean.TT;
 import com.scott_tigers.oncall.bean.WIP;
@@ -39,7 +39,6 @@ import com.scott_tigers.oncall.shared.Dates;
 import com.scott_tigers.oncall.shared.EngineerFiles;
 import com.scott_tigers.oncall.shared.EngineerType;
 import com.scott_tigers.oncall.shared.Executor;
-import com.scott_tigers.oncall.shared.Oncall;
 import com.scott_tigers.oncall.shared.URL;
 import com.scott_tigers.oncall.test.Company;
 
@@ -86,10 +85,10 @@ public class Utility {
 	};
     }
 
-    protected void writeEmailsByDate(List<OnCallScheduleRow> emailList, EngineerFiles fileType) {
+    protected void writeEmailsByDate(List<OnlineScheduleEvent> emailList, EngineerFiles fileType) {
 	List<EmailsByDate> emailLines = emailList
 		.stream()
-		.collect(Collectors.groupingBy(OnCallScheduleRow::getStartDate))
+		.collect(Collectors.groupingBy(t -> t.getStartDate()))
 		.entrySet()
 		.stream()
 		.map(EmailsByDate::new)
@@ -99,13 +98,20 @@ public class Utility {
 	fileType.write(w -> w.CSV(emailLines, EmailsByDate.class));
     }
 
-    protected List<OnCallScheduleRow> getOnCallSchedule() {
+    protected List<OnlineScheduleEvent> getOnCallSchedule() {
 	return EngineerFiles.ON_CALL_SCHEDULE
-		.readCSVToPojo(OnCallScheduleRow.class)
+		.readCSVToPojo(OnlineScheduleEvent.class)
 		.stream()
-		.map(OnCallScheduleRow::canonicalDate)
+//		.map(OnlineScheduleEvent::canonicalDate)
 		.collect(Collectors.toList());
     }
+
+//    protected List<OnlineScheduleEvent> getOnCallScheduleNew() {
+//	return EngineerFiles.ON_CALL_SCHEDULE
+//		.readCSVToPojo(OnlineScheduleEvent.class)
+//		.stream()
+//		.collect(Collectors.toList());
+//    }
 
     protected Engineer getEngineer(String uid) {
 	return Optional
@@ -468,7 +474,7 @@ public class Utility {
 		.stream();
     }
 
-    protected void reconcileMasterListToOncallList(Oncall oncallType, EngineerType engineerType) {
+    protected void reconcileMasterListToOncallList(EngineerType engineerType) {
 
 	List<String> offshoreUids = EngineerFiles.OFFSHORE_UIDS.readCSV().stream().map(Engineer::getUid)
 		.collect(Collectors.toList());
@@ -482,9 +488,9 @@ public class Utility {
 
 		.collect(Collectors.toList());
 
-	List<String> onCallUids = oncallType
+	List<String> onCallUids = engineerType
 		.getOnCallScheduleStream()
-		.map(OnCallScheduleRow::getUid)
+		.map(OnlineScheduleEvent::getUid)
 		.filter(Predicate.not(offshoreUids::contains))
 		.distinct()
 		.collect(Collectors.toList());
@@ -537,13 +543,24 @@ public class Utility {
 	launchUrl(URL.LTTR_TICKETS_LAST_WEEK_DELTA_REPORT);
     }
 
-    protected List<String> getOnCallUIDs(Oncall onCallType) {
-        return onCallType
-        	.getOnCallScheduleStream()
-        	.map(OnCallScheduleRow::getUid)
-        	.distinct()
-        	.sorted()
-        	.collect(Collectors.toList());
+    protected List<String> getOnCallUIDs(EngineerType onCallType) {
+	return onCallType
+		.getOnCallScheduleStream()
+		.map(OnlineScheduleEvent::getUid)
+		.distinct()
+		.sorted()
+		.collect(Collectors.toList());
+    }
+
+    protected Stream<Engineer> getPrimaryStream() {
+	Predicate<Engineer> filter = eng -> EngineerType.Primary.engineerIsType(eng)
+//		|| "DublinPrimary".equals(eng.getType())
+	;
+	return EngineerFiles.MASTER_LIST
+		.readCSV()
+		.stream()
+		.filter(Engineer::isCurrent)
+		.filter(filter);
     }
 
 }
