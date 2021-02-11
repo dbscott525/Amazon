@@ -17,6 +17,7 @@ public class CreateOncallCsvSchedule extends Utility implements Command {
 
 	EngineerFiles.ON_CALL_SCHEDULE.write(w -> w.CSV(
 		getOnCallStream()
+//			.peek(x -> Json.print(x))
 			.distinct()
 			.collect(Collectors.toList()),
 		"startDate", "uid"));
@@ -25,6 +26,7 @@ public class CreateOncallCsvSchedule extends Utility implements Command {
     private Stream<OnlineScheduleEvent> getOnCallStream() {
 	return Stream
 		.of(EngineerType.values())
+		.filter(EngineerType::useForDailyBulletin)
 		.flatMap(EngineerType::getOnCallScheduleStream);
     }
 }

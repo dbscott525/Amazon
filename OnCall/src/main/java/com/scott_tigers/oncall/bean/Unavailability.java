@@ -1,14 +1,21 @@
 package com.scott_tigers.oncall.bean;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.scott_tigers.oncall.shared.DateStream;
 import com.scott_tigers.oncall.shared.Dates;
 import com.scott_tigers.oncall.shared.Properties;
+import com.scott_tigers.oncall.shared.UnavailabilityDate;
 
 public class Unavailability {
 
+    private static final String END_POSTFIX = "End";
+    private static final String START_POSTFIX = "Start";
+    private static final int NUMBER_OF_DATE_RANGES = 4;
     private static final String END_DATE_3 = "End Date 3";
     private String uid;
     private String start1;
@@ -71,10 +78,10 @@ public class Unavailability {
 	}
 	ArrayList<String> dates = new ArrayList<String>();
 
-	IntStream.range(1, 5).forEach(index -> {
+	IntStream.rangeClosed(1, NUMBER_OF_DATE_RANGES).forEach(index -> {
 
-	    String startDate = extracted(index, "Start");
-	    String endDate = extracted(index, "End");
+	    String startDate = getDate(index, START_POSTFIX);
+	    String endDate = getDate(index, END_POSTFIX);
 
 	    if (startDate != null && endDate != null) {
 		while (true) {
@@ -89,7 +96,7 @@ public class Unavailability {
 	engineer.setOoo(dates.toString());
     }
 
-    private String extracted(int index, String type) {
+    private String getDate(int index, String type) {
 	try {
 	    String stringDate = (String) Unavailability.class.getMethod("get" + type + index).invoke(this);
 	    if (stringDate != null && stringDate.length() > 0) {
@@ -105,6 +112,37 @@ public class Unavailability {
     public String toString() {
 	return "Unavailability [uid=" + uid + ", start1=" + start1 + ", end1=" + end1 + ", start2=" + start2 + ", end2="
 		+ end2 + ", start3=" + start3 + ", end3=" + end3 + ", start4=" + start4 + ", end4=" + end4 + "]";
+    }
+
+    public Stream<UnavailabilityDate> getUnvailabilityKeyStream() {
+	return IntStream
+		.rangeClosed(1, NUMBER_OF_DATE_RANGES)
+		.mapToObj(index -> new SingleRange(getDate(index, START_POSTFIX), getDate(index, END_POSTFIX)))
+		.filter(SingleRange::haveValidDates)
+		.flatMap(SingleRange::getDatStream)
+		.map(date -> new UnavailabilityDate(uid, date));
+    }
+
+    private class SingleRange {
+
+	private String startDate;
+	private String endDate;
+
+	public SingleRange(String startDate, String endDate) {
+	    this.startDate = startDate;
+	    this.endDate = endDate;
+	}
+
+	public boolean haveValidDates() {
+	    return Stream
+		    .of(startDate, endDate)
+		    .allMatch(date -> Objects.nonNull(date));
+	}
+
+	public Stream<String> getDatStream() {
+	    return DateStream.get(startDate, endDate);
+	}
+
     }
 
 }

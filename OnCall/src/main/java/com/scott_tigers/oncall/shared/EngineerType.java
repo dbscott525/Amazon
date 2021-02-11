@@ -1,5 +1,6 @@
 package com.scott_tigers.oncall.shared;
 
+import java.util.Iterator;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -10,8 +11,8 @@ public enum EngineerType {
 
     Primary {
 	@Override
-	int getStartHour() {
-	    return 10;
+	public int getStartHour() {
+	    return 0;
 	}
 
 	@Override
@@ -28,10 +29,26 @@ public enum EngineerType {
 	String getHistoricalUrl() {
 	    return "https://oncall.corp.amazon.com/#/view/aurora-head-primary-ams/schedule";
 	}
+
+	@Override
+	public Iterator<ScheduleType> getScheduleTypeIterator() {
+	    return new ScheduleTypeIterator(i -> i
+		    .add(TimeZone.IST, 3)
+		    .add(TimeZone.EST, 6)
+		    .add(TimeZone.PST, 5)
+		    .add(TimeZone.PST, 5)
+		    .add(TimeZone.PST, 5));
+	}
+
+	@Override
+	public boolean useTimeZones() {
+	    return true;
+	}
+
     },
     Secondary {
 	@Override
-	int getStartHour() {
+	public int getStartHour() {
 	    return 10;
 	}
 
@@ -44,6 +61,12 @@ public enum EngineerType {
 	String getUrl() {
 	    return "https://oncall.corp.amazon.com/#/view/aurora-head-secondary/schedule";
 	}
+
+	@Override
+	public Iterator<ScheduleType> getScheduleTypeIterator() {
+	    return new ScheduleTypeIterator(i -> i.add(TimeZone.PST, 24));
+	}
+
     },
     TechEsc {
 	@Override
@@ -52,7 +75,7 @@ public enum EngineerType {
 	}
 
 	@Override
-	int getStartHour() {
+	public int getStartHour() {
 	    return 10;
 	}
 
@@ -69,6 +92,50 @@ public enum EngineerType {
 	@Override
 	public int getAdjustedTime(int time) {
 	    return getStartHour();
+	}
+
+	@Override
+	public Iterator<ScheduleType> getScheduleTypeIterator() {
+	    return new ScheduleTypeIterator(i -> i.add(TimeZone.PST, 24));
+	}
+    },
+    DublinPrimary {
+	@Override
+	String getHistoricalUrl() {
+	    return "https://oncall.corp.amazon.com/#/view/aurora-data-lake-primary/schedule";
+	}
+
+	@Override
+	String getUrl() {
+	    return Primary.getUrl();
+	}
+
+	@Override
+	public int getStartHour() {
+	    return 0;
+	}
+
+	@Override
+	protected int getShiftHours() {
+	    return 0;
+	}
+
+	@Override
+	public Iterator<ScheduleType> getScheduleTypeIterator() {
+	    return new ScheduleTypeIterator(i -> i
+		    .add(TimeZone.IST, 3)
+		    .add(TimeZone.DUB, 6)
+		    .add(TimeZone.PST, 15));
+	}
+
+	@Override
+	public boolean useTimeZones() {
+	    return true;
+	}
+
+	@Override
+	public boolean useForDailyBulletin() {
+	    return false;
 	}
     };
 
@@ -103,17 +170,12 @@ public enum EngineerType {
 	return scheduleStream.getStream();
     }
 
-    abstract int getStartHour();
-
-    OnlineScheduleEvent getEvent(String startDate, int startHour) {
-	return new OnlineScheduleEvent(startDate, startHour, getShiftHours());
-
-    }
+    public abstract int getStartHour();
 
     protected abstract int getShiftHours();
 
     OnlineScheduleEvent getEvent(String startDate) {
-	return getEvent(startDate, getStartHour());
+	return new OnlineScheduleEvent(startDate, this, getStartHour(), getShiftHours());
 
     }
 
@@ -127,5 +189,15 @@ public enum EngineerType {
 
     String getHistoricalUrl() {
 	return getUrl();
+    }
+
+    public abstract Iterator<ScheduleType> getScheduleTypeIterator();
+
+    public boolean useTimeZones() {
+	return false;
+    }
+
+    public boolean useForDailyBulletin() {
+	return true;
     }
 }

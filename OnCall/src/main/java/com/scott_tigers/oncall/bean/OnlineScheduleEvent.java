@@ -1,18 +1,25 @@
 package com.scott_tigers.oncall.bean;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.gson.GsonBuilder;
 import com.scott_tigers.oncall.schedule.Shift;
+import com.scott_tigers.oncall.shared.Constants;
 import com.scott_tigers.oncall.shared.Dates;
 import com.scott_tigers.oncall.shared.EngineerType;
+import com.scott_tigers.oncall.shared.ScheduleType;
+import com.scott_tigers.oncall.shared.TimeZone;
+import com.scott_tigers.oncall.shared.UnavailabilityDate;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OnlineScheduleEvent {
 
+    private static final int MID_DAY_OF_WEEK = 4;
     private String startDateTime;
     private String endDateTime;
     private List<String> oncallMember;
@@ -24,10 +31,9 @@ public class OnlineScheduleEvent {
     private String type;
     private int endHour;
     private int startHour;
-    private int shiftHours;
-
-    public OnlineScheduleEvent() {
-    }
+    private Iterator<ScheduleType> scheduleTyperIterator;
+    private ScheduleType scheduleType;
+    private int scheduleGap;
 
     public OnlineScheduleEvent(Shift shift) {
 	oncallMember = shift
@@ -36,7 +42,10 @@ public class OnlineScheduleEvent {
 		.map(Engineer::getUid)
 		.collect(Collectors.toList());
 
-	setDateTimes(shift.getDate(), -1, 8, 4, 10);
+	setDateTimes(shift.getDate(), -1, 8, 5, 8);
+    }
+
+    public OnlineScheduleEvent() {
     }
 
     @JsonIgnore
@@ -68,14 +77,26 @@ public class OnlineScheduleEvent {
 	this.type = type;
     }
 
-    public OnlineScheduleEvent(String startDate, int startHour, int shiftHours) {
+    public OnlineScheduleEvent(String startDate, int startHour, Iterator<ScheduleType> scheduleTyperIterator) {
+	this.scheduleTyperIterator = scheduleTyperIterator;
+	scheduleType = scheduleTyperIterator.next();
 	this.startDate = startDate;
 	this.startHour = startHour;
-	this.shiftHours = shiftHours;
+	initializeTimeInfo(startDate, startHour, scheduleType.getHours());
+    }
+
+    private void initializeTimeInfo(String startDate, int startHour, int shiftHours) {
 	endHour = startHour + shiftHours;
-	int dateIncrement = endHour > 24 ? 1 : 0;
-	endHour = endHour > 24 ? endHour - 24 : endHour;
+	int dateIncrement = endHour >= 24 ? 1 : 0;
+	endHour = endHour >= 24 ? endHour - 24 : endHour;
 	setDateTimes(startDate, 0, startHour, dateIncrement, endHour);
+    }
+
+    public OnlineScheduleEvent(String startDate, EngineerType engineerType, int startHour, int shiftHours) {
+	scheduleTyperIterator = engineerType.getScheduleTypeIterator();
+	scheduleType = scheduleTyperIterator.next();
+	this.startDate = startDate;
+	initializeTimeInfo(startDate, startHour, scheduleType.getHours());
     }
 
     public String getStartDateTime() {
@@ -191,12 +212,16 @@ public class OnlineScheduleEvent {
 
     @JsonIgnore
     public OnlineScheduleEvent getNextEvent() {
-	return new OnlineScheduleEvent(endDate, endHour, shiftHours);
+	return new OnlineScheduleEvent(endDate, endHour, scheduleTyperIterator);
     }
 
     @JsonIgnore
     public int getShiftType() {
-	return Dates.SORTABLE.getDayOfWeek(startDate) * 100 + startHour;
+	return getStartDayOfWeek() * 100 + startHour;
+    }
+
+    public int getStartDayOfWeek() {
+	return Dates.SORTABLE.getDayOfWeek(startDate);
     }
 
     public void processStartLine(EngineerType oncall, String line) {
@@ -262,6 +287,16 @@ public class OnlineScheduleEvent {
 	    protected void setDateTime(OnlineScheduleEvent onlineScheduleEvent, String dateTime) {
 		onlineScheduleEvent.startDateTime = dateTime;
 	    }
+
+	    @Override
+	    protected String getDate(OnlineScheduleEvent onlineScheduleEvent) {
+		return onlineScheduleEvent.startDate;
+	    }
+
+	    @Override
+	    protected int getHour(OnlineScheduleEvent onlineScheduleEvent) {
+		return onlineScheduleEvent.startHour;
+	    }
 	},
 	END {
 	    @Override
@@ -278,6 +313,16 @@ public class OnlineScheduleEvent {
 	    @Override
 	    protected void setDateTime(OnlineScheduleEvent onlineScheduleEvent, String dateTime) {
 		onlineScheduleEvent.endDateTime = dateTime;
+	    }
+
+	    @Override
+	    protected String getDate(OnlineScheduleEvent onlineScheduleEvent) {
+		return onlineScheduleEvent.endDate;
+	    }
+
+	    @Override
+	    protected int getHour(OnlineScheduleEvent onlineScheduleEvent) {
+		return onlineScheduleEvent.endHour;
 	    }
 	};
 
@@ -297,6 +342,119 @@ public class OnlineScheduleEvent {
 
 	protected abstract void setDateTime(OnlineScheduleEvent onlineScheduleEvent, String dateTime);
 
+	protected abstract String getDate(OnlineScheduleEvent onlineScheduleEvent);
+
+	protected abstract int getHour(OnlineScheduleEvent onlineScheduleEvent);
+
+    }
+
+    @JsonIgnore
+    public TimeZone getTimeZone() {
+	return scheduleType.getTimeZone();
+    }
+
+    public boolean inTimeZone(Engineer eng) {
+	return scheduleType.in(eng);
+    }
+
+    @JsonIgnore
+    public int getCommonHours(OnlineScheduleEvent nextEvent) {
+
+	if (Math.abs(getStartDayOfWeek() - nextEvent.getStartDayOfWeek()) > 1) {
+	    return 0;
+	}
+
+	int anchorDay = getStartDayOfWeek();
+	int startHour1 = getNormalizedHour(anchorDay, DateType.START);
+	int endHour1 = getNormalizedHour(anchorDay, DateType.END);
+	if (endHour1 < startHour1) {
+	    System.out.println("nextEvent=" + (nextEvent));
+	    System.out.println("this=" + (this));
+	}
+	assert endHour1 >= startHour1 : "bad start and end: " + startHour1 + "-" + endHour1;
+	int startHour2 = nextEvent.getNormalizedHour(anchorDay, DateType.START);
+	int endHour2 = nextEvent.getNormalizedHour(anchorDay, DateType.END);
+	assert endHour2 >= startHour2 : "bad start and end: " + startHour2 + "-" + endHour2;
+
+	if (debug()) {
+//	    System.out.println("this=" + (this));
+	    System.out.println("getStartDayOfWeek()=" + (getStartDayOfWeek()));
+	    System.out.println("nextEvent.getStartDayOfWeek()=" + (nextEvent.getStartDayOfWeek()));
+	    System.out.println("anchorDay=" + (anchorDay));
+	    System.out.println("startHour1=" + (startHour1));
+	    System.out.println("endHour1=" + (endHour1));
+	    System.out.println("startHour2=" + (startHour2));
+	    System.out.println("endHour2=" + (endHour2));
+	    System.out.println("startHour1 > endHour2=" + (startHour1 > endHour2));
+	    System.out.println("endHour1 < startHour2=" + (endHour1 < startHour2));
+	}
+
+	if (startHour1 > endHour2) {
+	    return 0;
+	}
+
+	if (endHour1 < startHour2) {
+	    return 0;
+	}
+
+	int start = Math.max(startHour1, startHour2);
+	int end = Math.min(endHour1, endHour2);
+	if (debug()) {
+	    System.out.println("start=" + (start));
+	    System.out.println("end=" + (end));
+	    System.out.println("end - start=" + (end - start));
+	}
+
+	return end - start;
+
+    }
+
+    private boolean debug() {
+	return "simdilip".equals(getUid()) && false;
+    }
+
+    @JsonIgnore
+    private int getNormalizedHour(int anchorDay, DateType dateType) {
+	Integer normalizedDay = getNormalizedDay(anchorDay, dateType);
+	return normalizedDay * 24 + dateType.getHour(this);
+    }
+
+    @JsonIgnore
+    private Integer getNormalizedDay(int anchorDay, DateType dateType) {
+	int dayOfWeek = Dates.SORTABLE.getDayOfWeek(dateType.getDate(this));
+	Integer normalizedDay = Math.floorMod(dayOfWeek + MID_DAY_OF_WEEK - anchorDay, Constants.DAYS_PER_WEEK) + 1;
+	return normalizedDay;
+    }
+
+    public boolean available(Engineer eng, List<UnavailabilityDate> unavailability) {
+	return Stream.of(startDate, endDate)
+		.map(date -> new UnavailabilityDate(eng.getUid(), date))
+		.noneMatch(unavailability::contains);
+    }
+
+    @JsonIgnore
+    public String getFormattedStartDate() {
+	return getFormattDate(startDate, startHour);
+    }
+
+    @JsonIgnore
+    private String getFormattDate(String date, int hour) {
+	return String.format("%s %02d:00", date, hour);
+    }
+
+    @JsonIgnore
+    public String getFormattedEndDate() {
+	return getFormattDate(endDate, endHour);
+    }
+
+    @JsonIgnore
+    public String getFormattedLine() {
+	return String.format("%s - %s %4d %-10s", getFormattedStartDate(), getFormattedEndDate(), scheduleGap,
+		getUid());
+    }
+
+    public void setScheduleGap(int scheduleGap) {
+	this.scheduleGap = scheduleGap;
     }
 
 }

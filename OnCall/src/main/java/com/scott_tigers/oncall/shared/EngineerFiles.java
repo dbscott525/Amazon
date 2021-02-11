@@ -62,6 +62,7 @@ public enum EngineerFiles {
     CUSTOMER_ISSUE_BACKLOG                      ("Customer Issue Backlog"),
     CUSTOMER_ISSUE_EMAIL                        ("Customer Issue Emails"),
     CUSTOMER_ISSUE_TEAM_INTRODUCTION            ("Customer Issue Team Introduction", Constants.PPTX_EXTENSION),
+    TEST_HISTORICAL_SCHEDULE			("Test Historical Schedule", Constants.JSON_EXTENSION),
     CUSTOMER_ISSUE_TEAM_SCHEDULE                ("Customer Issue Team Schedule", Constants.JSON_EXTENSION), 
     DAILY_ON_CALL_REMINDER_EMAILS               ("Daily On Call Reminder Emails"),
     DSU                                         ("DSU",  Constants.XML_EXTENSION),

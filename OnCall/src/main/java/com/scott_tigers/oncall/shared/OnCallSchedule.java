@@ -2,6 +2,9 @@ package com.scott_tigers.oncall.shared;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.MatchResult;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import com.scott_tigers.oncall.bean.OnlineScheduleEvent;
 import com.scott_tigers.oncall.utility.Utility;
@@ -14,8 +17,8 @@ public class OnCallSchedule extends Utility {
     private static final String BEGIN_VEVENT = "BEGIN:VEVENT";
 
     private EngineerType oncall;
-    private OnlineScheduleEvent currentEvent;
     private List<OnlineScheduleEvent> onCallSchedules = new ArrayList<>();
+    private Inputs inputs;
 
     public OnCallSchedule(EngineerType oncall) {
 	this.oncall = oncall;
@@ -30,19 +33,19 @@ public class OnCallSchedule extends Utility {
 		    "$1")) {
 
 	    case BEGIN_VEVENT:
-		newEvent();
+		inputs = new Inputs();
 		break;
 
 	    case DTSTART_TZID:
-		currentEvent.processStartLine(oncall, line);
+		inputs.setStartLine(line);
 		break;
 
 	    case DTEND_TZID:
-		currentEvent.processEndLine(oncall, line);
+		inputs.setEndLine(line);
 		break;
 
 	    case SUMMARY:
-		currentEvent.setUid(line.replaceAll(".* (.+)@.*", "$1"));
+		processSummary(line);
 		break;
 
 	    }
@@ -51,9 +54,45 @@ public class OnCallSchedule extends Utility {
 	return onCallSchedules;
     }
 
-    private void newEvent() {
-	currentEvent = new OnlineScheduleEvent(oncall.toString());
-	onCallSchedules.add(currentEvent);
+    private void processSummary(String line) {
+	getUIDStream(line)
+		.map(uid -> {
+		    OnlineScheduleEvent currentEvent = new OnlineScheduleEvent(oncall.toString());
+		    currentEvent.processStartLine(oncall, inputs.getStartLine());
+		    currentEvent.processEndLine(oncall, inputs.getEndLine());
+		    currentEvent.setUid(uid);
+		    return currentEvent;
+		})
+		.forEach(event -> onCallSchedules.add(event));
+    }
+
+    private Stream<String> getUIDStream(String line) {
+	return Pattern.compile(" [a-zA-Z]*?@ ")
+		.matcher(line)
+		.results()
+		.map(MatchResult::group)
+		.map(x -> x.replaceAll(" (.*?)@ ", "$1"));
+    }
+
+    private class Inputs {
+	private String startLine;
+	private String endLine;
+
+	public String getStartLine() {
+	    return startLine;
+	}
+
+	public void setStartLine(String startLine) {
+	    this.startLine = startLine;
+	}
+
+	public String getEndLine() {
+	    return endLine;
+	}
+
+	public void setEndLine(String endLine) {
+	    this.endLine = endLine;
+	}
     }
 
 }

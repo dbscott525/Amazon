@@ -6,14 +6,14 @@ import java.util.stream.Stream;
 import com.scott_tigers.oncall.bean.OnlineScheduleEvent;
 
 public class ScheduleStream {
-    private EngineerType oncall;
+    private EngineerType engineerType;
     private String startDate;
     private Function<String, String> endComputer = date -> date;
     private String endDate;
     private OnlineScheduleEvent nextEvent;
 
-    public void type(EngineerType oncall) {
-	this.oncall = oncall;
+    public void type(EngineerType engineerType) {
+	this.engineerType = engineerType;
     }
 
     public ScheduleStream startDate(String startDate) {
@@ -27,7 +27,7 @@ public class ScheduleStream {
     }
 
     public Stream<OnlineScheduleEvent> getStream() {
-	nextEvent = oncall.getEvent(startDate);
+	nextEvent = engineerType.getEvent(startDate);
 	endDate = endComputer.apply(startDate);
 
 	return new IteratorStream<OnlineScheduleEvent>() {

@@ -16,6 +16,7 @@ public class CreateDailyOnCallReminderEmails extends Utility implements Command 
 		getOnCallSchedule()
 			.stream()
 			.filter(OnlineScheduleEvent::afterToday)
+			.filter(x -> !x.getUid().contains("SUMMARY:"))
 			.collect(Collectors.toList()),
 		EngineerFiles.DAILY_ON_CALL_REMINDER_EMAILS);
     }

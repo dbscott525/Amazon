@@ -76,5 +76,6 @@ public class Constants {
     public static final String WINWORD_LOCATION = WINDOWS_PROGRAM_FILES_FOLDER + "WINWORD.EXE";
     public static final String XLSX_EXTENSION = ".xlsx";
     public static final String XML_EXTENSION = ".xml";
+    public static final int DAYS_PER_WEEK = 7;
 
 }
