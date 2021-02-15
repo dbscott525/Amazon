@@ -29,13 +29,10 @@ public class UpdateOnCallStartDateFromHistory extends Utility {
 
 	List<Engineer> engineers = EngineerFiles.MASTER_LIST.readCSV();
 	engineers.stream().forEach(eng -> {
-	    Optional<OnlineScheduleEvent> foo1 = map.get(eng.getUid());
-	    if (foo1 != null) {
-		String startDate = foo1.get().getStartDate();
-		String startDate2 = Dates.SORTABLE.convertFormat(startDate, Dates.ONLINE_SCHEDULE);
-		System.out.println("startDate2=" + (startDate2));
-		System.out.println("foo1.get().getStartDate()=" + startDate);
-		eng.setOncallStartDate(startDate2);
+	    Optional<OnlineScheduleEvent> optionalStartDate = map.get(eng.getUid());
+	    if (optionalStartDate != null) {
+		eng.setOncallStartDate(
+			Dates.SORTABLE.convertFormat(optionalStartDate.get().getStartDate(), Dates.ONLINE_SCHEDULE));
 		Json.print(eng);
 	    }
 	});

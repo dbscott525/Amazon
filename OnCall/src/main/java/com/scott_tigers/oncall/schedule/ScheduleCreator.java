@@ -108,7 +108,15 @@ public class ScheduleCreator {
     }
 
     private void getAndPrepareEngineers() {
-	engineers = EngineerFiles.MASTER_LIST.readCSV();
+	engineers = EngineerFiles.MASTER_LIST
+		.readCSV();
+	engineers = EngineerFiles.MASTER_LIST
+		.readCSV()
+		.stream()
+		.filter(Engineer::isCit)
+		.collect(Collectors.toList());
+	System.out.println("engineers.size()=" + (engineers.size()));
+
 	updateEngineersOOO();
 	createEngineerDateMap();
 	createUidMap();
@@ -135,7 +143,11 @@ public class ScheduleCreator {
 	dateMap = getShiftDateStream()
 		.collect(Collectors.toMap(Function.identity(), this::availableEngs));
 
-	dateMap.entrySet().stream().map(x -> x.getKey() + ": " + x.getValue().size()).sorted()
+	dateMap
+		.entrySet()
+		.stream()
+		.map(x -> x.getKey() + ": " + x.getValue().size())
+		.sorted()
 		.forEach(System.out::println);
     }
 
@@ -144,7 +156,8 @@ public class ScheduleCreator {
     }
 
     private List<Engineer> availableEngs(String startDate) {
-	return engineers.stream()
+	return engineers
+		.stream()
 		.filter(eng -> DateStream
 			.get(startDate, Dates.SORTABLE.getFormattedDelta(startDate, daysInShift), 1)
 			.noneMatch(eng::hasDateConflict))

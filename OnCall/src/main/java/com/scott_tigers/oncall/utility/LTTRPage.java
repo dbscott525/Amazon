@@ -3,15 +3,12 @@ package com.scott_tigers.oncall.utility;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.Select;
 
 import com.scott_tigers.oncall.bean.LTTRTicket;
 import com.scott_tigers.oncall.shared.Dates;
@@ -20,16 +17,16 @@ import com.scott_tigers.oncall.shared.Util;
 import com.scott_tigers.oncall.shared.WebElements;
 
 public enum LTTRPage {
-    TOP(URL.LTTR_PRIORITY),
+    TOP(URL.LTTR_PRIORITY_RANGE),
     GRAPH("https://rds-portal.corp.amazon.com/lttr/reports/weekly?week=START&range=END&team=Aurora+MySQL+-+Engine&graph=Line"),
-    LAST_FULL_WEEK(URL.LTTR_PRIORITY) {
+    LAST_FULL_WEEK(URL.LTTR_PRIORITY_RANGE) {
 	@Override
 	protected int getNumberOfWeeks() {
 	    return 1;
 	}
 
     },
-    PENULTIMATE_FULL_WEEK(URL.LTTR_PRIORITY) {
+    PENULTIMATE_FULL_WEEK(URL.LTTR_PRIORITY_RANGE) {
 	@Override
 	protected int getLastWeekDelta() {
 	    return 2;
@@ -46,8 +43,6 @@ public enum LTTRPage {
 
     private String urlTemplate;
 
-    public static List<String> weeks = null;
-
     LTTRPage(String urlTemplate) {
 	this.urlTemplate = urlTemplate;
     }
@@ -59,7 +54,7 @@ public enum LTTRPage {
     public String getUrl() {
 	boolean GET_WEEKS_FROM_PAGE = true;
 	if (GET_WEEKS_FROM_PAGE) {
-	    List<String> weeks = LTTRPage.getWeeks();
+	    List<String> weeks = LTTRWeeks.get();
 	    String startWeek = weeks.get(getNumberOfWeeks() + getLastWeekDelta() - 1);
 	    String endWeek = weeks.get(getLastWeekDelta());
 	    String url = urlTemplate.replaceAll("(.*)START(.*)END(.*)", "$1" + startWeek + "$2" + endWeek + "$3");
@@ -98,7 +93,6 @@ public enum LTTRPage {
     }
 
     Stream<LTTRTicket> getLttrTicketStream(WebDriver driver) {
-	System.out.println("getUrl()=" + (getUrl()));
 	driver.get(getUrl());
 	System.out.println("page loaded");
 	Util.sleep(2);
@@ -112,7 +106,7 @@ public enum LTTRPage {
     }
 
     Map<String, LTTRTicket> getMap() {
-	getWeeks();
+	LTTRWeeks.get();
 	WebDriver driver = Util.getWebDriver();
 	System.out.println("this=" + (this));
 	Map<String, LTTRTicket> map = getLttrTicketStream(driver)
@@ -120,24 +114,4 @@ public enum LTTRPage {
 	driver.close();
 	return map;
     }
-
-    public static List<String> getWeeks() {
-
-	return Optional.ofNullable(LTTRPage.weeks).orElseGet(() -> {
-	    String url = "https://rds-portal.corp.amazon.com/lttr/reports/prioritization?team=Aurora+MySQL+-+Engine#";
-	    WebDriver driver = Util.getWebDriver();
-	    driver.get(url);
-	    WebElement week = driver.findElement(By.id("week"));
-	    Select dropdown = new Select(week);
-	    LTTRPage.weeks = dropdown
-		    .getOptions()
-		    .stream()
-		    .map(x -> x.getText())
-		    .collect(Collectors.toList());
-	    driver.quit();
-	    return LTTRPage.weeks;
-	});
-
-    }
-
 }

@@ -87,14 +87,9 @@ public abstract class CreateOncallJsonSchedule extends Utility {
 			    .filter(eng -> event.available(eng, unavailability))
 			    .map(te -> new OncallMetric(te, event))
 			    .collect(Collectors.toList());
-//		    System.out.println("event.getStartDayOfWeek()=" + (event.getStartDayOfWeek()));
-//		    System.out.println("event.getStartDate()=" + (event.getStartDate()));
-//		    metrics.stream().sorted().forEach(System.out::println);
-//		    System.exit(1);
 
 		    OncallMetric metric = metrics
 			    .stream()
-//			    .peek(x -> System.out.println(x.uid + "->" + x.scheduleGap))
 			    .filter(x -> x.scheduleGap > 3)
 			    .min(Comparator.comparing(x -> x))
 			    .get();
@@ -134,8 +129,16 @@ public abstract class CreateOncallJsonSchedule extends Utility {
 	return isHoliday(event.getStartDate()) || isHoliday(event.getEndDateTime());
     }
 
+    private boolean isWeekend(OnlineScheduleEvent event) {
+	return isWeekend(event.getStartDate()) || isWeekend(event.getEndDateTime());
+    }
+
     private boolean isHoliday(String date) {
 	return holidays.contains(date);
+    }
+
+    private boolean isWeekend(String date) {
+	return Dates.SORTABLE.isWeekend(date);
     }
 
     protected boolean isDublinSchedule(OnlineScheduleEvent event) {
@@ -181,7 +184,9 @@ public abstract class CreateOncallJsonSchedule extends Utility {
 	private int randomSort;
 	private int scheduleGap;
 	private boolean holiday;
+	private boolean weekend;
 	private int numberOfHolidays = 0;
+	private int numberOfWeekends = 0;
 //	private int shiftType;
 //	private int shifts = 0;
 	private OnlineScheduleEvent nextEvent;
@@ -196,6 +201,7 @@ public abstract class CreateOncallJsonSchedule extends Utility {
 	    String date = nextEvent.getStartDate();
 //	    shiftType = nextEvent.getShiftType();
 	    holiday = isHoliday(nextEvent);
+	    weekend = isWeekend(nextEvent);
 	    adjustForNewEntry();
 
 	    newScedule
@@ -229,12 +235,6 @@ public abstract class CreateOncallJsonSchedule extends Utility {
 		    .map(previousEvent -> previousEvent.getCommonHours(nextEvent))
 		    .collect(Collectors.summingInt(Integer::intValue));
 
-//		double shiftTypeCount = newScedule
-//			.stream()
-//			.filter(e -> e.getShiftType() == shiftType)
-//			.count();
-
-//		shifts = (int) (shiftTypeCount / engineerCount * COUNT_FACTOR);
 	    numberOfHours = (int) (historicalHoursInShift / engineerCount);
 
 	    if (holiday) {
@@ -242,9 +242,16 @@ public abstract class CreateOncallJsonSchedule extends Utility {
 			.stream()
 			.filter(e -> isHoliday(e))
 			.count();
-		System.out.println("holidayCount=" + (holidayCount));
 		numberOfHolidays = (int) (holidayCount / engineerCount * COUNT_FACTOR);
-		System.out.println("numberOfHolidays=" + (numberOfHolidays));
+	    }
+
+	    if (weekend) {
+		double weekendCount = newScedule
+			.stream()
+			.filter(e -> isWeekend(e))
+			.count();
+		numberOfWeekends = (int) (weekendCount / engineerCount * COUNT_FACTOR);
+
 	    }
 	}
 
@@ -253,22 +260,11 @@ public abstract class CreateOncallJsonSchedule extends Utility {
 		    .of(lastScheduledDate, historicalEvent.getStartDate())
 		    .max(Comparator.comparing(x -> x))
 		    .get();
-//	    String scheduleDate = historicalEvent.getStartDate();
-
-//	    lastScheduledDate = Optional
-//		    .ofNullable(lastScheduledDate)
-//		    .filter(lastDate -> lastDate.compareTo(scheduleDate) > 0)
-//		    .orElse(scheduleDate);
 
 	    numberOfHours += historicalEvent.getCommonHours(nextEvent);
+	    numberOfHolidays += isHoliday(historicalEvent) && holiday ? COUNT_FACTOR : 0;
+	    numberOfWeekends += isWeekend(historicalEvent) && weekend ? COUNT_FACTOR : 0;
 
-//	    if (shiftType == historicalEvent.getShiftType()) {
-//		shifts += COUNT_FACTOR;
-//	    }
-
-	    if (isHoliday(historicalEvent) && holiday) {
-		numberOfHolidays += COUNT_FACTOR;
-	    }
 	}
 
 	public String getUid() {
@@ -278,7 +274,8 @@ public abstract class CreateOncallJsonSchedule extends Utility {
 	@Override
 	public String toString() {
 	    return "OncallMetric [uid=" + uid + ", randomSort=" + randomSort + ", scheduleGap=" + scheduleGap
-		    + ", numberOfHolidays=" + numberOfHolidays + ", numberOfHours=" + numberOfHours + "]";
+		    + ", numberOfHolidays=" + numberOfHolidays + ", numberOfWeekends=" + numberOfWeekends
+		    + ", numberOfHours=" + numberOfHours + "]";
 	}
 
 	@Override
@@ -286,6 +283,7 @@ public abstract class CreateOncallJsonSchedule extends Utility {
 
 	    Stream<Supplier<Integer>> comparators = Stream.of(
 		    () -> numberOfHolidays - o.numberOfHolidays,
+		    () -> numberOfWeekends - o.numberOfWeekends,
 		    () -> numberOfHours - o.numberOfHours,
 		    () -> o.scheduleGap - scheduleGap,
 		    () -> o.randomSort - randomSort);

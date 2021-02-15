@@ -40,7 +40,6 @@ import com.scott_tigers.oncall.shared.EngineerFiles;
 import com.scott_tigers.oncall.shared.EngineerType;
 import com.scott_tigers.oncall.shared.Executor;
 import com.scott_tigers.oncall.shared.URL;
-import com.scott_tigers.oncall.test.Company;
 
 public class Utility {
 
@@ -255,25 +254,6 @@ public class Utility {
 
     private boolean isDigits(String line) {
 	return line.matches("[0-9]+");
-    }
-
-    protected List<String> getCompanyList(EngineerFiles companyFile) {
-	List<String> list = companyListMap.get(companyFile);
-
-	if (list != null) {
-	    return list;
-	}
-
-	list = companyFile
-		.readCSVToPojo(Company.class)
-		.stream()
-		.map(Company::getCompany)
-		.collect(Collectors.toList());
-
-	companyListMap.put(companyFile, list);
-
-	return list;
-
     }
 
     protected List<Engineer> getEngineeringDetails(List<Engineer> engineers) {

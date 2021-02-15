@@ -43,6 +43,9 @@ public class Engineer {
     private String trainingDate;
     private String type;
     private String uid;
+    private String cit;
+    private String firstCitDate;
+    private int shiftAllowance;
 
     private transient int shiftsCompleted;
     private transient DateStringContainer oooDates;
@@ -104,6 +107,14 @@ public class Engineer {
 	this.levelAdjust = levelAdjust;
     }
 
+    public int getShiftAllowance() {
+	return shiftAllowance;
+    }
+
+    public void setShiftAllowance(int shiftAllowance) {
+	this.shiftAllowance = shiftAllowance;
+    }
+
     @JsonIgnore
     public String getOoo() {
 	return ooo;
@@ -114,10 +125,7 @@ public class Engineer {
     }
 
     public boolean hasDateConflict(String date) {
-	Boolean dateConflict = dateConflictCache.evaluate(date, () -> {
-	    return outOfOffice(date) || beforeStartDate(date) || afterEndDate(date);
-	});
-	return dateConflict;
+	return dateConflictCache.evaluate(date, () -> outOfOffice(date) || beforeStartDate(date) || afterEndDate(date));
     }
 
     private boolean beforeStartDate(String date) {
@@ -238,6 +246,11 @@ public class Engineer {
 	this.startDate = startDate;
     }
 
+    @JsonIgnore
+    public String getSortableStartDate() {
+	return Dates.ONLINE_SCHEDULE.convertFormat(startDate, Dates.SORTABLE);
+    }
+
     public String getExpertise() {
 	return expertise;
     }
@@ -269,6 +282,31 @@ public class Engineer {
 
     public String getOncallStartDate() {
 	return oncallStartDate;
+    }
+
+    public String getCit() {
+	return cit;
+    }
+
+    public void setCit(String cit) {
+	this.cit = cit;
+    }
+
+    public String getFirstCitDate() {
+	return firstCitDate;
+    }
+
+    public void setFirstCitDate(String firstCitDate) {
+	this.firstCitDate = firstCitDate;
+    }
+
+    @JsonIgnore
+    public boolean isCurrentCit() {
+	return isCurrent() && isCit();
+    }
+
+    public boolean isCit() {
+	return !(cit == null || cit.isEmpty());
     }
 
     public void setOncallStartDate(String oncallStartDate) {
@@ -336,4 +374,5 @@ public class Engineer {
     public boolean isCurrent() {
 	return isBeforeEndDate() && isAfterStartDate();
     }
+
 }

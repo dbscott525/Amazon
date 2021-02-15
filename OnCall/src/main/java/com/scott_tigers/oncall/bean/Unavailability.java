@@ -5,6 +5,7 @@ import java.util.Objects;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.scott_tigers.oncall.shared.DateStream;
 import com.scott_tigers.oncall.shared.Dates;
@@ -96,6 +97,7 @@ public class Unavailability {
 	engineer.setOoo(dates.toString());
     }
 
+    @JsonIgnore
     private String getDate(int index, String type) {
 	try {
 	    String stringDate = (String) Unavailability.class.getMethod("get" + type + index).invoke(this);
@@ -114,6 +116,7 @@ public class Unavailability {
 		+ end2 + ", start3=" + start3 + ", end3=" + end3 + ", start4=" + start4 + ", end4=" + end4 + "]";
     }
 
+    @JsonIgnore
     public Stream<UnavailabilityDate> getUnvailabilityKeyStream() {
 	return IntStream
 		.rangeClosed(1, NUMBER_OF_DATE_RANGES)

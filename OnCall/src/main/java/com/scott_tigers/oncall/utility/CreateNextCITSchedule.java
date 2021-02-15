@@ -30,7 +30,7 @@ public class CreateNextCITSchedule extends Utility {
 		.endAfterWeeksFromNow(12)
 		.shifts(12)
 		.shiftSize(9)
-		.maximumShiftFrequency(4)
+		.maximumShiftFrequency(5)
 		.daysBetweenShifts(7)
 //		.iterations(10000)
 		.timeLimit(20)

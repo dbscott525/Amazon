@@ -51,9 +51,9 @@ public class OnCallSchedule extends Utility {
 	    }
 	});
 
+
 	return onCallSchedules;
     }
-
     private void processSummary(String line) {
 	getUIDStream(line)
 		.map(uid -> {
@@ -65,6 +65,7 @@ public class OnCallSchedule extends Utility {
 		})
 		.forEach(event -> onCallSchedules.add(event));
     }
+
 
     private Stream<String> getUIDStream(String line) {
 	return Pattern.compile(" [a-zA-Z]*?@ ")

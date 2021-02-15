@@ -193,4 +193,14 @@ public enum Dates {
 	return Dates.SORTABLE.getFormattedDelta(Dates.SORTABLE.getFormattedString(date.getTime()), -8);
     }
 
+    public boolean isWeekend(String date) {
+	switch (getDayOfWeek(date)) {
+	case Calendar.SATURDAY:
+	case Calendar.SUNDAY:
+	    return true;
+	default:
+	    return false;
+	}
+    }
+
 }

@@ -9,9 +9,13 @@ public class PrepareForNextCITSchedule extends Utility {
     @SuppressWarnings("unchecked")
     private void run() {
 	runCommands(
+
+		UpdateEngineersShiftsAdjustment.class,
 		CreateTicketClosureReport.class,
 		UpdateMasterListWithTicketsClosed.class,
-		UpdateUnavailabilityFromQuip.class);
+		UpdateUnavailabilityFromQuip.class
+
+	);
     }
 
 }

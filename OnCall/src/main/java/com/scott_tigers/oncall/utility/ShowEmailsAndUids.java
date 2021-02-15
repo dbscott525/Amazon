@@ -2,6 +2,7 @@ package com.scott_tigers.oncall.utility;
 
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.scott_tigers.oncall.bean.Engineer;
@@ -19,12 +20,20 @@ public class ShowEmailsAndUids extends Utility {
     private void run() {
 	list = EngineerFiles.MASTER_LIST
 		.readCSV();
-	Stream.of(EngineerType.values()).forEach(engineerType -> {
-	    System.out.println(engineerType + " count: " + getEngineerStream(engineerType).count());
+	Stream.of(EngineerType.values())
+		.forEach(engineerType -> {
+		    System.out.println(engineerType + " count: " + getEngineerStream(engineerType).count());
+		    System.out.println();
 
-	    printList("UIDs", Engineer::getUid, engineerType);
-	    printList("Emails", Engineer::getEmail, engineerType);
-	});
+		    printList("UIDs", Engineer::getUid, engineerType);
+		    printList("Emails", Engineer::getEmail, engineerType);
+		    System.out.println(engineerType + " Email String");
+		    System.out.println();
+		    String string = getSortedEgineerStream(Engineer::getEmail, engineerType)
+			    .collect(Collectors.joining(";"));
+		    System.out.println(string);
+		    System.out.println();
+		});
     }
 
     private void printList(String message, Function<Engineer, String> mapper, EngineerType engineerType) {
@@ -35,17 +44,20 @@ public class ShowEmailsAndUids extends Utility {
 	    EngineerType engineerrType) {
 	System.out.println(engineerrType.toString() + " " + message + ":");
 	System.out.println();
-	getEngineerStream(engineerrType)
-		.map(mapper)
-		.sorted()
+	getSortedEgineerStream(mapper, engineerrType)
 		.forEach(System.out::println);
 	System.out.println();
+    }
+
+    private Stream<String> getSortedEgineerStream(Function<Engineer, String> mapper, EngineerType engineerrType) {
+	return getEngineerStream(engineerrType)
+		.map(mapper)
+		.sorted();
     }
 
     private Stream<Engineer> getEngineerStream(EngineerType engineerrType) {
 	return list
 		.stream()
-		.filter(Engineer::isCurrent)
 		.filter(engineerrType::engineerIsType);
     }
 

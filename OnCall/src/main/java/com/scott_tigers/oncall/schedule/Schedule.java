@@ -180,8 +180,14 @@ public class Schedule {
 		.stream()
 		.map(Shift::getEngineers)
 		.flatMap(List<Engineer>::stream)
+		.filter(Objects::nonNull)
 		.filter(eng -> !eng.afterEndDate(startDate))
 		.collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+
+	scheduleCount
+		.entrySet()
+		.forEach(entry -> entry.setValue(entry.getValue() + entry.getKey().getShiftAllowance()));
+
 	return scheduleCount;
     }
 
