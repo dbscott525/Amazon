@@ -34,6 +34,10 @@ public abstract class PickNextLttrSim extends Utility {
 		.filter(webTicket -> !planTickets.contains(webTicket.getTicket()))
 		.findFirst()
 		.ifPresentOrElse(this::makeTicketCandidate, () -> driver.quit());
+	doPostSelectionWork();
+    }
+
+    protected void doPostSelectionWork() {
     }
 
     private void makeTicketCandidate(LTTRTicket ticket) {

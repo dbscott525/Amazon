@@ -29,7 +29,8 @@ public class CreateRootCauseToDoList extends Utility implements TTReader {
 	    "rds-jira.amazon.com/browse/aurora",
 	    "sim.amazon.com/aurora",
 	    "sim.amazon.com/aurora",
-	    "sim.amazon.com/issues/aurora"
+	    "sim.amazon.com/issues/aurora",
+	    "https://t.corp.amazon.com"
     };
 
     private static final List<String> ROOT_CAUSE_REVIEW_COLUMNS = Arrays.asList(

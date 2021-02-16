@@ -21,4 +21,5 @@ public class URL {
     public static final String LTTR_NOT_ACTIONABLE_SIMS = "https://quip-amazon.com/kxeLAihnTUvH/LTTR-Not-Actionable-SIMs";
     public static final String LTTR_NON_ACTIONABLE_SIMS = "https://quip-amazon.com/kxeLAihnTUvH/Aurora-MySQL-LTTR-Non-Actionable-SIMs";
     public static final String LTTR_PRIORITY = "https://rds-portal.corp.amazon.com/lttr/reports/prioritization?team=Aurora+MySQL+-+Engine#";
+    public static final String LTTR_AUTOMATION_CANDIDATES = "https://quip-amazon.com/8JezAagfeocJ/Top-SIM-Automation-Candidates";
 }
