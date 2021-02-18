@@ -39,7 +39,6 @@ import com.scott_tigers.oncall.shared.Dates;
 import com.scott_tigers.oncall.shared.EngineerFiles;
 import com.scott_tigers.oncall.shared.EngineerType;
 import com.scott_tigers.oncall.shared.Executor;
-import com.scott_tigers.oncall.shared.Json;
 import com.scott_tigers.oncall.shared.URL;
 
 public class Utility {
@@ -241,7 +240,6 @@ public class Utility {
     private List<Integer> getAssingedTicketIds() {
 	try {
 	    return readFromUrl(URL.CIT_TICKET_TRACKER, WIP.class)
-		    .peek(wip -> Json.print(wip))
 		    .map(WIP::getTicketURL)
 		    .map(url -> url.replaceAll(".*?(\\d).*?", "$1"))
 		    .filter(this::isDigits)
@@ -266,7 +264,6 @@ public class Utility {
     }
 
     protected Function<Engineer, Engineer> mapToEngineerDetails() {
-//	return eng -> getEngineer(eng.getUid());
 	return eng -> getEngineer(getEngineer(eng));
     }
 

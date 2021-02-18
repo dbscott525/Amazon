@@ -110,7 +110,7 @@ public abstract class CreateOncallJsonSchedule extends Utility {
 		.map(x -> x.getFormattedLine())
 		.forEach(System.out::println);
 
-	EngineerFiles.ONLINE_SCHEDULE.write(w -> w.json(newSchedule));
+	getType().getScheduleFile().write(w -> w.json(newSchedule));
     }
 
     protected Predicate<OnlineScheduleEvent> getEventFilter() {

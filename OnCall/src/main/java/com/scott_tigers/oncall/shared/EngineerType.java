@@ -45,6 +45,11 @@ public enum EngineerType {
 	    return true;
 	}
 
+	@Override
+	public EngineerFiles getScheduleFile() {
+	    return EngineerFiles.PRIMARY_ONCALL_SCHEDULE;
+	}
+
     },
     Secondary {
 	@Override
@@ -65,6 +70,11 @@ public enum EngineerType {
 	@Override
 	public Iterator<ScheduleType> getScheduleTypeIterator() {
 	    return new ScheduleTypeIterator(i -> i.add(TimeZone.PST, 24));
+	}
+
+	@Override
+	public EngineerFiles getScheduleFile() {
+	    return EngineerFiles.SECONDARY_ONCALL_SCHEDULE;
 	}
 
     },
@@ -97,6 +107,11 @@ public enum EngineerType {
 	@Override
 	public Iterator<ScheduleType> getScheduleTypeIterator() {
 	    return new ScheduleTypeIterator(i -> i.add(TimeZone.PST, 24));
+	}
+
+	@Override
+	public EngineerFiles getScheduleFile() {
+	    return EngineerFiles.TECH_ESC_ONCALL_SCHEDULE;
 	}
     },
     DublinPrimary {
@@ -136,6 +151,12 @@ public enum EngineerType {
 	@Override
 	public boolean useForDailyBulletin() {
 	    return false;
+	}
+
+	@Override
+	public EngineerFiles getScheduleFile() {
+	    // TODO Auto-generated method stub
+	    return null;
 	}
     };
 
@@ -200,4 +221,6 @@ public enum EngineerType {
     public boolean useForDailyBulletin() {
 	return true;
     }
+
+    public abstract EngineerFiles getScheduleFile();
 }

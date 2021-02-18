@@ -1,5 +1,4 @@
 package com.scott_tigers.oncall.utility;
-
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.function.Function;
@@ -11,6 +10,7 @@ import com.scott_tigers.oncall.shared.Dates;
 import com.scott_tigers.oncall.shared.EngineerFiles;
 import com.scott_tigers.oncall.shared.Properties;
 import com.scott_tigers.oncall.shared.URL;
+import com.scott_tigers.oncall.utility.Utility;
 
 public class CreateTicketEscalationMetrics extends Utility {
 
