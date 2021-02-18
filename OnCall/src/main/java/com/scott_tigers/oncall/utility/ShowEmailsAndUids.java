@@ -10,7 +10,6 @@ import com.scott_tigers.oncall.shared.EngineerFiles;
 import com.scott_tigers.oncall.shared.EngineerType;
 
 public class ShowEmailsAndUids extends Utility {
-    // TEST CHANGE
 
     public static void main(String[] args) {
 	new ShowEmailsAndUids().run();
