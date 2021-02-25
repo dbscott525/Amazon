@@ -133,7 +133,7 @@ public class OnlineScheduleEvent {
     }
 
     public String getUid() {
-	return oncallMember.get(0);
+	return (oncallMember != null && oncallMember.size() > 0) ? oncallMember.get(0) : "";
     }
 
     public void setUid(String uid) {
@@ -455,6 +455,14 @@ public class OnlineScheduleEvent {
 
     public void setScheduleGap(int scheduleGap) {
 	this.scheduleGap = scheduleGap;
+    }
+
+    public int getScheduleGap() {
+	return scheduleGap;
+    }
+
+    public void previousEvent(OnlineScheduleEvent previousEvent) {
+	scheduleGap = Dates.SORTABLE.getDifference(previousEvent.startDate, startDate);
     }
 
 }

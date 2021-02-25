@@ -10,9 +10,11 @@ public class EngineerMetric {
     private transient int tickets = 0;
     private String name;
     private Double ticketsPerWeek;
+    private int weeksToSkip;
 
     public EngineerMetric(Engineer eng) {
 	name = eng.getFullName();
+	weeksToSkip = eng.getDynamicActionWeeks();
     }
 
     public EngineerMetric(String name, double ticketsPerWeek) {
@@ -21,13 +23,14 @@ public class EngineerMetric {
     }
 
     public void addWeek() {
-	weeks++;
+	weeks += weeksToSkip-- > 0 ? 0 : 1;
+//	weeks++;
 	updateTicketsPerWeek();
     }
 
     private void updateTicketsPerWeek() {
-	ticketsPerWeek = (double) tickets / weeks;
-
+	ticketsPerWeek = weeks == 0 ? 0 : (double) tickets / weeks;
+//	ticketsPerWeek = (double) tickets / weeks;
     }
 
     @JsonIgnore

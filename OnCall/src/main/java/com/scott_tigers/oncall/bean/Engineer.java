@@ -46,6 +46,7 @@ public class Engineer {
     private String cit;
     private String firstCitDate;
     private int shiftAllowance;
+    private int dynamicActionWeeks;
 
     private transient int shiftsCompleted;
     private transient DateStringContainer oooDates;
@@ -113,6 +114,14 @@ public class Engineer {
 
     public void setShiftAllowance(int shiftAllowance) {
 	this.shiftAllowance = shiftAllowance;
+    }
+
+    public int getDynamicActionWeeks() {
+	return dynamicActionWeeks;
+    }
+
+    public void setDynamicActionWeeks(int dynamicActionWeeks) {
+	this.dynamicActionWeeks = dynamicActionWeeks;
     }
 
     @JsonIgnore

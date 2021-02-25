@@ -1,6 +1,7 @@
 package com.scott_tigers.oncall.utility;
 
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import com.scott_tigers.oncall.bean.TT;
 import com.scott_tigers.oncall.bean.TTReader;
@@ -56,6 +57,11 @@ public class CustomerIssueReader extends Utility implements TTReader {
     public void printReport() {
 	System.out.println("Auto Resolve: " + (statusExcludedFromQueue));
 	System.out.println("Too Early: " + (excludedByAge));
+    }
+
+    @Override
+    public Stream<TT> getTicketStream() throws Exception {
+	return getTicketStreamFromUrl(getUrl());
     }
 
 }

@@ -87,7 +87,9 @@ public class CreateCustomerIssueReadyQueue extends Utility {
 	wip = 0;
 	AtomicInteger candidateTickets = new AtomicInteger();
 
-	List<TT> tickets = getTicketStreamFromUrl(reader.getUrl())
+//	Stream<TT> ticketSteam = getTicketStreamFromUrl(reader.getUrl());
+	Stream<TT> ticketSteam = reader.getTicketStream();
+	List<TT> tickets = ticketSteam
 		.peek(x -> candidateTickets.incrementAndGet())
 		.filter(tt -> reader.getFilter().test(tt))
 		.filter(this::notAssigned)

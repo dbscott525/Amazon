@@ -16,8 +16,10 @@ import com.scott_tigers.oncall.schedule.Shift;
 import com.scott_tigers.oncall.shared.Constants;
 import com.scott_tigers.oncall.shared.Dates;
 import com.scott_tigers.oncall.shared.EngineerFiles;
+import com.scott_tigers.oncall.shared.LargeVolumeTicketReader;
 import com.scott_tigers.oncall.shared.Properties;
 import com.scott_tigers.oncall.shared.Status;
+import com.scott_tigers.oncall.shared.URL;
 
 public class CreateRootCauseToDoList extends Utility implements TTReader {
 
@@ -111,7 +113,6 @@ public class CreateRootCauseToDoList extends Utility implements TTReader {
     @Override
     public Predicate<TT> getFilter() {
 	return tt -> needsWork(tt);
-//	return tt -> unresolved(tt) && !tt.getDescription().contains("Cross Issue Event - CIE");
     }
 
     @Override
@@ -122,6 +123,20 @@ public class CreateRootCauseToDoList extends Utility implements TTReader {
 
     @Override
     public void printReport() {
+    }
+
+    @Override
+    public Stream<TT> getTicketStream() throws Exception {
+	String startDate = Dates.SORTABLE.getFormattedDelta(Dates.SORTABLE.getFormattedDate(),
+		-Constants.ENGINE_TICKET_TRAILING_DAYS);
+	return LargeVolumeTicketReader
+		.getStream(s -> s
+
+			.urlTemplate(URL.ENGINE_TICKET_SEARCH_TEMPLATE)
+			.startDate(startDate)
+			.daysPerSearch(40)
+
+		);
     }
 
 }

@@ -24,7 +24,7 @@ public class CreatePrimaryOncallSchedule extends CreateOncallJsonSchedule {
 
     @Override
     protected String startDate() {
-	return "2021-02-22";
+	return "2021-03-01";
     }
 
     @Override

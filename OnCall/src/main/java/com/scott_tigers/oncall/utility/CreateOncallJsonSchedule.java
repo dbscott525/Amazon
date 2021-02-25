@@ -17,10 +17,14 @@ import com.scott_tigers.oncall.bean.Unavailability;
 import com.scott_tigers.oncall.shared.Dates;
 import com.scott_tigers.oncall.shared.EngineerFiles;
 import com.scott_tigers.oncall.shared.EngineerType;
+import com.scott_tigers.oncall.shared.Json;
+import com.scott_tigers.oncall.shared.OnCallContainer;
 import com.scott_tigers.oncall.shared.UnavailabilityDate;
 
 @JsonIgnoreProperties
 public abstract class CreateOncallJsonSchedule extends Utility {
+
+    private static final int ONCALL_MINIMUM_SCHEDULE_GAP = 5;
 
     private static final boolean USE_TEST_DATA = false;
 
@@ -28,16 +32,17 @@ public abstract class CreateOncallJsonSchedule extends Utility {
     private Random random;
     private List<OnlineScheduleEvent> newScedule;
     private List<Engineer> engineers;
-
     private List<UnavailabilityDate> unavailability;
 
     protected void run() throws Exception {
 
+	EngineerType engineerType = getType();
 	engineers = getRosterFile()
 		.readCSVToPojo(Engineer.class)
 		.stream()
 		.filter(Engineer::isCurrent)
-		.filter(getType()::engineerIsType)
+		.peek(eng -> Json.print(eng))
+		.filter(engineerType::engineerIsType)
 		.collect(Collectors.toList());
 
 	random = new Random();
@@ -52,21 +57,12 @@ public abstract class CreateOncallJsonSchedule extends Utility {
 	unavailability = EngineerFiles.UNAVAILABILITY
 		.readCSVToPojo(Unavailability.class)
 		.stream()
-		.flatMap(x -> x.getUnvailabilityKeyStream())
+		.flatMap(Unavailability::getUnvailabilityKeyStream)
 		.collect(Collectors.toList());
 
 	OnCallContainer historicalSchedule;
 
-	if (USE_TEST_DATA) {
-	    historicalSchedule = EngineerFiles.TEST_HISTORICAL_SCHEDULE.readJson(OnCallContainer.class);
-
-	} else {
-	    historicalSchedule = new OnCallContainer(getType()
-		    .getHistoricalOnCallScheduleStream()
-		    .collect(Collectors.toList()));
-
-	    EngineerFiles.TEST_HISTORICAL_SCHEDULE.write(w -> w.json(historicalSchedule));
-	}
+	historicalSchedule = readOnCallSchedule(engineerType, USE_TEST_DATA);
 
 	newScedule = historicalSchedule
 		.getSchedule()
@@ -74,7 +70,7 @@ public abstract class CreateOncallJsonSchedule extends Utility {
 		.filter(x -> x.before(startDate()))
 		.collect(Collectors.toList());
 
-	getType()
+	engineerType
 		.getStream(s -> s
 			.startDate(startDate())
 			.days(getNumberOfDays()))
@@ -83,14 +79,14 @@ public abstract class CreateOncallJsonSchedule extends Utility {
 
 		    List<OncallMetric> metrics = engineers
 			    .stream()
-			    .filter(eng -> !getType().useTimeZones() || event.inTimeZone(eng))
+			    .filter(eng -> !engineerType.useTimeZones() || event.inTimeZone(eng))
 			    .filter(eng -> event.available(eng, unavailability))
-			    .map(te -> new OncallMetric(te, event))
+			    .map(eng -> new OncallMetric(eng, event))
 			    .collect(Collectors.toList());
 
 		    OncallMetric metric = metrics
 			    .stream()
-			    .filter(x -> x.scheduleGap > 3)
+			    .filter(x -> x.scheduleGap >= ONCALL_MINIMUM_SCHEDULE_GAP)
 			    .min(Comparator.comparing(x -> x))
 			    .get();
 
@@ -110,7 +106,17 @@ public abstract class CreateOncallJsonSchedule extends Utility {
 		.map(x -> x.getFormattedLine())
 		.forEach(System.out::println);
 
-	getType().getScheduleFile().write(w -> w.json(newSchedule));
+	newSchedule
+		.stream()
+		.collect(Collectors.groupingBy(x -> x.getUid()))
+		.entrySet()
+		.stream()
+		.forEach(entry -> {
+		    System.out.println(entry.getKey());
+		    entry.getValue().stream().map(x -> "  " + x.getFormattedLine()).forEach(System.out::println);
+		});
+
+	engineerType.getScheduleFile().write(w -> w.json(newSchedule));
     }
 
     protected Predicate<OnlineScheduleEvent> getEventFilter() {
@@ -130,7 +136,7 @@ public abstract class CreateOncallJsonSchedule extends Utility {
     }
 
     private boolean isWeekend(OnlineScheduleEvent event) {
-	return isWeekend(event.getStartDate()) || isWeekend(event.getEndDateTime());
+	return isWeekend(event.getStartDate()) || isWeekend(event.getEndDate());
     }
 
     private boolean isHoliday(String date) {
@@ -153,18 +159,18 @@ public abstract class CreateOncallJsonSchedule extends Utility {
 	}
     }
 
-    private class OnCallContainer {
-	List<OnlineScheduleEvent> schedule;
-
-	public OnCallContainer(List<OnlineScheduleEvent> schedule) {
-	    this.schedule = schedule;
-	}
-
-	public List<OnlineScheduleEvent> getSchedule() {
-	    return schedule;
-	}
-
-    }
+//    class OnCallContainer {
+//	List<OnlineScheduleEvent> schedule;
+//
+//	public OnCallContainer(List<OnlineScheduleEvent> schedule) {
+//	    this.schedule = schedule;
+//	}
+//
+//	public List<OnlineScheduleEvent> getSchedule() {
+//	    return schedule;
+//	}
+//
+//    }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     private static class Holiday {
@@ -187,8 +193,6 @@ public abstract class CreateOncallJsonSchedule extends Utility {
 	private boolean weekend;
 	private int numberOfHolidays = 0;
 	private int numberOfWeekends = 0;
-//	private int shiftType;
-//	private int shifts = 0;
 	private OnlineScheduleEvent nextEvent;
 	private int numberOfHours = 0;
 	private Engineer engineer;
@@ -199,7 +203,6 @@ public abstract class CreateOncallJsonSchedule extends Utility {
 	    this.randomSort = random.nextInt(100);
 	    this.uid = engineer.getUid();
 	    String date = nextEvent.getStartDate();
-//	    shiftType = nextEvent.getShiftType();
 	    holiday = isHoliday(nextEvent);
 	    weekend = isWeekend(nextEvent);
 	    adjustForNewEntry();
@@ -221,38 +224,29 @@ public abstract class CreateOncallJsonSchedule extends Utility {
 		return;
 	    }
 
-	    int engineerCount = (int) engineers
+	    List<Engineer> timeZoneEngineers = engineers
 		    .stream()
-		    .map(Engineer::getUid)
-		    .filter(uid -> !engineer.getUid().equals(uid))
-		    .distinct()
-		    .count();
+		    .filter(eng -> eng.getTimeZone().equals(engineer.getTimeZone()))
+		    .filter(eng -> !eng.equals(engineer))
+		    .collect(Collectors.toList());
 
-	    int historicalHoursInShift = newScedule
+	    List<String> timeZoneUids = timeZoneEngineers.stream().map(x -> x.getUid()).collect(Collectors.toList());
+
+	    HistoricalCounter historicalCount = new HistoricalCounter();
+
+	    newScedule
 		    .stream()
-		    .filter(previousEvent -> !previousEvent.getUid().equals(uid))
 		    .filter(previousEvent -> previousEvent.before(engineer.getOncallStartDate()))
-		    .map(previousEvent -> previousEvent.getCommonHours(nextEvent))
-		    .collect(Collectors.summingInt(Integer::intValue));
+		    .filter(previousEvent -> timeZoneUids.contains(previousEvent.getUid()))
+		    .forEach(previousEvent -> {
+			historicalCount.addHours(previousEvent.getCommonHours(nextEvent));
+			historicalCount.addWeekend(weekend && isWeekend(previousEvent));
+			historicalCount.addHoliday(holiday && isHoliday(previousEvent));
+		    });
 
-	    numberOfHours = (int) (historicalHoursInShift / engineerCount);
-
-	    if (holiday) {
-		double holidayCount = newScedule
-			.stream()
-			.filter(e -> isHoliday(e))
-			.count();
-		numberOfHolidays = (int) (holidayCount / engineerCount * COUNT_FACTOR);
-	    }
-
-	    if (weekend) {
-		double weekendCount = newScedule
-			.stream()
-			.filter(e -> isWeekend(e))
-			.count();
-		numberOfWeekends = (int) (weekendCount / engineerCount * COUNT_FACTOR);
-
-	    }
+	    numberOfHours = (int) (historicalCount.getHours() / timeZoneUids.size());
+	    numberOfHolidays = (int) (historicalCount.getHolidays() / timeZoneUids.size() * COUNT_FACTOR);
+	    numberOfWeekends = (int) (historicalCount.getWeekends() / timeZoneUids.size() * COUNT_FACTOR);
 	}
 
 	private void processEvent(OnlineScheduleEvent historicalEvent) {
@@ -273,9 +267,8 @@ public abstract class CreateOncallJsonSchedule extends Utility {
 
 	@Override
 	public String toString() {
-	    return "OncallMetric [uid=" + uid + ", randomSort=" + randomSort + ", scheduleGap=" + scheduleGap
-		    + ", numberOfHolidays=" + numberOfHolidays + ", numberOfWeekends=" + numberOfWeekends
-		    + ", numberOfHours=" + numberOfHours + "]";
+	    return String.format("uid:%10s holidays:%2d weekends:%2d hours:%2d gap:%3d random:%2d", uid,
+		    numberOfHolidays, numberOfWeekends, numberOfHours, scheduleGap, randomSort);
 	}
 
 	@Override
@@ -295,5 +288,40 @@ public abstract class CreateOncallJsonSchedule extends Utility {
 		    .orElse(0);
 	}
 
+    }
+
+    private class HistoricalCounter {
+	int hours = 0;
+	int holidays = 0;
+	int weekends = 0;
+
+	public void addHours(int hours) {
+	    this.hours += hours;
+	}
+
+	public void addHoliday(boolean holiday) {
+	    holidays += holiday ? 1 : 0;
+	}
+
+	public void addWeekend(boolean weekend) {
+	    weekends += weekend ? 1 : 0;
+	}
+
+	public int getHours() {
+	    return hours;
+	}
+
+	public int getHolidays() {
+	    return holidays;
+	}
+
+	public int getWeekends() {
+	    return weekends;
+	}
+
+	@Override
+	public String toString() {
+	    return "HistoricalCounter [hours=" + hours + ", holidays=" + holidays + ", weekends=" + weekends + "]";
+	}
     }
 }

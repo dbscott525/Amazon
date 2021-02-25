@@ -2,13 +2,14 @@ package com.scott_tigers.oncall.utility;
 
 import java.util.Comparator;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import com.scott_tigers.oncall.bean.TT;
 import com.scott_tigers.oncall.bean.TTReader;
 import com.scott_tigers.oncall.shared.Dates;
 import com.scott_tigers.oncall.shared.EngineerFiles;
 
-public class RootCauseReader implements TTReader {
+public class RootCauseReader extends Utility implements TTReader {
 
     @Override
     public String getUrl() {
@@ -47,6 +48,11 @@ public class RootCauseReader implements TTReader {
     public void printReport() {
 	// TODO Auto-generated method stub
 
+    }
+
+    @Override
+    public Stream<TT> getTicketStream() throws Exception {
+	return getTicketStreamFromUrl(getUrl());
     }
 
 }

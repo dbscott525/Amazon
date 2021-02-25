@@ -116,6 +116,10 @@ public class CreateAndSendCTIRedirectEmails extends Utility {
     }
 
     private boolean isRedirect(TT tt) {
+	if (tt.getRootCauseDetails() == null) {
+	    return false;
+	}
+
 	return redirects.stream()
 		.anyMatch(rd -> tt.getRootCauseDetails().toLowerCase().contains(rd.getSim().toLowerCase()));
     }

@@ -65,8 +65,8 @@ public enum EngineerFiles {
     DSU_TEMPLATE                                ("DSU Template", Constants.XML_EXTENSION),
     EMAILS                                      ("Emails"),
     ENGINE_TICKET_COUNTS                        ("Engine Ticket Counts"),
-    ENGINE_TICKET_DAILY_REVIEW                  ("Engine Ticket Daily Review"), 
-    ENGINEER_ADDS                               ("Engineers to be Added"),
+    ENGINE_TICKET_DAILY_REVIEW                  ("Engine Ticket Daily Review"),
+    ENGINEER_ADDS                               ("Engineers to be Added"), 
     ENGINEERS_AND_SHIFTS                        ("Engineers and Shifts"),
     ESCALATED_TICKETS                           ("Escalated Tickets"),
     ESCALATION_CHOOSER                          ("Escalation Chooser"),
@@ -85,8 +85,8 @@ public enum EngineerFiles {
     LTTR_PLAN_TICKETS                           ("LTTR Plan Tickets"),
     LTTR_PRIORITIZED_TICKETS                    ("LTTR Prioritized Tickets"),
     LTTR_WEEK_DELTA_REPORT                      ("LTTR Week Delta Report"),
-    LTTR_WEEKS                                  ("LTTR Weeks", Constants.JSON_EXTENSION),    
-    MASTER_LIST                                 ("Engineer Master List"),
+    LTTR_WEEKS                                  ("LTTR Weeks", Constants.JSON_EXTENSION),
+    MASTER_LIST                                 ("Engineer Master List"),    
     MODULE_LABEL_TAXONOMY	                ("Module Label Taxonomy"),
     MODULE_LABEL_TAXONOMY_RAW_DATA              ("Module Label Taxonomy Raw Data"),
     NEW_LEVEL_ENGINEERS                         ("New Level Engineers"),
@@ -106,6 +106,7 @@ public enum EngineerFiles {
     SDMS                                        ("SDMs"),
     SECONDARY_ONCALL_SCHEDULE                   ("Secondary Oncall Schedule" ,Constants.JSON_EXTENSION),
     SIM_AUTOMATION_PLAN                         ("SIM Automation Plan"),
+    SIM_BUG_INQUIRY_DATA                        ("SIM Bug Inquiry Data"),
     TECH_ESC                                    ("Tech Esc"),
     TECH_ESC_ONCALL_SCHEDULE                    ("Tech Esc Oncall Schedule" ,Constants.JSON_EXTENSION),
     TECH_ESC_ONLINE_SCHEDULE                    ("Tech Esc Online Schedule", Constants.JSON_EXTENSION),
@@ -145,7 +146,7 @@ public enum EngineerFiles {
 	    put(Constants.CSV_EXTENSION, Constants.EXCEL_LOCATION);
 	    put(Constants.XLSX_EXTENSION, Constants.EXCEL_LOCATION);
 	    put(Constants.PPTX_EXTENSION, Constants.WINDOWS_PROGRAM_FILES_FOLDER + "POWERPNT.EXE");
-	    put(Constants.JSON_EXTENSION, "C:\\Users\\bruscob\\eclipse\\jee-2020-062\\eclipse\\eclipse.exe");
+	    put(Constants.JSON_EXTENSION, "C:\\Users\\bruscob\\eclipse\\jee-2020-12\\eclipse\\eclipse.exe");
 	}
     };
 

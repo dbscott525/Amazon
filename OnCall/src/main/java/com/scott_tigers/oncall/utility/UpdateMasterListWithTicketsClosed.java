@@ -34,8 +34,7 @@ public class UpdateMasterListWithTicketsClosed extends Utility implements Comman
 	eng.setLevel(Optional
 		.ofNullable(metricMap.get(eng.getUid()))
 		.map(EngineerMetric::getTicketsPerWeek)
-		.orElse(0.0)
-		+ eng.getLevelAdjust());
+		.orElse(0.0));
     }
 
 }

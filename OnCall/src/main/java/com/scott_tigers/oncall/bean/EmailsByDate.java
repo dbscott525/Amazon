@@ -20,7 +20,7 @@ public class EmailsByDate {
     }
 
     public EmailsByDate(Entry<String, List<OnlineScheduleEvent>> entry) {
-	date = entry.getKey();
+	date = Dates.SORTABLE.getFormattedDelta(entry.getKey(), -1);
 
 	emails = entry
 		.getValue()

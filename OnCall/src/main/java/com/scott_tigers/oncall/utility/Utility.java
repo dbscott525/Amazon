@@ -8,7 +8,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -20,7 +19,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import com.scott_tigers.oncall.bean.Email;
@@ -39,6 +37,8 @@ import com.scott_tigers.oncall.shared.Dates;
 import com.scott_tigers.oncall.shared.EngineerFiles;
 import com.scott_tigers.oncall.shared.EngineerType;
 import com.scott_tigers.oncall.shared.Executor;
+import com.scott_tigers.oncall.shared.LargeVolumeTicketReader;
+import com.scott_tigers.oncall.shared.OnCallContainer;
 import com.scott_tigers.oncall.shared.URL;
 
 public class Utility {
@@ -46,7 +46,7 @@ public class Utility {
     protected List<Engineer> masterList;
     private Map<String, Engineer> uidToEngMap;
     private List<Integer> assignedTicketIds;
-    private Map<EngineerFiles, List<String>> companyListMap = new HashMap<>();
+    private static Map<String, String> urlMap = new HashMap<>();
     private Map<EngineerFiles, List<Engineer>> fileTypeToListMap = new HashMap<>();
     private Map<String, Double> uidToLevelMap = null;
     protected String templateDoc;
@@ -84,10 +84,10 @@ public class Utility {
 	};
     }
 
-    protected void writeEmailsByDate(List<OnlineScheduleEvent> emailList, EngineerFiles fileType) {
-	List<EmailsByDate> emailLines = emailList
+    protected void writeEmailsByDate(List<OnlineScheduleEvent> onCallScheduleEvents, EngineerFiles fileType) {
+	List<EmailsByDate> emailLines = onCallScheduleEvents
 		.stream()
-		.collect(Collectors.groupingBy(t -> t.getStartDate()))
+		.collect(Collectors.groupingBy(OnlineScheduleEvent::getStartDate))
 		.entrySet()
 		.stream()
 		.map(EmailsByDate::new)
@@ -101,16 +101,8 @@ public class Utility {
 	return EngineerFiles.ON_CALL_SCHEDULE
 		.readCSVToPojo(OnlineScheduleEvent.class)
 		.stream()
-//		.map(OnlineScheduleEvent::canonicalDate)
 		.collect(Collectors.toList());
     }
-
-//    protected List<OnlineScheduleEvent> getOnCallScheduleNew() {
-//	return EngineerFiles.ON_CALL_SCHEDULE
-//		.readCSVToPojo(OnlineScheduleEvent.class)
-//		.stream()
-//		.collect(Collectors.toList());
-//    }
 
     protected Engineer getEngineer(String uid) {
 	return Optional
@@ -173,7 +165,18 @@ public class Utility {
     }
 
     protected String launchUrlAndWaitForDownload(String url) {
+	return Optional
+		.ofNullable(urlMap.get(url))
+		.orElseGet(() -> {
+		    String downLoadFileName = launchURLAndWait(url);
+		    urlMap.put(url, downLoadFileName);
+		    return downLoadFileName;
+		});
 
+//	return launchURLAndWait(url);
+    }
+
+    private String launchURLAndWait(String url) {
 	try {
 	    File newestFile = getNewestFile();
 	    File downloadedFile = newestFile;
@@ -181,7 +184,6 @@ public class Utility {
 	    launchUrl(url);
 	    while (downloadedFile.compareTo(newestFile) == 0) {
 		downloadedFile = getNewestFile();
-//		System.out.println("downloadedFile=" + (downloadedFile));
 		TimeUnit.SECONDS.sleep(3);
 	    }
 
@@ -213,15 +215,13 @@ public class Utility {
 
     private Stream<TT> getTicketStream(String ttFileName) throws IOException {
 	System.out.println("ttFileName=" + (ttFileName));
-	Class<TT> pojoClass = TT.class;
-
 	List<String> lines = Files.readAllLines(Paths.get(ttFileName), Charset.forName("ISO-8859-1"));
 	lines.remove(0);
 
 	EngineerFiles.TT_DOWNLOAD.writeLines(lines);
 
 	return EngineerFiles.TT_DOWNLOAD
-		.readCSVToPojo(pojoClass)
+		.readCSVToPojo(TT.class)
 		.stream();
     }
 
@@ -305,38 +305,10 @@ public class Utility {
 	scheduleRow.setEngineers(scheduleRow
 		.getEngineers()
 		.stream()
-//		.map(this::getLevel)
 		.map(this::getEngineer)
 		.sorted(Comparator.comparing(Engineer::getLevel).reversed())
 		.collect(Collectors.toList()));
 	return scheduleRow;
-    }
-
-    protected void makeReplacement(String searchString, String replacement) {
-	String search = Optional.ofNullable(Constants.TEMPLATE_REPLACEMENTS.get(searchString)).orElse(searchString);
-	templateDoc = templateDoc.replace(search, replacement);
-    }
-
-    protected void replaceEngineers() {
-	replaceEngineers(getShiftForThisWeek());
-    }
-
-    protected void replaceEngineers(Optional<Shift> shiftOfWeek) {
-	shiftOfWeek.ifPresent(shift -> {
-//	    List<Engineer> engineers = getEngineeringDetails(shift.getEngineers());
-	    List<Engineer> engineers = shift.getEngineers();
-	    List<Engineer> orderedList = new ArrayList<Engineer>(engineers);
-	    Collections.shuffle(engineers);
-	    IntStream.range(0, engineers.size())
-		    .forEach(index -> {
-			makeReplacement(engineers, index, "CIT");
-			makeReplacement(orderedList, index, "CITO");
-		    });
-	});
-    }
-
-    void makeReplacement(List<Engineer> engineers, int index, String prefix) {
-	makeReplacement(prefix + index, engineers.get(index).getFullName());
     }
 
     protected List<EngineerMetric> getTicketClosedMetrics() {
@@ -375,11 +347,15 @@ public class Utility {
 		.map(this::getEngMetric)
 		.forEach(EngineerMetric::addWeek);
 
-	getTicketStreamFromUrl(URL.CIT_RESOLVED_TICKETS)
-		.filter(tt -> tt.include())
+	LargeVolumeTicketReader.getStream(r -> r
+		.urlTemplate(URL.CUSTOMER_ISSUE_CLOSED_TICKETS_TEMPLATE)
+		.daysPerSearch(60)
+		.startDate(Constants.CIT_START_DATE))
+		.filter(TT::include)
 		.map(this::getMetric)
 		.filter(Objects::nonNull)
 		.forEach(EngineerMetric::addTicket);
+
     }
 
     private EngineerMetric getMetric(TT tt) {
@@ -515,11 +491,16 @@ public class Utility {
 	return readFromUrl(URL.LTTR_CANDIDATES, LTTRTicket.class);
     }
 
+    @SuppressWarnings("unchecked")
     protected void openLTTRDocuments() {
+	runCommands(
+		LaunchAMSLTTRGraph.class);
+
 	launchUrl(URL.LTTR_NON_ACTIONABLE_SIMS);
 	launchUrl(URL.LTTR_CANDIDATES);
 	launchUrl(URL.LTTR_PLAN);
 	launchUrl(URL.LTTR_TICKETS_LAST_WEEK_DELTA_REPORT);
+
     }
 
     protected List<String> getOnCallUIDs(EngineerType onCallType) {
@@ -532,14 +513,30 @@ public class Utility {
     }
 
     protected Stream<Engineer> getPrimaryStream() {
-	Predicate<Engineer> filter = eng -> EngineerType.Primary.engineerIsType(eng)
-//		|| "DublinPrimary".equals(eng.getType())
-	;
 	return EngineerFiles.MASTER_LIST
 		.readCSV()
 		.stream()
 		.filter(Engineer::isCurrent)
-		.filter(filter);
+		.filter(EngineerType.Primary::engineerIsType);
+    }
+
+    protected OnCallContainer readOnCallSchedule(EngineerType engineerType, boolean useSavedSchedule) {
+	OnCallContainer historicalSchedule;
+	if (useSavedSchedule) {
+	    historicalSchedule = EngineerFiles.TEST_HISTORICAL_SCHEDULE.readJson(OnCallContainer.class);
+	    System.out.println("historicalSchedule.getSchedule().size()=" + (historicalSchedule.getSchedule().size()));
+	} else {
+	    List<OnlineScheduleEvent> scheduleFromOnline = engineerType
+		    .getHistoricalOnCallScheduleStream()
+		    .collect(Collectors.toList());
+	    System.out.println("scheduleFromOnline.size()=" + (scheduleFromOnline.size()));
+	    System.out.println("scheduleFromOnline.size()=" + (scheduleFromOnline.size()));
+	    historicalSchedule = new OnCallContainer(scheduleFromOnline);
+	    System.out.println("historicalSchedule.getSchedule().size()=" + (historicalSchedule.getSchedule().size()));
+
+	    EngineerFiles.TEST_HISTORICAL_SCHEDULE.write(w -> w.json(historicalSchedule));
+	}
+	return historicalSchedule;
     }
 
 }

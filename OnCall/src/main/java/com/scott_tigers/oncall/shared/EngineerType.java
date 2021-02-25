@@ -99,10 +99,10 @@ public enum EngineerType {
 	    return "https://oncall.corp.amazon.com/#/view/aurora-tech-escalation/schedule";
 	}
 
-	@Override
-	public int getAdjustedTime(int time) {
-	    return getStartHour();
-	}
+//	@Override
+//	public int getAdjustedTime(int time) {
+//	    return getStartHour();
+//	}
 
 	@Override
 	public Iterator<ScheduleType> getScheduleTypeIterator() {
@@ -155,7 +155,6 @@ public enum EngineerType {
 
 	@Override
 	public EngineerFiles getScheduleFile() {
-	    // TODO Auto-generated method stub
 	    return null;
 	}
     };

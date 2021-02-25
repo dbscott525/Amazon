@@ -1,5 +1,6 @@
 package com.scott_tigers.oncall.utility;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 import com.scott_tigers.oncall.bean.OnlineScheduleEvent;
@@ -12,12 +13,12 @@ public class CreateDailyOnCallReminderEmails extends Utility implements Command 
     }
 
     public void run() {
+	List<OnlineScheduleEvent> schedule = getOnCallSchedule()
+		.stream()
+		.filter(OnlineScheduleEvent::afterToday)
+		.collect(Collectors.toList());
 	writeEmailsByDate(
-		getOnCallSchedule()
-			.stream()
-			.filter(OnlineScheduleEvent::afterToday)
-			.filter(x -> !x.getUid().contains("SUMMARY:"))
-			.collect(Collectors.toList()),
+		schedule,
 		EngineerFiles.DAILY_ON_CALL_REMINDER_EMAILS);
     }
 }
