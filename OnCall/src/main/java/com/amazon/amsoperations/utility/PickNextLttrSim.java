@@ -1,0 +1,120 @@
+package com.amazon.amsoperations.utility;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+
+import com.amazon.amsoperations.bean.LTTRTicket;
+import com.amazon.amsoperations.shared.EngineerFiles;
+import com.amazon.amsoperations.shared.Json;
+import com.amazon.amsoperations.shared.Lambda;
+import com.amazon.amsoperations.shared.Properties;
+import com.amazon.amsoperations.shared.Util;
+
+public abstract class PickNextLttrSim extends Utility {
+
+    private WebDriver driver;
+
+    protected void run() throws InterruptedException {
+
+	LTTRWeeks.get();
+
+	List<String> planTickets = getExistingTicketStream()
+		.map(LTTRTicket::getTicket)
+		.collect(Collectors.toList());
+
+	driver = Util.getWebDriver();
+
+	LTTRPage.TOP.getLttrTicketStream(driver)
+		.filter(webTicket -> !planTickets.contains(webTicket.getTicket()))
+		.findFirst()
+		.ifPresentOrElse(this::makeTicketCandidate, () -> driver.quit());
+	doPostSelectionWork();
+    }
+
+    protected void doPostSelectionWork() {
+    }
+
+    private void makeTicketCandidate(LTTRTicket ticket) {
+	System.out.println("found ticket");
+	driver.get(ticket.getSearchUrl());
+	Util.sleep(2);
+	List<WebElement> o1 = driver.findElements(By.xpath("//*[contains(text(),'matches')]"));
+	String totalTickets = Optional
+		.ofNullable(o1)
+		.filter(Lambda.minSize(1))
+		.map(Lambda.getElement(0))
+		.map(WebElement::getText)
+		.map(x -> x.replaceAll("Displaying .*?of (\\d*) matches", "$1"))
+		.orElse("unknown");
+	driver.quit();
+	ticket.setTotalTickets(totalTickets);
+	processTicket(ticket);
+
+	Json.print(ticket);
+
+	LTTRList.addTicket(getTicketType(), ticket);
+
+	launchUrl(ticket.getTicket());
+    }
+
+    protected Stream<LTTRTicket> getExistingTicketStream() {
+	return getTickertPlanFile()
+		.readCSVToPojo(LTTRTicket.class)
+		.stream();
+    }
+
+    protected abstract TicketType getTicketType();
+
+    protected abstract EngineerFiles getTickertPlanFile();
+
+    protected abstract void processTicket(LTTRTicket ticket);
+
+    enum TicketType {
+	HIGH_FREQUENCY, AUTOMATION
+    }
+
+    enum LTTRList {
+	EMAIL(TicketType.HIGH_FREQUENCY, EngineerFiles.LTTR_CANDIDATE_EMAIL_DATA, Properties.SEND, Properties.TICKET_ID,
+		Properties.EMAIL, Properties.TO, Properties.TICKETS,
+		Properties.DESCRIPTION, Properties.TICKET, Properties.SEARCH_URL, Properties.TOTAL_TICKETS),
+	PLAN(TicketType.HIGH_FREQUENCY, EngineerFiles.LTTR_PLAN_TICKETS, Properties.TICKET,
+		Properties.TICKETS_PER_WEEK, Properties.DESCRIPTION),
+	AUTOMATION(TicketType.AUTOMATION, EngineerFiles.SIM_AUTOMATION_PLAN, Properties.TICKET, Properties.DESCRIPTION,
+		Properties.TICKETS_PER_WEEK,
+		Properties.TOTAL_TICKETS, Properties.NOTES, Properties.STATE);
+
+	private EngineerFiles fileType;
+	private String[] columnHeaders;
+	private TicketType ticketType;
+
+	LTTRList(TicketType ticketType, EngineerFiles fileType, String... columnHeaders) {
+	    this.ticketType = ticketType;
+	    this.fileType = fileType;
+	    this.columnHeaders = columnHeaders;
+	}
+
+	private static void addTicket(TicketType ticketType, LTTRTicket ticket) {
+	    Stream.of(values())
+		    .filter(listType -> listType.ticketType == ticketType)
+		    .forEach(listType -> listType.addTicketToList(ticket));
+	}
+
+	void addTicketToList(LTTRTicket ticket) {
+	    List<LTTRTicket> newList = Stream
+		    .concat(
+			    Stream.of(ticket),
+			    fileType.readCSVToPojo(LTTRTicket.class).stream())
+		    .collect(Collectors.toList());
+
+	    fileType.write(w -> w.CSV(newList, columnHeaders).archive());
+	}
+
+    }
+
+}
