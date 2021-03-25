@@ -1,6 +1,6 @@
 package com.scott_tigers.oncall.test;
 
-import com.scott_tigers.oncall.shared.EngineerFiles;
+import com.scott_tigers.oncall.utility.LTTRPage;
 import com.scott_tigers.oncall.utility.Utility;
 
 public class Test extends Utility {
@@ -9,7 +9,7 @@ public class Test extends Utility {
     }
 
     private void run() throws Exception {
-	EngineerFiles.CIT_SCHEDULE_CHANGE_NOTIFICATION_EMAIL.launch();
+	launchUrl(LTTRPage.GRAPH.getUrl());
     }
 
 }

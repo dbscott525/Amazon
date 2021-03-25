@@ -80,13 +80,11 @@ public abstract class PickNextLttrSim extends Utility {
     }
 
     enum LTTRList {
-	EMAIL(TicketType.HIGH_FREQUENCY, EngineerFiles.LTTR_CANDIDATE_EMAIL_DATA, Properties.TICKET_ID,
+	EMAIL(TicketType.HIGH_FREQUENCY, EngineerFiles.LTTR_CANDIDATE_EMAIL_DATA, Properties.SEND, Properties.TICKET_ID,
 		Properties.EMAIL, Properties.TO, Properties.TICKETS,
 		Properties.DESCRIPTION, Properties.TICKET, Properties.SEARCH_URL, Properties.TOTAL_TICKETS),
 	PLAN(TicketType.HIGH_FREQUENCY, EngineerFiles.LTTR_PLAN_TICKETS, Properties.TICKET,
-		Properties.TICKETS_PER_WEEK, Properties.DESCRIPTION,
-		Properties.AREA, Properties.RELEASE, Properties.RELEASE_DATE, Properties.TOTAL_TICKETS,
-		Properties.ASSIGNEE, Properties.TICKET_ID, Properties.STATE, Properties.NOTES),
+		Properties.TICKETS_PER_WEEK, Properties.DESCRIPTION),
 	AUTOMATION(TicketType.AUTOMATION, EngineerFiles.SIM_AUTOMATION_PLAN, Properties.TICKET, Properties.DESCRIPTION,
 		Properties.TICKETS_PER_WEEK,
 		Properties.TOTAL_TICKETS, Properties.NOTES, Properties.STATE);

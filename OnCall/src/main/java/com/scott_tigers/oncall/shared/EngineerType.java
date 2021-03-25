@@ -32,12 +32,21 @@ public enum EngineerType {
 
 	@Override
 	public Iterator<ScheduleType> getScheduleTypeIterator() {
-	    return new ScheduleTypeIterator(i -> i
-		    .add(TimeZone.IST, 3)
-		    .add(TimeZone.EST, 6)
-		    .add(TimeZone.PST, 5)
-		    .add(TimeZone.PST, 5)
-		    .add(TimeZone.PST, 5));
+	    if (AFTER_2021_04_04) {
+		return new ScheduleTypeIterator(i -> i
+			.add(TimeZone.IST, 4)
+			.add(TimeZone.EST, 5)
+			.add(TimeZone.PST, 8)
+			.add(TimeZone.PST, 7));
+
+	    } else {
+		return new ScheduleTypeIterator(i -> i
+			.add(TimeZone.IST, 3)
+			.add(TimeZone.EST, 6)
+			.add(TimeZone.PST, 8)
+			.add(TimeZone.PST, 7));
+
+	    }
 	}
 
 	@Override
@@ -48,6 +57,16 @@ public enum EngineerType {
 	@Override
 	public EngineerFiles getScheduleFile() {
 	    return EngineerFiles.PRIMARY_ONCALL_SCHEDULE;
+	}
+
+	@Override
+	public boolean isTimeZoneSensitive() {
+	    return true;
+	}
+
+	@Override
+	public EngineerFiles getScheduleContainerFiler() {
+	    return EngineerFiles.PRIMARY_ONCALL_SCHEDULE_CONTAINER;
 	}
 
     },
@@ -77,6 +96,16 @@ public enum EngineerType {
 	    return EngineerFiles.SECONDARY_ONCALL_SCHEDULE;
 	}
 
+	@Override
+	public boolean isTimeZoneSensitive() {
+	    return false;
+	}
+
+	@Override
+	public EngineerFiles getScheduleContainerFiler() {
+	    return EngineerFiles.SECONDARY_ONCALL_SCHEDULE_CONTAINER;
+	}
+
     },
     TechEsc {
 	@Override
@@ -99,11 +128,6 @@ public enum EngineerType {
 	    return "https://oncall.corp.amazon.com/#/view/aurora-tech-escalation/schedule";
 	}
 
-//	@Override
-//	public int getAdjustedTime(int time) {
-//	    return getStartHour();
-//	}
-
 	@Override
 	public Iterator<ScheduleType> getScheduleTypeIterator() {
 	    return new ScheduleTypeIterator(i -> i.add(TimeZone.PST, 24));
@@ -112,6 +136,16 @@ public enum EngineerType {
 	@Override
 	public EngineerFiles getScheduleFile() {
 	    return EngineerFiles.TECH_ESC_ONCALL_SCHEDULE;
+	}
+
+	@Override
+	public boolean isTimeZoneSensitive() {
+	    return false;
+	}
+
+	@Override
+	public EngineerFiles getScheduleContainerFiler() {
+	    return EngineerFiles.TECH_ESC_ONCALL_SCHEDULE_CONTAINER;
 	}
     },
     DublinPrimary {
@@ -157,7 +191,79 @@ public enum EngineerType {
 	public EngineerFiles getScheduleFile() {
 	    return null;
 	}
+
+	@Override
+	public boolean isTimeZoneSensitive() {
+	    return false;
+	}
+
+	@Override
+	public EngineerFiles getScheduleContainerFiler() {
+	    // TODO Auto-generated method stub
+	    return null;
+	}
+    },
+    Trainee {
+	@Override
+	public int getStartHour() {
+	    return 0;
+	}
+
+	@Override
+	protected int getShiftHours() {
+	    return 8;
+	}
+
+	@Override
+	String getUrl() {
+	    return "https://oncall.corp.amazon.com/#/view/aurora-head-primary/schedule";
+	}
+
+	@Override
+	String getHistoricalUrl() {
+	    return "https://oncall.corp.amazon.com/#/view/aurora-head-primary-ams/schedule";
+	}
+
+	@Override
+	public Iterator<ScheduleType> getScheduleTypeIterator() {
+	    if (AFTER_2021_04_04) {
+		return new ScheduleTypeIterator(i -> i
+			.add(TimeZone.SKIP, 4)
+			.add(TimeZone.EST, 5)
+			.add(TimeZone.PST, 8)
+			.add(TimeZone.SKIP, 7));
+	    } else {
+		return new ScheduleTypeIterator(i -> i
+			.add(TimeZone.SKIP, 3)
+			.add(TimeZone.EST, 6)
+			.add(TimeZone.PST, 8)
+			.add(TimeZone.SKIP, 7));
+	    }
+	}
+
+	@Override
+	public boolean useTimeZones() {
+	    return true;
+	}
+
+	@Override
+	public EngineerFiles getScheduleFile() {
+	    return EngineerFiles.TRAINEE_ONCALL_SCHEDULE;
+	}
+
+	@Override
+	public boolean isTimeZoneSensitive() {
+	    return true;
+	}
+
+	@Override
+	public EngineerFiles getScheduleContainerFiler() {
+	    return EngineerFiles.TRAINEE_ONCALL_SCHEDULE_CONTAINER;
+	}
+
     };
+
+    private static final boolean AFTER_2021_04_04 = true;
 
     public OnCallSchedule getOnCallSchedule() {
 	return new OnCallSchedule(this);
@@ -222,4 +328,8 @@ public enum EngineerType {
     }
 
     public abstract EngineerFiles getScheduleFile();
+
+    public abstract boolean isTimeZoneSensitive();
+
+    public abstract EngineerFiles getScheduleContainerFiler();
 }

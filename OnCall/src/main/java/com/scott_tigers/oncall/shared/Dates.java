@@ -203,4 +203,8 @@ public enum Dates {
 	}
     }
 
+    public String getDayOfWeekName(String date) {
+	return new SimpleDateFormat("EEE").format(getDateFromString(date));
+    }
+
 }

@@ -152,7 +152,10 @@ public class ScheduleCreator {
     }
 
     private void createUidMap() {
-	uidMap = engineers.stream().collect(Collectors.toMap(Engineer::getUid, Function.identity()));
+	uidMap = EngineerFiles.MASTER_LIST
+		.readCSV()
+		.stream()
+		.collect(Collectors.toMap(Engineer::getUid, Function.identity()));
     }
 
     private List<Engineer> availableEngs(String startDate) {
@@ -214,7 +217,9 @@ public class ScheduleCreator {
     }
 
     public Engineer getEngineer(String uid) {
-	return uidMap.get(uid);
+	Engineer engineer = uidMap.get(uid);
+	assert engineer != null : "can't find " + uid + " in map";
+	return engineer;
     }
 
     public Schedule getExistingSchedule() {

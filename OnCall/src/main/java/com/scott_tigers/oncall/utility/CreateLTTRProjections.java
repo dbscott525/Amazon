@@ -22,6 +22,7 @@ import com.scott_tigers.oncall.bean.LTTRTicket;
 import com.scott_tigers.oncall.shared.Dates;
 import com.scott_tigers.oncall.shared.EngineerFiles;
 import com.scott_tigers.oncall.shared.Properties;
+import com.scott_tigers.oncall.shared.URL;
 import com.scott_tigers.oncall.shared.Util;
 
 public class CreateLTTRProjections extends Utility {
@@ -73,6 +74,7 @@ public class CreateLTTRProjections extends Utility {
 	EngineerFiles.TICKET_REDUCTION_PROJECTION
 		.write(w -> w.CSV(reductionList, Properties.MONTH, Properties.TICKETS_PER_MONTH));
 	EngineerFiles.TICKET_REDUCTION_PROJECTION_GRAPH.launch();
+	launchUrl(URL.LTTR_PLAN);
     }
 
     private boolean onOrAfterCurrentMonth(TicketReduction ticketReduction) {

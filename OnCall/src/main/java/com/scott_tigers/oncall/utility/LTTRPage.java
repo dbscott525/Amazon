@@ -96,7 +96,6 @@ public enum LTTRPage {
 	driver.get(getUrl());
 	System.out.println("page loaded");
 	Util.sleep(2);
-	System.out.println("End Stream<LTTRTicket> getLttrTicketStream(WebDriver driver) {");
 	return driver
 		.findElement(By.id(WebElements.TBL_PRIORITIZATION_ID))
 		.findElements(By.tagName(WebElements.TABLE_ROW_TAG))

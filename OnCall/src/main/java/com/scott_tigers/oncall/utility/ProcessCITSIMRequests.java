@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.scott_tigers.oncall.bean.Engineer;
 import com.scott_tigers.oncall.shared.EngineerFiles;
+import com.scott_tigers.oncall.shared.Json;
 import com.scott_tigers.oncall.shared.URL;
 
 public class ProcessCITSIMRequests extends Utility {
@@ -27,28 +28,9 @@ public class ProcessCITSIMRequests extends Utility {
 		.filter(x -> x.getEmailed().equals("0"))
 		.map(SimBugRequest::new)
 		.collect(Collectors.toList());
+	Json.print(emails);
 	EngineerFiles.SIM_BUG_INQUIRY_DATA.write(w -> w.CSV(emails, SimBugRequest.class));
-//	Json.print(bugs);
-
-//	Json.print(foo2);
-//	List<SimBugRequest> requests = EngineerFiles.SIM_BUG_INQUIRY_DATA.readCSVToPojo(SimBugRequest.class);
-//	requests
-//		.stream()
-//		.filter(request -> request.getSend().equals("Yes"))
-//		.forEach(request -> {
-//		    System.out.println("request.getFullName()=" + (request.getFullName()));
-//		    Optional
-//			    .ofNullable(request.getFullName())
-//			    .map(fn -> foo2.get(fn))
-//			    .filter(Objects::nonNull)
-//			    .ifPresent(eng -> {
-//				request.setEmail(eng.getEmail());
-//				request.setName(eng.getFirstName());
-//			    });
-//		});
-//
-//	EngineerFiles.SIM_BUG_INQUIRY_DATA.write(w -> w.CSV(requests, SimBugRequest.class));
-//
+	EngineerFiles.SIM_BUG_INQUIRY_EMAIL.launch();
     }
 
     private class SimBugRequest {
@@ -59,10 +41,34 @@ public class ProcessCITSIMRequests extends Utility {
 
 	public SimBugRequest(CITBug citBug) {
 	    Engineer engineer = engineerMap.get(citBug.getSdm());
+	    if (engineer == null) {
+		System.out.println("Can't find email for " + citBug.getSdm());
+		System.exit(1);
+	    }
 	    email = engineer.getEmail();
 	    name = engineer.getFirstName();
 	    sim = citBug.getSim();
 	    tt = citBug.getTt();
+	}
+
+	@SuppressWarnings("unused")
+	public String getEmail() {
+	    return email;
+	}
+
+	@SuppressWarnings("unused")
+	public String getName() {
+	    return name;
+	}
+
+	@SuppressWarnings("unused")
+	public String getSim() {
+	    return sim;
+	}
+
+	@SuppressWarnings("unused")
+	public String getTt() {
+	    return tt;
 	}
 
     }

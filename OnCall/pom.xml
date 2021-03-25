@@ -68,7 +68,7 @@
 			<artifactId>selenium-java</artifactId>
 			<version>3.141.59</version>
 		</dependency>
-		
+
 		<!-- ADDED TO TRY TO GET FLUXO TO WORK -->
 
 		<!-- https://mvnrepository.com/artifact/commons-httpclient/commons-httpclient -->
@@ -91,14 +91,14 @@
 			<artifactId>javax.net.websocket-api</artifactId>
 			<version>1.0-b04</version>
 		</dependency>
-		
+
 		<!-- https://mvnrepository.com/artifact/javax.net.websocket/javax.net.websocket-api -->
 		<dependency>
 			<groupId>javax.net.websocket</groupId>
 			<artifactId>javax.net.websocket-api</artifactId>
 			<version>1.0-b04</version>
 		</dependency>
-		
+
 		<!-- END ADDED TO TRY TO GET FLUXO TO WORK -->
 
 	</dependencies>

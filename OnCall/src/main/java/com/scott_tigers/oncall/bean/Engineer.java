@@ -36,6 +36,7 @@ public class Engineer {
     private String expertise;
     private String firstName = "";
     private String lastName = "";
+    private String mentor = "";
     private String ooo;
     private String oncallStartDate;
     private String startDate;
@@ -74,6 +75,14 @@ public class Engineer {
 
     public void setLastName(String lastName) {
 	this.lastName = lastName;
+    }
+
+    public String getMentor() {
+	return mentor;
+    }
+
+    public void setMentor(String mentor) {
+	this.mentor = mentor;
     }
 
     public String getType() {
@@ -319,10 +328,11 @@ public class Engineer {
     }
 
     public void setOncallStartDate(String oncallStartDate) {
-	this.oncallStartDate = oncallStartDate.isEmpty()
-		? null
-		: Dates.ONLINE_SCHEDULE.convertFormat(oncallStartDate, Dates.SORTABLE);
-
+	this.oncallStartDate = oncallStartDate;
+//	this.oncallStartDate = oncallStartDate.isEmpty()
+//		? null
+//		: Dates.ONLINE_SCHEDULE.convertFormat(oncallStartDate, Dates.SORTABLE);
+//
     }
 
     public void candidateStartDate(String candidateStartDate) {
@@ -382,6 +392,16 @@ public class Engineer {
     @JsonIgnore
     public boolean isCurrent() {
 	return isBeforeEndDate() && isAfterStartDate();
+    }
+
+    @JsonIgnore
+    public boolean isOncall(String date) {
+	return !Optional
+		.ofNullable(oncallStartDate)
+		.filter(d -> !d.isEmpty())
+		.map(d -> Dates.ONLINE_SCHEDULE.convertFormat(d, Dates.SORTABLE))
+		.filter(d -> d.compareTo(date) > 0)
+		.isPresent();
     }
 
 }

@@ -1,6 +1,5 @@
 package com.scott_tigers.oncall.utility;
 
-import com.scott_tigers.oncall.shared.EngineerFiles;
 import com.scott_tigers.oncall.shared.EngineerType;
 
 public class CreateTechEscOncallSchedule extends CreateOncallJsonSchedule {
@@ -10,26 +9,7 @@ public class CreateTechEscOncallSchedule extends CreateOncallJsonSchedule {
     }
 
     protected void run() throws Exception {
+	setEngineerType(EngineerType.TechEsc);
 	super.run();
-    }
-
-    @Override
-    protected int getNumberOfDays() {
-	return 30;
-    }
-
-    @Override
-    protected String startDate() {
-	return "2021-03-08";
-    }
-
-    @Override
-    protected EngineerType getType() {
-	return EngineerType.TechEsc;
-    }
-
-    @Override
-    protected EngineerFiles getRosterFile() {
-	return EngineerFiles.TECH_ESC;
     }
 }

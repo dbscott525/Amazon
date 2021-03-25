@@ -26,6 +26,11 @@ public class ScheduleStream {
 	return this;
     }
 
+    public ScheduleStream endDate(String endDate) {
+	endComputer = date -> endDate;
+	return this;
+    }
+
     public Stream<OnlineScheduleEvent> getStream() {
 	nextEvent = engineerType.getEvent(startDate);
 	endDate = endComputer.apply(startDate);

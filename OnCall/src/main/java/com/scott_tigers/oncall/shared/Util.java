@@ -1,5 +1,7 @@
 package com.scott_tigers.oncall.shared;
 
+import java.awt.Toolkit;
+import java.awt.datatransfer.StringSelection;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -99,11 +101,11 @@ public class Util {
 	scanner.nextLine();
 	System.out.println("Continuing");
     }
+
+    public static void copyToClipboard(String text) {
+	Toolkit
+		.getDefaultToolkit()
+		.getSystemClipboard()
+		.setContents(new StringSelection(text), null);
+    }
 }
-//    public static void waitForUser(String message) {
-//	try (Scanner scanner = new Scanner(System.in)) {
-//	    System.out.println(message);
-//	    scanner.nextLine();
-//	    System.out.println("Continuing");
-//	}
-//    }

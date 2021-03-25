@@ -38,6 +38,7 @@ public class LTTRTicket {
     private String notes;
     private String release;
     private String releaseDate;
+    private String send;
     private String searchUrl;
     private String state;
     private String ticketId;
@@ -244,6 +245,15 @@ public class LTTRTicket {
 
     public void setReleaseDate(String releaseDate) {
 	this.releaseDate = releaseDate;
+    }
+
+    @JsonProperty(Properties.SEND)
+    public String getSend() {
+	return send;
+    }
+
+    public void setSend(String send) {
+	this.send = send;
     }
 
     @JsonProperty(Properties.SEARCH_URL)

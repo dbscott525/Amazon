@@ -2,15 +2,14 @@ package com.scott_tigers.oncall.utility;
 
 import com.scott_tigers.oncall.shared.EngineerType;
 
-public class ShowPrimaryOncallScheduleReport extends ShowOncallScheduleReport {
+public class ShowTechEscOncallScheduleReport extends ShowOncallScheduleReport {
 
     public static void main(String[] args) {
-	new ShowPrimaryOncallScheduleReport().run();
+	new ShowTechEscOncallScheduleReport().run();
     }
 
     protected void run() {
-	setEngineeringType(EngineerType.Primary);
-//	useSavedSchedule();
+	setEngineeringType(EngineerType.TechEsc);
 	super.run();
     }
 }

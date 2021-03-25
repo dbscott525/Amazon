@@ -2,6 +2,8 @@ package com.scott_tigers.oncall.bean;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -31,7 +33,7 @@ public class OnlineScheduleEvent {
     private String type;
     private int endHour;
     private int startHour;
-    private Iterator<ScheduleType> scheduleTyperIterator;
+    private transient Iterator<ScheduleType> scheduleTyperIterator;
     private ScheduleType scheduleType;
     private int scheduleGap;
 
@@ -199,6 +201,14 @@ public class OnlineScheduleEvent {
 
     public void setStartHour(int startHour) {
 	this.startHour = startHour;
+    }
+
+    public int getEndHour() {
+	return endHour;
+    }
+
+    public void setEndHour(int endHour) {
+	this.endHour = endHour;
     }
 
     public boolean before(String date) {
@@ -439,7 +449,7 @@ public class OnlineScheduleEvent {
 
     @JsonIgnore
     private String getFormattDate(String date, int hour) {
-	return String.format("%s %02d:00", date, hour);
+	return String.format("%s (%s) %02d:00", date, Dates.SORTABLE.getDayOfWeekName(date), hour);
     }
 
     @JsonIgnore
@@ -463,6 +473,46 @@ public class OnlineScheduleEvent {
 
     public void previousEvent(OnlineScheduleEvent previousEvent) {
 	scheduleGap = Dates.SORTABLE.getDifference(previousEvent.startDate, startDate);
+    }
+
+    public boolean isAfterHours() {
+	return startHour >= 17;
+    }
+
+    public OnlineScheduleEvent combine(OnlineScheduleEvent p) {
+
+	Stream<Supplier<Boolean>> comparators = Stream.of(
+
+		() -> p != null,
+		() -> p.oncallMember.equals(oncallMember),
+		() -> p.endDate.equals(startDate),
+		() -> p.endHour == startHour
+
+	);
+
+	boolean adjacent = comparators.allMatch(Supplier<Boolean>::get);
+
+	if (adjacent) {
+	    p.endDate = endDate;
+	    p.endHour = endHour;
+	    return null;
+	} else {
+	    return this;
+	}
+    }
+
+    public String getScheduleKey() {
+	return startDateTime + "|" + endDateTime;
+    }
+
+    public void addUids(OnlineScheduleEvent onlineScheduleEvent) {
+	oncallMember = Stream
+		.of(this, onlineScheduleEvent)
+		.filter(Objects::nonNull)
+		.map(x -> x.oncallMember)
+		.flatMap(List<String>::stream)
+		.distinct()
+		.collect(Collectors.toList());
     }
 
 }

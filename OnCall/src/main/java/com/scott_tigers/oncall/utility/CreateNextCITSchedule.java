@@ -22,6 +22,7 @@ public class CreateNextCITSchedule extends Utility {
 			.readCSVToPojo(Notification.class)
 			.get(0)
 			.getDate(), Dates.SORTABLE);
+	System.out.println("startDate=" + (startDate));
 
 	new ScheduleCreator()
 		.startDate(startDate)

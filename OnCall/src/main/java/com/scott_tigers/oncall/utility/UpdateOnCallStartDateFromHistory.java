@@ -15,12 +15,15 @@ import com.scott_tigers.oncall.shared.Json;
 
 public class UpdateOnCallStartDateFromHistory extends Utility {
 
+//    private static final EngineerType ENGINEER_TYPE = EngineerType.Primary;
+    private static final EngineerType ENGINEER_TYPE = EngineerType.TechEsc;
+
     public static void main(String[] args) {
 	new UpdateOnCallStartDateFromHistory().run();
     }
 
     private void run() {
-	Map<String, Optional<OnlineScheduleEvent>> map = EngineerType.Primary
+	Map<String, Optional<OnlineScheduleEvent>> map = ENGINEER_TYPE
 		.getHistoricalOnCallScheduleStream()
 		.collect(Collectors.groupingBy(x -> x.getUid(),
 			Collectors.minBy(Comparator.comparing(x -> x.getStartDate()))));
@@ -31,6 +34,8 @@ public class UpdateOnCallStartDateFromHistory extends Utility {
 	engineers.stream().forEach(eng -> {
 	    Optional<OnlineScheduleEvent> optionalStartDate = map.get(eng.getUid());
 	    if (optionalStartDate != null) {
+		System.out
+			.println("optionalStartDate.get().getStartDate()=" + (optionalStartDate.get().getStartDate()));
 		eng.setOncallStartDate(
 			Dates.SORTABLE.convertFormat(optionalStartDate.get().getStartDate(), Dates.ONLINE_SCHEDULE));
 		Json.print(eng);

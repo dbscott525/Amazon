@@ -17,6 +17,7 @@ public class OpenOpsReviewDocuments extends Utility {
 	EngineerFiles.TICKET_FLOW_REPORT.launch();
 	EngineerFiles.TICKET_FLOW_GRAPH_WITH_OPENED.launch();
 	launchUrl(LTTRPage.GRAPH.getUrl());
+	launchUrl(LTTRPage.LAST_FULL_WEEK.getUrl());
 	Stream.of(
 
 		URL.LTTR_TICKETS_LAST_WEEK_DELTA_REPORT,

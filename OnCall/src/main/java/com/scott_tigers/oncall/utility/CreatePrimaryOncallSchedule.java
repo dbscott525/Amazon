@@ -4,7 +4,6 @@ import java.util.Calendar;
 import java.util.function.Predicate;
 
 import com.scott_tigers.oncall.bean.OnlineScheduleEvent;
-import com.scott_tigers.oncall.shared.EngineerFiles;
 import com.scott_tigers.oncall.shared.EngineerType;
 
 public class CreatePrimaryOncallSchedule extends CreateOncallJsonSchedule {
@@ -14,38 +13,27 @@ public class CreatePrimaryOncallSchedule extends CreateOncallJsonSchedule {
     }
 
     protected void run() throws Exception {
+	eventFilter(getEventFilter());
+	setEngineerType(EngineerType.Primary);
+	postScheduleProcess(schedule -> mergeOnCallTrainees(schedule));
 	super.run();
+
     }
 
-    @Override
-    protected int getNumberOfDays() {
-	return 30;
-    }
-
-    @Override
-    protected String startDate() {
-	return "2021-03-01";
-    }
-
-    @Override
-    protected EngineerType getType() {
-	return EngineerType.Primary;
-    }
-
-    @Override
-    protected EngineerFiles getRosterFile() {
-	return EngineerFiles.MASTER_LIST;
-    }
-
-    @Override
-    protected Predicate<OnlineScheduleEvent> getEventFilter() {
-
+    private Predicate<OnlineScheduleEvent> getEventFilter() {
 	return event -> {
-	    if (event.getStartHour() == 0) {
-		return false;
-	    }
+	    switch (event.getStartHour()) {
 
-	    return !(event.getStartDayOfWeek() == Calendar.MONDAY && event.getStartHour() == 3);
+	    case 0: // IST is a separate schedule
+		return false;
+
+	    case 3: // Monday at 3 AM PST is for Dublin
+		return event.getStartDayOfWeek() != Calendar.MONDAY;
+
+	    default:
+		return true;
+	    }
 	};
     }
+
 }

@@ -2,6 +2,7 @@ package com.scott_tigers.oncall.utility;
 
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -15,11 +16,14 @@ public class ShowEmailsAndUids extends Utility {
 	new ShowEmailsAndUids().run();
     }
 
-    private List<Engineer> list;
+    private List<Engineer> engineers;
 
     private void run() {
-	list = EngineerFiles.MASTER_LIST
-		.readCSV();
+	engineers = EngineerFiles.MASTER_LIST
+		.readCSV()
+		.stream()
+		.filter(engineerFilter())
+		.collect(Collectors.toList());
 	Stream.of(EngineerType.values())
 		.forEach(engineerType -> {
 		    System.out.println(engineerType + " count: " + getEngineerStream(engineerType).count());
@@ -34,6 +38,11 @@ public class ShowEmailsAndUids extends Utility {
 		    System.out.println(string);
 		    System.out.println();
 		});
+    }
+
+    private Predicate<? super Engineer> engineerFilter() {
+//	return eng -> TimeZone.PST.isIn(eng);
+	return eng -> true;
     }
 
     private void printList(String message, Function<Engineer, String> mapper, EngineerType engineerType) {
@@ -56,9 +65,12 @@ public class ShowEmailsAndUids extends Utility {
     }
 
     private Stream<Engineer> getEngineerStream(EngineerType engineerrType) {
-	return list
+	return engineers
 		.stream()
-		.filter(engineerrType::engineerIsType);
+		.filter(engineerrType::engineerIsType)
+
+	;
+
     }
 
 }

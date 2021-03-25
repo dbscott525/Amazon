@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -521,22 +522,48 @@ public class Utility {
     }
 
     protected OnCallContainer readOnCallSchedule(EngineerType engineerType, boolean useSavedSchedule) {
+	Map<String, OnlineScheduleEvent> uidEventMap = new HashMap<>();
 	OnCallContainer historicalSchedule;
 	if (useSavedSchedule) {
 	    historicalSchedule = EngineerFiles.TEST_HISTORICAL_SCHEDULE.readJson(OnCallContainer.class);
-	    System.out.println("historicalSchedule.getSchedule().size()=" + (historicalSchedule.getSchedule().size()));
+	    System.out.println("Saved Schedule Size: " + (historicalSchedule.getSchedule().size()));
 	} else {
+	    AtomicReference<OnlineScheduleEvent> previous = new AtomicReference<OnlineScheduleEvent>();
 	    List<OnlineScheduleEvent> scheduleFromOnline = engineerType
 		    .getHistoricalOnCallScheduleStream()
+//		    .peek(event -> Json.print(event))
+//		    .filter(event -> event.getUid().equals("vamsat"))
+		    .map(event -> {
+			OnlineScheduleEvent previousEvent = uidEventMap.get(event.getUid());
+			if (previousEvent != null) {
+			    OnlineScheduleEvent combined = event.combine(previousEvent);
+			    if (combined == null) {
+				return null;
+			    }
+			}
+			uidEventMap.put(event.getUid(), event);
+			return event;
+		    })
+		    .filter(Objects::nonNull)
 		    .collect(Collectors.toList());
-	    System.out.println("scheduleFromOnline.size()=" + (scheduleFromOnline.size()));
-	    System.out.println("scheduleFromOnline.size()=" + (scheduleFromOnline.size()));
+	    System.out.println("Read Schedule Size: " + (scheduleFromOnline.size()));
 	    historicalSchedule = new OnCallContainer(scheduleFromOnline);
-	    System.out.println("historicalSchedule.getSchedule().size()=" + (historicalSchedule.getSchedule().size()));
 
 	    EngineerFiles.TEST_HISTORICAL_SCHEDULE.write(w -> w.json(historicalSchedule));
 	}
 	return historicalSchedule;
+    }
+
+    protected void mergeOnCallTrainees(List<OnlineScheduleEvent> primarySchedule) {
+        Map<String, OnlineScheduleEvent> traineeMap = EngineerFiles.TRAINEE_ONCALL_SCHEDULE_CONTAINER
+        	.readJson(OnCallContainer.class)
+        	.getSchedule()
+        	.stream()
+        	.collect(Collectors.toMap(OnlineScheduleEvent::getScheduleKey, Function.identity()));
+    
+        primarySchedule
+        	.stream()
+        	.forEach(event -> event.addUids(traineeMap.get(event.getScheduleKey())));
     }
 
 }

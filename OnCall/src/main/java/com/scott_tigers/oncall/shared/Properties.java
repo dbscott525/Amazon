@@ -59,5 +59,6 @@ public class Properties {
     public static final String PRIMARY = "Primary";
     public static final String SECONDARY = "Secondary";
     public static final String CIT = "CIT";
+    public static final String SEND = "Send";
 
 }

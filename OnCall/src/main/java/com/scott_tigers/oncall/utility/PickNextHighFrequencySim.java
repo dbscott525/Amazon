@@ -33,6 +33,7 @@ public class PickNextHighFrequencySim extends PickNextLttrSim {
 	ticket.setEmail(Constants.REPLACE_ME_EMAIL);
 	ticket.setTo("SDM");
 	ticket.setState("Candidate");
+	ticket.setSend("Yes");
 
     }
 
@@ -44,7 +45,8 @@ public class PickNextHighFrequencySim extends PickNextLttrSim {
     @Override
     protected Stream<LTTRTicket> getExistingTicketStream() {
 	return Stream
-		.of(URL.LTTR_CANDIDATES, URL.LTTR_PLAN, URL.LTTR_NOT_ACTIONABLE_SIMS)
+		.of(URL.LTTR_CANDIDATES, URL.LTTR_PLAN, URL.LTTR_NON_ACTIONABLE_SIMS)
+		.peek(System.out::println)
 		.flatMap(url -> readFromUrl(url, LTTRTicket.class));
     }
 }

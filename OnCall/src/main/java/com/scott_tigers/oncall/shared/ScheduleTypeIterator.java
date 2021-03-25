@@ -31,4 +31,8 @@ public class ScheduleTypeIterator implements Iterator<ScheduleType> {
 	}
 	return listIterator.next();
     }
+
+    public List<ScheduleType> getScheduleTypes() {
+	return scheduleTypes;
+    }
 }

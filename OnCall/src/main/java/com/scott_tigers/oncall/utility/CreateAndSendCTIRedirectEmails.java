@@ -47,7 +47,6 @@ public class CreateAndSendCTIRedirectEmails extends Utility {
 		.collect(Collectors.toMap(x -> x.getUid(), x -> x));
 
 	redirects = EngineerFiles.CTI_REDIRECT_SIMS.readCSVToPojo(CTIRedirect.class);
-	redirects.stream().map(CTIRedirect::getSim).forEach(System.out::println);
 
 	List<CTIRedirectEmail> redirectEmailData = getTicketStreamFromUrl(getSearchURL())
 		.filter(this::isRedirect)
